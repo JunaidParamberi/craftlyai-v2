@@ -214,6 +214,7 @@ export async function updateClient(
 
   revalidatePath("/protected/clients");
   revalidatePath(`/protected/clients/${parsedId.data}`);
+  revalidatePath(`/protected/clients/${parsedId.data}/edit`);
 
   return { ok: true, client: normalizeClientRow(data) };
 }
@@ -254,6 +255,7 @@ export async function deleteClient(id: string): Promise<DeleteClientResult> {
 
   revalidatePath("/protected/clients");
   revalidatePath(`/protected/clients/${parsedId.data}`);
+  revalidatePath(`/protected/clients/${parsedId.data}/edit`);
 
   return { ok: true };
 }

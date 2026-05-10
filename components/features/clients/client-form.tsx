@@ -114,6 +114,7 @@ export function ClientForm(props: ClientFormProps) {
         return;
       }
 
+      router.push(`/protected/clients/${props.clientId}`);
       router.refresh();
     });
   }

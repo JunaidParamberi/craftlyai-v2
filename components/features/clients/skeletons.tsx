@@ -20,20 +20,16 @@ export function ClientsPageSkeleton() {
       <ul className="flex flex-col gap-3">
         {Array.from({ length: 5 }, (_, i) => (
           <li key={i}>
-            <div className="block rounded-2xl ring-1 ring-border">
-              <Card className="border-0 shadow-none ring-0">
-                <CardContent className="flex items-center gap-4 py-4">
-                  <Skeleton className="size-10 shrink-0 rounded-xl" />
-                  <div className="flex min-w-0 flex-1 flex-col gap-2">
-                    <Skeleton className="h-5 max-w-[240px]" />
-                    <Skeleton className="h-4 max-w-[320px]" />
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                    <Skeleton className="h-3 w-8" />
-                    <Skeleton className="size-4 rounded" />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="flex items-center gap-4 rounded-2xl border border-border bg-card px-6 py-4 shadow-sm">
+              <Skeleton className="size-10 shrink-0 rounded-xl" />
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <Skeleton className="h-5 max-w-[240px]" />
+                <Skeleton className="h-4 max-w-[320px]" />
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <Skeleton className="h-3 w-8" />
+                <Skeleton className="size-4 rounded" />
+              </div>
             </div>
           </li>
         ))}
@@ -107,19 +103,51 @@ export function ClientNewPageSkeleton() {
 
 export function ClientDetailPageSkeleton() {
   return (
-    <FormPageShell>
+    <FormPageShell maxWidth="7xl">
       <div className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex min-w-0 flex-col gap-3">
-            <Skeleton className="h-8 w-28 rounded-md" />
-            <div className="flex min-w-0 flex-col gap-2">
-              <Skeleton className="h-9 w-full max-w-md" />
-              <Skeleton className="h-4 w-48 max-w-full" />
+        <div className="flex flex-col gap-6">
+          <Skeleton className="h-4 w-32" />
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start">
+              <Skeleton className="size-16 shrink-0 rounded-2xl" />
+              <div className="flex min-w-0 flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Skeleton className="h-9 w-48 max-w-full" />
+                  <Skeleton className="h-6 w-32 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-64 max-w-full" />
+                <Skeleton className="h-4 w-full max-w-xl" />
+                <div className="flex gap-4">
+                  <Skeleton className="h-3 w-40" />
+                  <Skeleton className="h-3 w-36" />
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Skeleton className="h-9 w-28 rounded-4xl" />
+              <Skeleton className="h-9 w-32 rounded-4xl" />
+              <Skeleton className="h-9 w-24 rounded-4xl" />
+              <Skeleton className="size-9 rounded-full" />
             </div>
           </div>
-          <Skeleton className="h-9 w-36 shrink-0 rounded-4xl" />
         </div>
-        <ClientFormCardSkeleton />
+        <div className="flex min-w-0 flex-col gap-2 border-b border-border/60 pb-1">
+          <div className="flex flex-wrap gap-4">
+            <Skeleton className="h-8 w-40" />
+            <Skeleton className="h-8 w-28" />
+            <Skeleton className="h-8 w-36" />
+          </div>
+        </div>
+        <div className="grid gap-8 lg:grid-cols-[1fr_minmax(260px,320px)]">
+          <div className="flex flex-col gap-8">
+            <Skeleton className="min-h-[200px] w-full rounded-4xl" />
+            <Skeleton className="min-h-[120px] w-full rounded-4xl" />
+          </div>
+          <div className="flex flex-col gap-6">
+            <Skeleton className="min-h-[220px] w-full rounded-4xl" />
+            <Skeleton className="min-h-[200px] w-full rounded-4xl" />
+          </div>
+        </div>
       </div>
     </FormPageShell>
   );

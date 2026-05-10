@@ -13,7 +13,7 @@ Migration: `supabase/migrations/20260513120000_clients.sql`.
 | `name` | Required |
 | `email`, `phone`, `company`, `address`, `notes` | Optional text |
 | `currency` | Optional ISO 4217, 3 letters (stored uppercase in app) |
-| `health_score` | `smallint` 0–100 or null — **not** exposed in create/update UI yet (reserved for Relationship Manager / AI). |
+| `health_score` | `smallint` 0–100 or null — surfaced as a **health badge** on client detail (not yet on the edit form; Relationship Manager / automation may populate later). |
 | `created_at`, `updated_at` | Automatic |
 
 **v1 address model:** a single `address` text column (multiline in UI). CLAUDE.md lists split address fields on the conceptual `clients` model; we ship one field until a migration splits it.
@@ -36,7 +36,7 @@ Ensure the migration is applied to your Supabase project before relying on the a
 | `getClientById` | Single row or `null` (wrong id / other user / unauthenticated) |
 | `createClient` | Validates with `parseClientCreateInput`, inserts |
 | `updateClient` | Same validation, scoped by id + `user_id` |
-| `deleteClient` | Delete scoped by id + `user_id`; revalidates list and detail paths |
+| `deleteClient` | Delete scoped by id + `user_id`; revalidates list, detail, and `/clients/[id]/edit` paths |
 
 Onboarding step 3 calls `createClient` from [`components/onboarding/first-client-onboarding-form.tsx`](/components/onboarding/first-client-onboarding-form.tsx).
 
@@ -49,8 +49,18 @@ Onboarding step 3 calls `createClient` from [`components/onboarding/first-client
 | Path | Role |
 |------|------|
 | `/protected/clients` | List |
-| `/protected/clients/new` | Create |
-| `/protected/clients/[id]` | Detail, edit, delete |
+| `/protected/clients/new` | Create (`ClientForm` create) |
+| `/protected/clients/[id]` | **Detail / overview** — wireframe-style layout (tabs: Overview & projects, Documents, Notes & activity), edit/delete affordances; uses [`components/features/clients/detail/`](/components/features/clients/detail/) |
+| `/protected/clients/[id]/edit` | **Edit** — same [`ClientForm`](/components/features/clients/client-form.tsx) as create; after save, navigates back to detail |
+
+Display helpers for detail UI live in [`lib/clients/display.ts`](/lib/clients/display.ts) (monogram, dates, health labels).
+
+### Stubbed until later milestones
+
+- **Active projects** cards: empty state until `projects` + client linkage ship (Phase 1 Projects).
+- **Documents** tab / badge count: `0` until Document Studio (Phase 2).
+- **Financial summary** numbers: placeholders until invoices/payments exist (Phase 2).
+- **Activity** feed on Notes tab: copy-only placeholder until integrations.
 
 ## Dev-only QA
 
