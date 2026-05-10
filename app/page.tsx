@@ -1,10 +1,14 @@
 import { AuthEntryLinks } from "@/components/auth/auth-entry-links";
 import { Logo } from "@/components/shared/logo";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 export default function HomePage() {
   return (
     <main className="p-8">
-      <Logo />
+      <div className="flex items-center justify-between gap-4">
+        <Logo />
+        <ThemeToggle />
+      </div>
       <p className="mt-4 text-muted-foreground">
         Supabase auth is wired. Use the links below to login, sign up,
         reset password, or open the protected page when signed in.

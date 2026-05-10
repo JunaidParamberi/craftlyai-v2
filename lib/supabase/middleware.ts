@@ -3,6 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabasePublishableKey } from "@/lib/supabase/publishable-key";
 
+/** Forward pathname for Server Components (e.g. gated layouts). */
+function requestHeadersWithPathname(request: NextRequest): Headers {
+  const headers = new Headers(request.headers);
+  headers.set("x-pathname", request.nextUrl.pathname);
+  return headers;
+}
+
 /**
  * Routes that do not require a session. Expand when you add marketing/auth pages.
  */
@@ -17,7 +24,6 @@ function isPublicPath(pathname: string): boolean {
     "/forgot-password",
     "/reset-password",
     "/auth",
-    "/onboarding",
     "/pricing",
     "/about",
     "/blog",
@@ -26,8 +32,27 @@ function isPublicPath(pathname: string): boolean {
 }
 
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Never wrap Next.js internals, dev tooling, or static assets — avoids broken CSS/JS after navigation.
+  const lastSegment = pathname.split("/").pop() ?? "";
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/__nextjs") ||
+    pathname.startsWith("/api/") ||
+    pathname === "/api" ||
+    pathname === "/favicon.ico" ||
+    /\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|mjs|map|woff2?|ttf|eot)$/i.test(
+      lastSegment,
+    )
+  ) {
+    return NextResponse.next({
+      request: { headers: requestHeadersWithPathname(request) },
+    });
+  }
+
   let supabaseResponse = NextResponse.next({
-    request,
+    request: { headers: requestHeadersWithPathname(request) },
   })
 
   // With Fluid compute, don't put this client in a global environment
@@ -43,7 +68,7 @@ export async function updateSession(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
-            request,
+            request: { headers: requestHeadersWithPathname(request) },
           })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)

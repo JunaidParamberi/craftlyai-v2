@@ -8,6 +8,11 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    /*
+     * Exclude Next internals, APIs, and file-like URLs so middleware never runs on
+     * CSS/JS/font chunks or dev endpoints (fixes plain HTML / missing Tailwind after navigation).
+     * Use `_next` / `api/` prefixes so routes like `/apiary` still match middleware.
+     */
+    "/((?!_next|__nextjs|api(?:/|$)|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|mjs|map|woff2?|ttf|eot)$).*)",
   ],
 };
