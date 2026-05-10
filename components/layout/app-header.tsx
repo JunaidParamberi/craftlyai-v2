@@ -70,7 +70,7 @@ export function AppHeader({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon"
           className="text-muted-foreground"
           aria-label="Notifications"
         >
@@ -82,14 +82,14 @@ export function AppHeader({
             render={
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="icon"
                 className="rounded-full p-0"
                 aria-label="Account menu"
               />
             }
           >
-            <Avatar size="sm">
-              <AvatarFallback>{userInitials}</AvatarFallback>
+            <Avatar className="size-9">
+              <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-56">
