@@ -39,6 +39,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
@@ -187,33 +188,34 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                 }
               />
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>Health</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup
-                  value={healthFilter}
-                  onValueChange={(v) =>
-                    setHealthFilter(v as HealthFilterValue)
-                  }
-                >
-                  <DropdownMenuRadioItem value="all">
-                    All clients
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="excellent">
-                    Excellent
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="good">
-                    Good
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="fair">
-                    Fair
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="risk">
-                    At risk
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="unset">
-                    Not set
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Health</DropdownMenuLabel>
+                  <DropdownMenuRadioGroup
+                    value={healthFilter}
+                    onValueChange={(v) =>
+                      setHealthFilter(v as HealthFilterValue)
+                    }
+                  >
+                    <DropdownMenuRadioItem value="all">
+                      All clients
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="excellent">
+                      Excellent
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="good">
+                      Good
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="fair">
+                      Fair
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="risk">
+                      At risk
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="unset">
+                      Not set
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
