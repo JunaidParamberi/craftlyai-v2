@@ -2,8 +2,11 @@ import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { getProfile } from "@/lib/profile/actions";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { getUserInitials } from "@/lib/dashboard/user-display";
 import { getRequiredOnboardingPath } from "@/lib/onboarding/status";
+import { getProfile } from "@/lib/profile/actions";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function ProtectedLayout({
   children,
@@ -36,5 +39,17 @@ export default async function ProtectedLayout({
     redirect(nextOnboarding);
   }
 
-  return children;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const userEmail = user?.email ?? null;
+  const userInitials = getUserInitials(result.profile.full_name, userEmail);
+
+  return (
+    <DashboardShell userEmail={userEmail} userInitials={userInitials}>
+      {children}
+    </DashboardShell>
+  );
 }
