@@ -305,6 +305,16 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 
 ---
 
+## Git workflow rules (respect these)
+
+- Never do feature work directly on `main`
+- Create one branch per task/feature/fix (example: `feat/dashboard-shell`, `fix/auth-callback`)
+- Commit and push on that branch, then open a PR to merge into `main`
+- Keep `main` stable and deployable; use `main` directly only for tiny docs/meta edits when necessary
+- Delete merged branches to keep the repo clean
+
+---
+
 ## Tool split rules (respect these)
 
 - **Claude.ai:** architecture decisions, schema design, agent prompts, TypeScript types, Zod schemas, server action logic, Edge Function first drafts, code review (max 80 lines). Fresh chat every session — paste this file first.
