@@ -11,6 +11,7 @@ function isPublicPath(pathname: string): boolean {
   if (pathname.startsWith("/_next")) return true;
   if (pathname.startsWith("/api")) return true;
   const publicPrefixes = [
+    "/auth/login",
     "/login",
     "/signup",
     "/forgot-password",
@@ -63,7 +64,7 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && !isPublicPath(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 

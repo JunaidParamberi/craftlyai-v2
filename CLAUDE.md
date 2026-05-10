@@ -247,7 +247,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - [x] Project setup — Next.js 15 App Router, Tailwind 4, shadcn/ui, ESLint, TypeScript
 - [x] Supabase wiring — `@supabase/supabase-js`, `@supabase/ssr`, `lib/supabase/*`, root `middleware.ts`, env pattern
 - [x] `GET /api/health/supabase` — connectivity check
-- [ ] todo · Auth — login, signup, magic link, Google OAuth
+- [x] Auth — login, signup, magic link, Google OAuth
 - [ ] todo · Onboarding — 3-step: profile, brand kit, first client
 - [ ] todo · Dashboard shell — sidebar, layout, dark mode
 - [ ] todo · Clients — CRUD, list, detail page
@@ -310,3 +310,4 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - **Claude.ai:** architecture decisions, schema design, agent prompts, TypeScript types, Zod schemas, server action logic, Edge Function first drafts, code review (max 80 lines). Fresh chat every session — paste this file first.
 - **Cursor:** all file editing, component building, debugging, installing packages, wiring Supabase to UI, Tailwind fixes. Open the full project folder, never paste files into Claude.ai when Cursor can read them directly.
 - **Cowork:** updating this file, organizing /docs and /assets, drafting marketing copy, writing feature specs to /docs/specs/, weekly reviews, scheduled reminders. Never touches code files.
+
