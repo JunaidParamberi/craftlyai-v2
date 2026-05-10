@@ -78,17 +78,19 @@ export function AppHeader({
         </Button>
         <ThemeToggle />
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="rounded-full p-0"
-              aria-label="Account menu"
-            >
-              <Avatar size="sm">
-                <AvatarFallback>{userInitials}</AvatarFallback>
-              </Avatar>
-            </Button>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="rounded-full p-0"
+                aria-label="Account menu"
+              />
+            }
+          >
+            <Avatar size="sm">
+              <AvatarFallback>{userInitials}</AvatarFallback>
+            </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-56">
             <DropdownMenuLabel className="font-normal">
