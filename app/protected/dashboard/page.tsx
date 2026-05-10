@@ -114,6 +114,7 @@ export default async function DashboardPage() {
             <Button
               variant="outline"
               size="sm"
+              nativeButton={false}
               render={<Link href="/protected/projects" />}
             >
               View all
