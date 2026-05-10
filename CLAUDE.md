@@ -3,6 +3,8 @@
 Last updated: 2026-05-10
 Current phase: Phase 1 — Foundation (Weeks 1–3)
 
+Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
+
 ---
 
 ## What this project is
@@ -236,44 +238,58 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 
 ## Feature status
 
-### DONE
-- [ ] (nothing yet — project initialized)
+- **`[x]`** = done (ticked)
+- **`[ ] todo ·`** = not started
+- **`[ ] in-progress ·`** = you are building it now (change to `[x]` when finished)
 
-### IN PROGRESS
-- [ ] Project setup (Next.js 15, shadcn/ui, Supabase, Tailwind)
+### Phase 1 — Foundation (Weeks 1–3)
 
-### NOT STARTED
-- [ ] Auth (login, signup, magic link, Google OAuth)
-- [ ] Onboarding (3-step flow: profile, brand kit, first client)
-- [ ] Dashboard shell (sidebar, layout, dark mode)
-- [ ] Clients — CRUD, list, detail page
-- [ ] Projects — linked to client, status, tasks
-- [ ] Time tracker — start/stop, manual entry
-- [ ] Document Studio — Tiptap editor, templates, variables
-- [ ] Brand kit — logo upload, colors, fonts, applied globally
-- [ ] PDF generation
-- [ ] Invoice flow — create, send (Resend), mark paid
-- [ ] Quote flow — create, send, approval tracking
-- [ ] Proposal flow — multi-section, client approval
-- [ ] Client portal — public link, no login, payment embed
-- [ ] Financial dashboard — revenue, outstanding, expenses
-- [ ] Lemon Squeezy integration — plans, webhooks, plan gating
-- [ ] Cmd+K command palette
-- [ ] Router Agent (Edge Function)
-- [ ] Document Writer Agent
-- [ ] Communication Drafter Agent
-- [ ] Finance Analyst Agent
-- [ ] Project Intelligence Agent
-- [ ] Follow-Up Engine — triggers, draft, one-click send
-- [ ] Relationship Manager Agent
-- [ ] Pricing Advisor Agent (Pro)
-- [ ] Business Strategist Agent (Pro)
-- [ ] Email integration (Gmail / Outlook OAuth)
-- [ ] Calendar integration (Google Calendar)
-- [ ] pgvector semantic search
-- [ ] Mobile app (Expo)
-- [ ] Agency tier — multi-user, roles, shared workspace
-- [ ] Public API
+- [x] Project setup — Next.js 15 App Router, Tailwind 4, shadcn/ui, ESLint, TypeScript
+- [x] Supabase wiring — `@supabase/supabase-js`, `@supabase/ssr`, `lib/supabase/*`, root `middleware.ts`, env pattern
+- [x] `GET /api/health/supabase` — connectivity check
+- [ ] todo · Auth — login, signup, magic link, Google OAuth
+- [ ] todo · Onboarding — 3-step: profile, brand kit, first client
+- [ ] todo · Dashboard shell — sidebar, layout, dark mode
+- [ ] todo · Clients — CRUD, list, detail page
+- [ ] todo · Projects — linked to client, status, tasks
+- [ ] todo · Time tracker — start/stop, manual entry
+
+### Phase 2 — Documents & Finance (Weeks 4–6)
+
+- [ ] todo · Document Studio — Tiptap editor, templates, variables
+- [ ] todo · Brand kit — logo upload, colors, fonts, applied globally
+- [ ] todo · PDF generation
+- [ ] todo · Invoice flow — create, send (Resend), mark paid
+- [ ] todo · Quote flow — create, send, approval tracking
+- [ ] todo · Proposal flow — multi-section, client approval
+- [ ] todo · Client portal — public link, no login, payment embed
+- [ ] todo · Financial dashboard — revenue, outstanding, expenses
+- [ ] todo · Lemon Squeezy — plans, webhooks, plan gating
+
+### Phase 3 — AI Layer (Weeks 7–10)
+
+- [ ] todo · Cmd+K command palette
+- [ ] todo · Router Agent (Edge Function)
+- [ ] todo · Document Writer Agent
+- [ ] todo · Communication Drafter Agent
+- [ ] todo · Finance Analyst Agent
+- [ ] todo · Project Intelligence Agent
+- [ ] todo · Follow-Up Engine — triggers, draft, one-click send
+- [ ] todo · Relationship Manager Agent
+
+### Phase 4 — Pro AI & integrations (Weeks 11–14)
+
+- [ ] todo · Pricing Advisor Agent (Pro)
+- [ ] todo · Business Strategist Agent (Pro)
+- [ ] todo · Email integration (Gmail / Outlook OAuth)
+- [ ] todo · Calendar integration (Google Calendar)
+- [ ] todo · pgvector semantic search
+- [ ] todo · Mobile app (Expo)
+
+### Phase 5 — Growth & scale (Month 4+)
+
+- [ ] todo · Agency tier — multi-user, roles, shared workspace
+- [ ] todo · Public API
 
 ---
 
@@ -285,7 +301,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 
 ## Last session summary
 
-- 2026-05-10: Project initialized. Folder structure scaffolded for v2. CLAUDE.md written. No code yet.
+- 2026-05-10: Project initialized; Next.js + Tailwind + shadcn; Supabase wired; health check endpoint added. Feature status: checkboxes + `todo ·` / `in-progress ·` prefixes.
 
 ---
 
