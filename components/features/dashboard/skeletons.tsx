@@ -91,10 +91,10 @@ export function DashboardPageSkeleton() {
   );
 }
 
-/** Matches generic placeholder pages (Projects, Settings, …), same width shell as form pages. */
+/** Matches generic placeholder pages (Projects, Settings, …); full-width, left-aligned like SectionPlaceholder. */
 export function ProtectedPlaceholderSkeleton() {
   return (
-    <FormPageShell>
+    <FormPageShell maxWidth="full">
       <div
         role="status"
         aria-busy="true"

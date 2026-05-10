@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { listClients } from "@/lib/clients/actions";
 
+import { ClientsTable } from "@/components/features/clients/clients-table";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Building2, ChevronRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 export default async function ClientsPage() {
   const result = await listClients();
@@ -69,35 +70,7 @@ export default async function ClientsPage() {
           </CardContent>
         </Card>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {clients.map((c) => (
-            <li key={c.id}>
-              <Link
-                href={`/protected/clients/${c.id}`}
-                className="flex items-center gap-4 rounded-2xl border border-border bg-card px-6 py-4 text-card-foreground shadow-sm transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted">
-                  <Building2 className="size-5 text-muted-foreground" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{c.name}</p>
-                  <p className="truncate text-muted-foreground text-sm">
-                    {[c.company, c.email].filter(Boolean).join(" · ") ||
-                      "No company or email"}
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-1">
-                  {c.currency ? (
-                    <span className="text-muted-foreground text-xs tabular-nums">
-                      {c.currency}
-                    </span>
-                  ) : null}
-                  <ChevronRight className="size-4 text-muted-foreground" />
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <ClientsTable clients={clients} />
       )}
     </div>
   );

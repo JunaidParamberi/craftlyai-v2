@@ -17,23 +17,43 @@ export function ClientsPageSkeleton() {
         </div>
         <Skeleton className="h-9 w-[9.5rem] shrink-0 rounded-4xl" />
       </div>
-      <ul className="flex flex-col gap-3">
-        {Array.from({ length: 5 }, (_, i) => (
-          <li key={i}>
-            <div className="flex items-center gap-4 rounded-2xl border border-border bg-card px-6 py-4 shadow-sm">
-              <Skeleton className="size-10 shrink-0 rounded-xl" />
-              <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <Skeleton className="h-5 max-w-[240px]" />
-                <Skeleton className="h-4 max-w-[320px]" />
+      <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm ring-1 ring-border/50">
+        <div className="flex flex-col gap-3 border-b border-border/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <Skeleton className="h-9 w-full max-w-sm rounded-4xl" />
+          <Skeleton className="h-9 w-full rounded-4xl sm:w-28" />
+        </div>
+        <div className="px-4 py-3 sm:px-6">
+          <div className="flex gap-4 border-b border-border py-3">
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="hidden h-4 w-20 md:block" />
+            <Skeleton className="hidden h-4 w-14 lg:block" />
+            <Skeleton className="h-4 w-14" />
+            <Skeleton className="ms-auto h-4 w-8" />
+          </div>
+          {Array.from({ length: 6 }, (_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-4 border-b border-border py-4 last:border-0"
+            >
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <Skeleton className="size-9 shrink-0 rounded-full" />
+                <Skeleton className="h-5 max-w-[200px]" />
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-1">
-                <Skeleton className="h-3 w-8" />
-                <Skeleton className="size-4 rounded" />
-              </div>
+              <Skeleton className="hidden h-4 w-24 md:block" />
+              <Skeleton className="hidden h-4 w-32 lg:block" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="size-8 shrink-0 rounded-full" />
             </div>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
+        <div className="flex flex-col gap-3 border-t border-border/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <Skeleton className="h-4 w-48" />
+          <div className="flex gap-2">
+            <Skeleton className="size-8 rounded-lg" />
+            <Skeleton className="size-8 rounded-lg" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

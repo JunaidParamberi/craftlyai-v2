@@ -78,3 +78,51 @@ export function healthPresentation(
   }
   return { label: "At risk", variant: "destructive" };
 }
+
+/**
+ * Shorter labels for dense tables (list wireframe).
+ * Variants stay aligned with {@link healthPresentation}.
+ */
+export function healthPresentationCompact(
+  score: number | null,
+): HealthPresentation | null {
+  const pr = healthPresentation(score);
+  if (!pr) {
+    return null;
+  }
+  const label =
+    pr.label === "Excellent health"
+      ? "Excellent"
+      : pr.label === "Healthy"
+        ? "Good"
+        : pr.label === "Needs attention"
+          ? "Fair"
+          : pr.label;
+  return { label, variant: pr.variant };
+}
+
+/** Bucket key for client-side health filtering on the list. */
+export type ClientHealthBucket =
+  | "excellent"
+  | "good"
+  | "fair"
+  | "risk"
+  | "unset";
+
+export function clientHealthBucket(
+  score: number | null,
+): ClientHealthBucket | null {
+  if (score === null) {
+    return null;
+  }
+  if (score >= 80) {
+    return "excellent";
+  }
+  if (score >= 55) {
+    return "good";
+  }
+  if (score >= 30) {
+    return "fair";
+  }
+  return "risk";
+}
