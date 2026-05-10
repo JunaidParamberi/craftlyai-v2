@@ -93,16 +93,18 @@ export function AppHeader({
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-56">
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">Account</span>
-                {userEmail ? (
-                  <span className="truncate text-xs text-muted-foreground">
-                    {userEmail}
-                  </span>
-                ) : null}
-              </div>
-            </DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm font-medium">Account</span>
+                  {userEmail ? (
+                    <span className="truncate text-xs text-muted-foreground">
+                      {userEmail}
+                    </span>
+                  ) : null}
+                </div>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem render={<Link href="/protected/settings" />}>
@@ -115,9 +117,11 @@ export function AppHeader({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={() => void signOut()}>
-              Log out
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem variant="destructive" onClick={() => void signOut()}>
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
