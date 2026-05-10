@@ -1,6 +1,6 @@
 # CLAUDE.md — CraftlyAI Project Context
 
-Last updated: 2026-05-10
+Last updated: 2026-05-11
 Current phase: Phase 1 — Foundation (Weeks 1–3)
 
 Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
@@ -248,8 +248,8 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - [x] Supabase wiring — `@supabase/supabase-js`, `@supabase/ssr`, `lib/supabase/*`, root `middleware.ts`, env pattern
 - [x] `GET /api/health/supabase` — connectivity check
 - [x] Auth — login, signup, magic link, Google OAuth
-- [ ] todo · Onboarding — 3-step: profile, brand kit, first client
-- [ ] todo · Dashboard shell — sidebar, layout, dark mode
+- [x] Onboarding — 3-step: profile, brand kit, first client (routes, RLS, server actions, merged to `main`)
+- [x] Dashboard shell — sidebar, main app layout, header (search / Cmd+K stub), protected routes + placeholder pages (`feat/dashboard-shell` → `main`)
 - [ ] todo · Clients — CRUD, list, detail page
 - [ ] todo · Projects — linked to client, status, tasks
 - [ ] todo · Time tracker — start/stop, manual entry
@@ -302,16 +302,60 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 ## Last session summary
 
 - 2026-05-10: Project initialized; Next.js + Tailwind + shadcn; Supabase wired; health check endpoint added. Feature status: checkboxes + `todo ·` / `in-progress ·` prefixes.
+- 2026-05-11: Onboarding 3-step shipped and merged to `main`; shadcn **base-luma** (mist) + UI tokens; Git workflow section expanded in this file.
+- 2026-05-11: **Dashboard shell** merged to `main` — sidebar + header + dashboard home + placeholder section routes (`feat/dashboard-shell`). Phase 1 next focus: **Clients** CRUD.
 
 ---
 
 ## Git workflow rules (respect these)
 
-- Never do feature work directly on `main`
-- Create one branch per task/feature/fix (example: `feat/dashboard-shell`, `fix/auth-callback`)
-- Commit and push on that branch, then open a PR to merge into `main`
-- Keep `main` stable and deployable; use `main` directly only for tiny docs/meta edits when necessary
-- Delete merged branches to keep the repo clean
+Agents and humans follow the same flow: **`main` is always deployable**; real work happens on **short-lived branches**, then merges back via PR.
+
+### Non-negotiables
+
+- Never do feature work directly on `main` (except trivial docs/meta when unavoidable).
+- **One branch per task** — name it by intent: `feat/onboarding-scroll`, `fix/middleware-css`, `chore/bump-deps`.
+- **Commit and push** that branch, **open a PR into `main`**, merge when checks pass.
+- **Delete the branch** after merge (local + remote). Keeping old `feat/*` branches does not help isolate bugs once merged — `main` already contains the work; use a **new** `fix/*` branch from `main` for follow-ups.
+
+### Standard loop (copy-paste)
+
+```bash
+git checkout main && git pull origin main
+git checkout -b feat/short-task-name
+# … edit, commit often …
+git push -u origin feat/short-task-name
+```
+
+Then open a PR on GitHub → review → merge → locally:
+
+```bash
+git checkout main && git pull origin main
+git branch -d feat/short-task-name
+# Remote: delete branch in GitHub UI or: git push origin --delete feat/short-task-name
+```
+
+### Before merging a PR
+
+- Run **`npm run build`** (and **`npm run lint`** if the project uses it).
+- Smoke-test the flows you touched in the browser.
+
+### After a bug ships to `main`
+
+- Branch from **current `main`**: `git checkout -b fix/issue-short-label`.
+- Do **not** rely on an old feature branch name for isolation — it usually points at the same commits as `main` after merge.
+
+### Mental model
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Single source of truth for deploy; stays green |
+| `feat/*`, `fix/*`, `chore/*` | Sandboxed work until merged |
+
+### Solo vs team
+
+- **Solo:** still use PRs if you want a single diff view and GitHub “Merge”; merging locally is OK only if you still reviewed your own diff.
+- **Team:** PR required; optional reviewers; CI on PR when wired up.
 
 ---
 
