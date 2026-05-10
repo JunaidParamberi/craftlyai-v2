@@ -46,7 +46,7 @@ export function ClientDetailHeader({ client }: ClientDetailHeaderProps) {
     <TooltipProvider delay={300}>
       <div className="flex flex-col gap-6">
         <Link
-          href="/protected/clients"
+          href="/clients"
           className={cn(
             "inline-flex w-fit items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground",
           )}
@@ -95,7 +95,7 @@ export function ClientDetailHeader({ client }: ClientDetailHeaderProps) {
           <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">
             <Button
               nativeButton={false}
-              render={<Link href={`/protected/clients/${client.id}/edit`} />}
+              render={<Link href={`/clients/${client.id}/edit`} />}
             >
               <Pencil />
               Edit client
@@ -127,7 +127,7 @@ export function ClientDetailHeader({ client }: ClientDetailHeaderProps) {
               />
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  render={<Link href={`/protected/clients/${client.id}/edit`} />}
+                  render={<Link href={`/clients/${client.id}/edit`} />}
                 >
                   Edit details
                 </DropdownMenuItem>

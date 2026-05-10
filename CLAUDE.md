@@ -57,15 +57,15 @@ craftlyai.app/
 │   │   ├── signup/
 │   │   ├── forgot-password/
 │   │   └── reset-password/
-│   ├── (dashboard)/
-│   │   ├── dashboard/         ← main home after login
+│   ├── (app)/                 ← route group: URLs have no “app” segment
+│   │   ├── dashboard/         ← /dashboard
 │   │   ├── clients/
 │   │   ├── projects/
 │   │   ├── documents/
 │   │   ├── finance/
 │   │   ├── time/
 │   │   ├── settings/
-│   │   └── billing/
+│   │   └── support/
 │   ├── (marketing)/
 │   │   ├── pricing/
 │   │   ├── about/
@@ -304,7 +304,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - 2026-05-10: Project initialized; Next.js + Tailwind + shadcn; Supabase wired; health check endpoint added. Feature status: checkboxes + `todo ·` / `in-progress ·` prefixes.
 - 2026-05-11: Onboarding 3-step shipped and merged to `main`; shadcn **base-luma** (mist) + UI tokens; Git workflow section expanded in this file.
 - 2026-05-11: **Dashboard shell** merged to `main` — sidebar + header + dashboard home + placeholder section routes (`feat/dashboard-shell`). Phase 1 next focus: **Clients** CRUD.
-- 2026-05-11: **Clients CRM** — list `/protected/clients`, new + detail/edit/delete, Vitest for `parseClientCreateInput`, spec `docs/specs/clients-crm.md` (`feat/clients-crm`).
+- 2026-05-11: **Clients CRM** — list `/clients`, new + detail/edit/delete, Vitest for `parseClientCreateInput`, spec `docs/specs/clients-crm.md` (`feat/clients-crm`).
 
 ---
 

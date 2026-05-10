@@ -27,7 +27,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader className="gap-3 border-b border-sidebar-border/70 pb-4">
         <Link
-          href="/protected/dashboard"
+          href="/dashboard"
           className="flex items-center gap-3 px-2 transition-opacity hover:opacity-90 group-data-[collapsible=icon]:justify-center"
         >
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary font-heading text-lg font-semibold text-primary-foreground shadow-sm">
@@ -46,7 +46,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="New Project"
-              render={<Link href="/protected/projects/new" />}
+              render={<Link href="/projects/new" />}
               className={cn(
                 "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground",
                 "data-active:bg-primary data-active:text-primary-foreground",

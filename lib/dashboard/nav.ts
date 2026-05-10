@@ -19,33 +19,29 @@ export type NavItem = {
 export const primaryNav: NavItem[] = [
   {
     title: "Dashboard",
-    href: "/protected/dashboard",
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
     title: "Projects",
-    href: "/protected/projects",
+    href: "/projects",
     icon: FolderKanban,
   },
-  { title: "Clients", href: "/protected/clients", icon: Users },
-  { title: "Finance", href: "/protected/finance", icon: Wallet },
-  { title: "Documents", href: "/protected/documents", icon: FileText },
-  { title: "Time", href: "/protected/time", icon: Timer },
+  { title: "Clients", href: "/clients", icon: Users },
+  { title: "Finance", href: "/finance", icon: Wallet },
+  { title: "Documents", href: "/documents", icon: FileText },
+  { title: "Time", href: "/time", icon: Timer },
 ];
 
 export const footerNav: NavItem[] = [
-  { title: "Settings", href: "/protected/settings", icon: Settings },
-  { title: "Support", href: "/protected/support", icon: LifeBuoy },
+  { title: "Settings", href: "/settings", icon: Settings },
+  { title: "Support", href: "/support", icon: LifeBuoy },
 ];
 
-/** Active nav item: dashboard also matches /protected index before redirect. */
+/** Active nav item: dashboard also matches app root `/` before redirect. */
 export function isNavActive(pathname: string, href: string): boolean {
-  if (href === "/protected/dashboard") {
-    return (
-      pathname === "/protected/dashboard" ||
-      pathname === "/protected" ||
-      pathname === "/protected/"
-    );
+  if (href === "/dashboard") {
+    return pathname === "/dashboard" || pathname === "/" || pathname === "";
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }

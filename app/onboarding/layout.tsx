@@ -31,7 +31,7 @@ export default async function OnboardingLayout({
   const required = getRequiredOnboardingPath(profileResult.profile);
 
   if (required === null) {
-    redirect("/protected");
+    redirect("/dashboard");
   }
 
   const pathMatches =

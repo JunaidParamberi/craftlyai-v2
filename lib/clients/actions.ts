@@ -144,7 +144,7 @@ export async function createClient(input: unknown): Promise<CreateClientResult> 
     return { ok: false, message: "Client could not be created." };
   }
 
-  revalidatePath("/protected/clients");
+  revalidatePath("/clients");
 
   return { ok: true, client: normalizeClientRow(data) };
 }
@@ -212,9 +212,9 @@ export async function updateClient(
     return { ok: false, message: "Client not found or could not be updated." };
   }
 
-  revalidatePath("/protected/clients");
-  revalidatePath(`/protected/clients/${parsedId.data}`);
-  revalidatePath(`/protected/clients/${parsedId.data}/edit`);
+  revalidatePath("/clients");
+  revalidatePath(`/clients/${parsedId.data}`);
+  revalidatePath(`/clients/${parsedId.data}/edit`);
 
   return { ok: true, client: normalizeClientRow(data) };
 }
@@ -253,9 +253,9 @@ export async function deleteClient(id: string): Promise<DeleteClientResult> {
     return { ok: false, message: "Client not found." };
   }
 
-  revalidatePath("/protected/clients");
-  revalidatePath(`/protected/clients/${parsedId.data}`);
-  revalidatePath(`/protected/clients/${parsedId.data}/edit`);
+  revalidatePath("/clients");
+  revalidatePath(`/clients/${parsedId.data}`);
+  revalidatePath(`/clients/${parsedId.data}/edit`);
 
   return { ok: true };
 }

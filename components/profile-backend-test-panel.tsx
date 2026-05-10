@@ -209,7 +209,7 @@ export function ProfileBackendTestPanel({ initialProfile }: Props) {
             {isPending ? "Saving…" : "Save via updateProfile()"}
           </Button>
           <Link
-            href="/protected"
+            href="/dashboard"
             className={cn(buttonVariants({ variant: "outline" }), "inline-flex")}
           >
             Back to protected

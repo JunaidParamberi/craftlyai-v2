@@ -29,7 +29,7 @@ export async function skipBrandOnboarding(): Promise<OnboardingActionResult> {
   }
 
   revalidatePath("/onboarding", "layout");
-  revalidatePath("/protected", "layout");
+  revalidatePath("/dashboard", "layout");
   return { ok: true };
 }
 
@@ -54,6 +54,6 @@ export async function completeOnboarding(): Promise<OnboardingActionResult> {
   }
 
   revalidatePath("/onboarding", "layout");
-  revalidatePath("/protected", "layout");
+  revalidatePath("/dashboard", "layout");
   return { ok: true };
 }

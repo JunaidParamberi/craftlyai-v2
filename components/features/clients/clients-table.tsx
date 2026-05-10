@@ -251,7 +251,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                     <TableCell className="ps-4 sm:ps-6">
                       <div className="flex min-w-0 flex-col gap-1">
                         <Link
-                          href={`/protected/clients/${c.id}`}
+                          href={`/clients/${c.id}`}
                           className="flex min-w-0 items-center gap-3 font-medium text-foreground hover:underline"
                         >
                           <span
@@ -312,7 +312,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             render={
-                              <Link href={`/protected/clients/${c.id}`} />
+                              <Link href={`/clients/${c.id}`} />
                             }
                           >
                             View profile
@@ -320,7 +320,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                           <DropdownMenuItem
                             render={
                               <Link
-                                href={`/protected/clients/${c.id}/edit`}
+                                href={`/clients/${c.id}/edit`}
                               />
                             }
                           >

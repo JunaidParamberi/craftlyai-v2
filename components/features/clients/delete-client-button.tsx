@@ -38,7 +38,7 @@ export function DeleteClientButton({
         return;
       }
       setOpen(false);
-      router.push("/protected/clients");
+      router.push("/clients");
       router.refresh();
     });
   }

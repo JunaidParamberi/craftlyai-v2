@@ -8,7 +8,7 @@ import { getRequiredOnboardingPath } from "@/lib/onboarding/status";
 import { getProfile } from "@/lib/profile/actions";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function ProtectedLayout({
+export default async function AppShellLayout({
   children,
 }: Readonly<{
   children: ReactNode;
@@ -17,9 +17,9 @@ export default async function ProtectedLayout({
   const pathname = h.get("x-pathname") ?? "";
 
   if (
-    pathname.startsWith("/protected/profile-test") ||
-    pathname.startsWith("/protected/brand-kit-test") ||
-    pathname.startsWith("/protected/clients-test")
+    pathname.startsWith("/profile-test") ||
+    pathname.startsWith("/brand-kit-test") ||
+    pathname.startsWith("/clients-test")
   ) {
     return children;
   }

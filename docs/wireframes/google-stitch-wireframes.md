@@ -219,7 +219,7 @@ Use this document as the single source of truth when generating UI in [Google St
 
 | Field | Value |
 |--------|--------|
-| **Route** | `/protected` |
+| **Route** | `/` → redirects to `/dashboard` |
 | **Screen ID** | `PROTECTED` |
 
 **ASCII wireframe**

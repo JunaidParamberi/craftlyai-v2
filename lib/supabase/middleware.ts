@@ -14,7 +14,6 @@ function requestHeadersWithPathname(request: NextRequest): Headers {
  * Routes that do not require a session. Expand when you add marketing/auth pages.
  */
 function isPublicPath(pathname: string): boolean {
-  if (pathname === "/") return true;
   if (pathname.startsWith("/_next")) return true;
   if (pathname.startsWith("/api")) return true;
   const publicPrefixes = [

@@ -65,7 +65,7 @@ export function FirstClientOnboardingForm() {
         return;
       }
       router.refresh();
-      router.push("/protected");
+      router.push("/dashboard");
     });
   }
 
@@ -100,7 +100,7 @@ export function FirstClientOnboardingForm() {
 
       reset(defaults);
       router.refresh();
-      router.push("/protected");
+      router.push("/dashboard");
     });
   }
 

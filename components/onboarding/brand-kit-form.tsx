@@ -71,7 +71,7 @@ export function BrandKitForm({
 
   const backHref =
     backHrefProp ??
-    (variant === "onboarding" ? "/onboarding/profile" : "/protected/profile-test");
+    (variant === "onboarding" ? "/onboarding/profile" : "/profile-test");
   const backLabel =
     backLabelProp ?? (variant === "onboarding" ? "← Back" : "Back to profile");
   const submitLabel =

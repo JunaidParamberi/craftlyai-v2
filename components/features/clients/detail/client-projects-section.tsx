@@ -25,7 +25,7 @@ export function ClientProjectsSection() {
           size="sm"
           className="gap-1 text-muted-foreground"
           nativeButton={false}
-          render={<Link href="/protected/projects" />}
+          render={<Link href="/projects" />}
         >
           View all
           <ArrowRight className="size-4" />
@@ -42,7 +42,7 @@ export function ClientProjectsSection() {
             dates, and billing at a glance.
           </p>
         </div>
-        <Button nativeButton={false} render={<Link href="/protected/projects/new" />}>
+        <Button nativeButton={false} render={<Link href="/projects/new" />}>
           Create project
         </Button>
       </CardContent>

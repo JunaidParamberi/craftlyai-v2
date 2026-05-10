@@ -90,7 +90,7 @@ export function ClientForm(props: ClientFormProps) {
           }
           return;
         }
-        router.push(`/protected/clients/${created.client.id}`);
+        router.push(`/clients/${created.client.id}`);
         router.refresh();
         return;
       }
@@ -114,7 +114,7 @@ export function ClientForm(props: ClientFormProps) {
         return;
       }
 
-      router.push(`/protected/clients/${props.clientId}`);
+      router.push(`/clients/${props.clientId}`);
       router.refresh();
     });
   }
@@ -252,7 +252,7 @@ export function ClientForm(props: ClientFormProps) {
         </CardContent>
         <CardFooter className="flex flex-wrap justify-end gap-2 border-t border-border pt-6">
           <Link
-            href="/protected/clients"
+            href="/clients"
             className={cn(buttonVariants({ variant: "outline" }))}
           >
             Cancel

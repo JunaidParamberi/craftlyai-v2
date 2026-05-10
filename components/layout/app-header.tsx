@@ -107,11 +107,11 @@ export function AppHeader({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem render={<Link href="/protected/settings" />}>
+              <DropdownMenuItem render={<Link href="/settings" />}>
                 <Settings />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem render={<Link href="/protected/support" />}>
+              <DropdownMenuItem render={<Link href="/support" />}>
                 <LifeBuoy />
                 Support
               </DropdownMenuItem>

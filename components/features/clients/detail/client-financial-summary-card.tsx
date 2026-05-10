@@ -69,7 +69,7 @@ export function ClientFinancialSummaryCard() {
             ships.
           </p>
           <Link
-            href="/protected/finance"
+            href="/finance"
             className="text-primary text-xs underline-offset-4 hover:underline"
           >
             Open finance (preview)

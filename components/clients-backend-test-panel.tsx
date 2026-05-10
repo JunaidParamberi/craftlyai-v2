@@ -253,11 +253,11 @@ export function ClientsBackendTestPanel({ initialClients }: Props) {
 
       <p className="text-xs text-muted-foreground">
         Remove this route before production or protect behind an env flag.{" "}
-        <Link href="/protected/profile-test" className="underline underline-offset-4">
+        <Link href="/profile-test" className="underline underline-offset-4">
           Profile test
         </Link>
         {" · "}
-        <Link href="/protected" className="underline underline-offset-4">
+        <Link href="/dashboard" className="underline underline-offset-4">
           Protected home
         </Link>
       </p>

@@ -48,10 +48,10 @@ Onboarding step 3 calls `createClient` from [`components/onboarding/first-client
 
 | Path | Role |
 |------|------|
-| `/protected/clients` | List |
-| `/protected/clients/new` | Create (`ClientForm` create) |
-| `/protected/clients/[id]` | **Detail / overview** — wireframe-style layout (tabs: Overview & projects, Documents, Notes & activity), edit/delete affordances; uses [`components/features/clients/detail/`](/components/features/clients/detail/) |
-| `/protected/clients/[id]/edit` | **Edit** — same [`ClientForm`](/components/features/clients/client-form.tsx) as create; after save, navigates back to detail |
+| `/clients` | List |
+| `/clients/new` | Create (`ClientForm` create) |
+| `/clients/[id]` | **Detail / overview** — wireframe-style layout (tabs: Overview & projects, Documents, Notes & activity), edit/delete affordances; uses [`components/features/clients/detail/`](/components/features/clients/detail/) |
+| `/clients/[id]/edit` | **Edit** — same [`ClientForm`](/components/features/clients/client-form.tsx) as create; after save, navigates back to detail |
 
 Display helpers for detail UI live in [`lib/clients/display.ts`](/lib/clients/display.ts) (monogram, dates, health labels).
 
@@ -64,4 +64,4 @@ Display helpers for detail UI live in [`lib/clients/display.ts`](/lib/clients/di
 
 ## Dev-only QA
 
-`/protected/clients-test` — bypasses onboarding in [`app/protected/layout.tsx`](/app/protected/layout.tsx); use for quick CRUD checks against Supabase.
+`/clients-test` — bypasses onboarding in `app/(app)/layout.tsx`; use for quick CRUD checks against Supabase.

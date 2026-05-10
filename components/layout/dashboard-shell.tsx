@@ -41,7 +41,7 @@ export function DashboardShell({
           userInitials={userInitials}
           onOpenSearch={() => setCommandOpen(true)}
         />
-        <div className="min-h-0 flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden p-4 md:p-6">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-4 md:p-6">
           {children}
         </div>
       </SidebarInset>

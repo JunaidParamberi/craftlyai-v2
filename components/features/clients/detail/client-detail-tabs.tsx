@@ -26,7 +26,7 @@ type ClientDetailTabsProps = {
 };
 
 export function ClientDetailTabs({ client }: ClientDetailTabsProps) {
-  const editHref = `/protected/clients/${client.id}/edit`;
+  const editHref = `/clients/${client.id}/edit`;
   const hasNotes = Boolean(client.notes?.trim());
   const updatedLabel = formatLastUpdated(client.updated_at)
     ? `Last updated ${formatLastUpdated(client.updated_at)}`

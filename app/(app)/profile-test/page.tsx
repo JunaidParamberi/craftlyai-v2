@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { BrandKitForm } from "@/components/onboarding/brand-kit-form";
-import { getBrandKit } from "@/lib/brand-kit/actions";
+import { ProfileBackendTestPanel } from "@/components/profile-backend-test-panel";
+import { getProfile } from "@/lib/profile/actions";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
-  title: "Brand kit backend test · CraftlyAI",
+  title: "Profile backend test · CraftlyAI",
 };
 
-export default async function BrandKitBackendTestPage() {
+export default async function ProfileBackendTestPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -21,20 +21,20 @@ export default async function BrandKitBackendTestPage() {
     redirect("/auth/login");
   }
 
-  const result = await getBrandKit();
+  const result = await getProfile();
 
-  const brandKit = result.ok && result.brandKit ? result.brandKit : null;
-  const panelKey = brandKit?.updated_at ?? "no-brand-kit";
+  const profile = result.ok && result.profile ? result.profile : null;
+  const panelKey = profile?.updated_at ?? "no-profile";
 
   return (
     <div className="mx-auto flex min-h-svh max-w-3xl flex-col gap-8 px-4 py-10">
       <header className="flex flex-col gap-2">
         <p className="text-sm text-muted-foreground">
           Dev harness for{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">getBrandKit</code> /{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">saveBrandKit</code>
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">getProfile</code> /{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">updateProfile</code>
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight">Brand kit backend test</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Profile backend test</h1>
         <p className="text-sm text-muted-foreground">
           Signed in as <span className="text-foreground">{user.email}</span>
         </p>
@@ -45,11 +45,11 @@ export default async function BrandKitBackendTestPage() {
           className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
           role="alert"
         >
-          getBrandKit failed: {result.message}
+          getProfile failed: {result.message}
         </div>
       ) : null}
 
-      {result.ok && result.brandKit === null ? (
+      {result.ok && result.profile === null ? (
         <div
           className={cn(
             "rounded-md border px-3 py-2 text-sm",
@@ -59,36 +59,29 @@ export default async function BrandKitBackendTestPage() {
           )}
         >
           {result.reason === "no_row"
-            ? "No brand kit row yet — save the form once (creates row + links profiles.brand_kit_id)."
+            ? "No profile row yet — apply the profiles migration, then save once (upsert will create it)."
             : "No session (unexpected here)."}
         </div>
       ) : null}
 
-      {result.ok && result.brandKit ? (
+      {result.ok && result.profile ? (
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-muted-foreground">Current row (getBrandKit)</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Current row (getProfile)</h2>
           <pre className="max-h-64 overflow-auto rounded-md border border-border bg-muted/40 p-3 text-xs">
-            {JSON.stringify(result.brandKit, null, 2)}
+            {JSON.stringify(result.profile, null, 2)}
           </pre>
         </section>
       ) : null}
 
-      <BrandKitForm
-        key={panelKey}
-        initialBrandKit={brandKit}
-        redirectAfterSave={false}
-        backHref="/protected/profile-test"
-        backLabel="Back to profile test"
-        submitLabel="Save via saveBrandKit()"
-      />
+      <ProfileBackendTestPanel key={panelKey} initialProfile={profile} />
 
       <p className="text-xs text-muted-foreground">
         Remove this route before production or protect behind env flag.{" "}
-        <Link href="/onboarding/client" className="font-medium underline underline-offset-4">
-          Next: First client (onboarding placeholder)
+        <Link href="/brand-kit-test" className="font-medium underline underline-offset-4">
+          Next: Brand kit test
         </Link>
         {" · "}
-        <Link href="/protected" className="underline underline-offset-4">
+        <Link href="/dashboard" className="underline underline-offset-4">
           Protected home
         </Link>
         {" · "}

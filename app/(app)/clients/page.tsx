@@ -43,7 +43,7 @@ export default async function ClientsPage() {
         </div>
         <Button
           nativeButton={false}
-          render={<Link href="/protected/clients/new" />}
+          render={<Link href="/clients/new" />}
         >
           <Plus />
           Add client
@@ -62,7 +62,7 @@ export default async function ClientsPage() {
           <CardContent>
             <Button
               nativeButton={false}
-              render={<Link href="/protected/clients/new" />}
+              render={<Link href="/clients/new" />}
             >
               <Plus />
               Add your first client
