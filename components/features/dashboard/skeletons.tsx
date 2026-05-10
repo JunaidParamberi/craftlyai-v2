@@ -1,3 +1,4 @@
+import { FormPageShell } from "@/components/shared/form-page-shell";
 import {
   Card,
   CardContent,
@@ -90,18 +91,20 @@ export function DashboardPageSkeleton() {
   );
 }
 
-/** Matches generic placeholder pages (Projects, Settings, …). */
+/** Matches generic placeholder pages (Projects, Settings, …), same width shell as form pages. */
 export function ProtectedPlaceholderSkeleton() {
   return (
-    <div
-      role="status"
-      aria-busy="true"
-      aria-label="Loading"
-      className="flex flex-col gap-3"
-    >
-      <Skeleton className="h-8 w-44 max-w-[85%] rounded-lg md:h-9 md:w-52" />
-      <Skeleton className="h-4 w-full max-w-lg" />
-      <Skeleton className="h-4 w-full max-w-md" />
-    </div>
+    <FormPageShell>
+      <div
+        role="status"
+        aria-busy="true"
+        aria-label="Loading"
+        className="flex flex-col gap-3"
+      >
+        <Skeleton className="h-8 w-44 max-w-[85%] rounded-lg md:h-9 md:w-52" />
+        <Skeleton className="h-4 w-full max-w-lg" />
+        <Skeleton className="h-4 w-full max-w-md" />
+      </div>
+    </FormPageShell>
   );
 }
