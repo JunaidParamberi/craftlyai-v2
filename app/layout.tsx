@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Fraunces } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 
 import { siteConfig } from "@/config/site";
 
@@ -9,11 +9,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -35,12 +31,12 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("font-sans", dmSans.variable, fraunces.variable)}
+      className={cn("font-sans", inter.variable, fraunces.variable)}
     >
       <body
         className={cn(
           "min-h-dvh font-sans antialiased",
-          dmSans.variable,
+          inter.variable,
           fraunces.variable,
         )}
       >
