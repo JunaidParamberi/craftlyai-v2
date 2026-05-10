@@ -250,7 +250,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - [x] Auth — login, signup, magic link, Google OAuth
 - [x] Onboarding — 3-step: profile, brand kit, first client (routes, RLS, server actions, merged to `main`)
 - [x] Dashboard shell — sidebar, main app layout, header (search / Cmd+K stub), protected routes + placeholder pages (`feat/dashboard-shell` → `main`)
-- [ ] todo · Clients — CRUD, list, detail page
+- [x] Clients — CRUD, list, detail page
 - [ ] todo · Projects — linked to client, status, tasks
 - [ ] todo · Time tracker — start/stop, manual entry
 
@@ -304,6 +304,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - 2026-05-10: Project initialized; Next.js + Tailwind + shadcn; Supabase wired; health check endpoint added. Feature status: checkboxes + `todo ·` / `in-progress ·` prefixes.
 - 2026-05-11: Onboarding 3-step shipped and merged to `main`; shadcn **base-luma** (mist) + UI tokens; Git workflow section expanded in this file.
 - 2026-05-11: **Dashboard shell** merged to `main` — sidebar + header + dashboard home + placeholder section routes (`feat/dashboard-shell`). Phase 1 next focus: **Clients** CRUD.
+- 2026-05-11: **Clients CRM** — list `/protected/clients`, new + detail/edit/delete, Vitest for `parseClientCreateInput`, spec `docs/specs/clients-crm.md` (`feat/clients-crm`).
 
 ---
 
