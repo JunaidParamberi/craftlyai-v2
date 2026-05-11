@@ -10,6 +10,10 @@ import {
   CLIENT_LIMITS,
   type ClientCreateFormInput,
 } from "@/lib/validations/client";
+import {
+  FORM_CARD_CONTENT_BEFORE_FOOTER,
+  FORM_CARD_FOOTER_END_ACTIONS,
+} from "@/lib/ui/form-card";
 import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -131,7 +135,9 @@ export function ClientForm(props: ClientFormProps) {
             {props.mode === "create" ? "Client details" : "Edit client"}
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-6 pt-2">
+        <CardContent
+          className={cn("flex flex-col gap-6 pt-2", FORM_CARD_CONTENT_BEFORE_FOOTER)}
+        >
           {serverError ? (
             <Alert variant="destructive">
               <AlertTitle>Could not save</AlertTitle>
@@ -250,7 +256,7 @@ export function ClientForm(props: ClientFormProps) {
             ) : null}
           </div>
         </CardContent>
-        <CardFooter className="flex flex-wrap justify-end gap-2 border-t border-border pt-6">
+        <CardFooter className={FORM_CARD_FOOTER_END_ACTIONS}>
           <Link
             href="/clients"
             className={cn(buttonVariants({ variant: "outline" }))}

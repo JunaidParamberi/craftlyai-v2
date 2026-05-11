@@ -14,6 +14,10 @@ import {
   type BrandKitFormValues,
 } from "@/lib/validations/brand-kit";
 import type { BrandKitRow } from "@/types";
+import {
+  FORM_CARD_CONTENT_BEFORE_FOOTER,
+  FORM_CARD_FOOTER_ONBOARDING_SPLIT,
+} from "@/lib/ui/form-card";
 import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -421,7 +425,7 @@ export function BrandKitForm({
     ) : null;
 
   const onboardingFooter = (
-    <CardFooter className="shrink-0 flex flex-wrap items-center justify-between gap-4 border-t border-border bg-card px-6 pt-6 pb-6">
+    <CardFooter className={FORM_CARD_FOOTER_ONBOARDING_SPLIT}>
       <Link
         href={backHref}
         className={cn(
@@ -487,7 +491,12 @@ export function BrandKitForm({
             noValidate
             className="flex min-h-0 flex-1 flex-col overflow-hidden"
           >
-            <CardContent className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 pt-2 pb-6">
+            <CardContent
+              className={cn(
+                "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 pt-2",
+                FORM_CARD_CONTENT_BEFORE_FOOTER,
+              )}
+            >
               <CardTitle className="sr-only">Brand kit</CardTitle>
               <div className="flex flex-col gap-6">
                 {initialBrandKit?.logo_url ? (

@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { formatLastUpdated } from "@/lib/clients/display";
-import type { ClientRow } from "@/types";
+import type { ClientRow, ProjectListRow } from "@/types";
 
 import { ClientFinancialSummaryCard } from "@/components/features/clients/detail/client-financial-summary-card";
 import { ClientPinnedNote } from "@/components/features/clients/detail/client-pinned-note";
@@ -23,9 +23,10 @@ import { FileText, History } from "lucide-react";
 
 type ClientDetailTabsProps = {
   client: ClientRow;
+  projects: ProjectListRow[];
 };
 
-export function ClientDetailTabs({ client }: ClientDetailTabsProps) {
+export function ClientDetailTabs({ client, projects }: ClientDetailTabsProps) {
   const editHref = `/clients/${client.id}/edit`;
   const hasNotes = Boolean(client.notes?.trim());
   const updatedLabel = formatLastUpdated(client.updated_at)
@@ -51,7 +52,7 @@ export function ClientDetailTabs({ client }: ClientDetailTabsProps) {
       <TabsContent value="overview" className="mt-0">
         <div className="grid gap-8 lg:grid-cols-[1fr_minmax(260px,320px)] lg:items-start">
           <div className="flex flex-col gap-8">
-            <ClientProjectsSection />
+            <ClientProjectsSection clientId={client.id} projects={projects} />
             {hasNotes ? (
               <ClientPinnedNote
                 notes={client.notes!}

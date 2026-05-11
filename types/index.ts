@@ -52,3 +52,53 @@ export type ClientRow = {
   created_at: string;
   updated_at: string;
 };
+
+/** Matches `projects_status_check` in `*_projects_tasks.sql`. */
+export type ProjectStatus =
+  | "planning"
+  | "active"
+  | "on_hold"
+  | "completed"
+  | "archived";
+
+/**
+ * Row shape for `public.projects` (see supabase/migrations/*_projects_tasks.sql).
+ */
+export type ProjectRow = {
+  id: string;
+  user_id: string;
+  client_id: string;
+  title: string;
+  status: ProjectStatus;
+  budget: number | null;
+  spent: number | null;
+  start_date: string | null;
+  deadline: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** Project row with embedded CRM client (see `listProjects` / `getProjectById` select). */
+export type ProjectListRow = ProjectRow & {
+  client: { id: string; name: string } | null;
+};
+
+/** Matches `tasks_status_check` in `*_projects_tasks.sql`. */
+export type TaskStatus = "todo" | "in_progress" | "done" | "cancelled";
+
+/** Matches `tasks_priority_check` in `*_projects_tasks.sql`. */
+export type TaskPriority = "low" | "medium" | "high";
+
+/**
+ * Row shape for `public.tasks` (see supabase/migrations/*_projects_tasks.sql).
+ */
+export type TaskRow = {
+  id: string;
+  project_id: string;
+  title: string;
+  status: TaskStatus;
+  due_date: string | null;
+  priority: TaskPriority;
+  created_at: string;
+  updated_at: string;
+};

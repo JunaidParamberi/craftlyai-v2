@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ClientDetailView } from "@/components/features/clients/detail/client-detail-view";
 import { FormPageShell } from "@/components/shared/form-page-shell";
 import { getClientById } from "@/lib/clients/actions";
+import { listProjects } from "@/lib/projects/actions";
 
 export default async function ClientDetailPage({
   params,
@@ -15,9 +16,12 @@ export default async function ClientDetailPage({
     notFound();
   }
 
+  const projectsResult = await listProjects();
+  const projects = projectsResult.ok ? projectsResult.projects : [];
+
   return (
     <FormPageShell maxWidth="7xl">
-      <ClientDetailView client={client} />
+      <ClientDetailView client={client} projects={projects} />
     </FormPageShell>
   );
 }

@@ -1,5 +1,10 @@
 import { FormPageShell } from "@/components/shared/form-page-shell";
 import {
+  FORM_CARD_CONTENT_BEFORE_FOOTER,
+  FORM_CARD_FOOTER_END_ACTIONS,
+} from "@/lib/ui/form-card";
+import { cn } from "@/lib/utils";
+import {
   Card,
   CardContent,
   CardFooter,
@@ -64,7 +69,9 @@ function ClientFormCardSkeleton() {
       <CardHeader className="pb-2">
         <Skeleton className="h-6 w-40" />
       </CardHeader>
-      <CardContent className="flex flex-col gap-6 pt-2">
+      <CardContent
+        className={cn("flex flex-col gap-6 pt-2", FORM_CARD_CONTENT_BEFORE_FOOTER)}
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2 sm:col-span-2">
             <Skeleton className="h-4 w-28" />
@@ -98,7 +105,7 @@ function ClientFormCardSkeleton() {
           <Skeleton className="min-h-[6rem] w-full rounded-2xl" />
         </div>
       </CardContent>
-      <CardFooter className="flex flex-wrap justify-end gap-2 border-t border-border pt-6">
+      <CardFooter className={FORM_CARD_FOOTER_END_ACTIONS}>
         <Skeleton className="h-9 w-20 rounded-4xl" />
         <Skeleton className="h-9 w-28 rounded-4xl" />
       </CardFooter>

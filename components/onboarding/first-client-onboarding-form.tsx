@@ -9,6 +9,10 @@ import { ArrowRightIcon } from "lucide-react";
 import { completeOnboarding } from "@/lib/onboarding/actions";
 import { createClient } from "@/lib/clients/actions";
 import { CLIENT_LIMITS } from "@/lib/validations/client";
+import {
+  FORM_CARD_CONTENT_BEFORE_FOOTER,
+  FORM_CARD_FOOTER_ONBOARDING_SPLIT,
+} from "@/lib/ui/form-card";
 import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -130,7 +134,12 @@ export function FirstClientOnboardingForm() {
           onSubmit={handleSubmit(onSaveAndFinish)}
           noValidate
         >
-          <CardContent className="relative z-0 min-h-0 overflow-y-auto overscroll-y-contain px-6 pt-2 pb-6 touch-pan-y [-webkit-overflow-scrolling:touch] [scrollbar-gutter:stable]">
+          <CardContent
+            className={cn(
+              "relative z-0 min-h-0 overflow-y-auto overscroll-y-contain px-6 pt-2 touch-pan-y [-webkit-overflow-scrolling:touch] [scrollbar-gutter:stable]",
+              FORM_CARD_CONTENT_BEFORE_FOOTER,
+            )}
+          >
             <CardTitle className="sr-only">First client</CardTitle>
             <div className="flex flex-col gap-6">
               <div className="grid gap-4 sm:grid-cols-2">
@@ -273,7 +282,7 @@ export function FirstClientOnboardingForm() {
             </div>
           </CardContent>
 
-          <CardFooter className="shrink-0 flex flex-wrap items-center justify-between gap-4 border-t border-border bg-card px-6 pt-6 pb-6">
+          <CardFooter className={FORM_CARD_FOOTER_ONBOARDING_SPLIT}>
             <Link
               href="/onboarding/brand"
               className={cn(

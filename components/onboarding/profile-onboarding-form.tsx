@@ -13,6 +13,10 @@ import {
 } from "@/lib/validations/onboarding-profile-form";
 import { updateProfile, type UpdateProfileResult } from "@/lib/profile/actions";
 import type { ProfileRow } from "@/types";
+import {
+  FORM_CARD_CONTENT_BEFORE_FOOTER,
+  FORM_CARD_FOOTER_ONBOARDING_SPLIT,
+} from "@/lib/ui/form-card";
 import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -117,7 +121,12 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
           onSubmit={handleSubmit(onSubmit)}
           className="flex min-h-0 flex-1 flex-col overflow-hidden"
         >
-          <CardContent className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 pt-2 pb-6">
+          <CardContent
+            className={cn(
+              "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 pt-2",
+              FORM_CARD_CONTENT_BEFORE_FOOTER,
+            )}
+          >
             <CardTitle className="sr-only">Profile basics</CardTitle>
             <div className="flex flex-col gap-6">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -265,7 +274,7 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
             </div>
           </CardContent>
 
-          <CardFooter className="shrink-0 flex flex-wrap items-center justify-between gap-4 border-t border-border bg-card px-6 pt-6 pb-6">
+          <CardFooter className={FORM_CARD_FOOTER_ONBOARDING_SPLIT}>
             <Link
               href="/"
               className={cn(
