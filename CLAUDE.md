@@ -1,7 +1,7 @@
 # CLAUDE.md — CraftlyAI Project Context
 
-Last updated: 2026-05-11
-Current phase: Phase 1 — Foundation (Weeks 1–3)
+Last updated: 2026-05-17
+Current phase: Phase 1 — Foundation complete; Phase 2 — Documents & Finance next
 
 Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
 
@@ -92,6 +92,7 @@ craftlyai.app/
 │   ├── auth/
 │   ├── db/
 │   ├── stripe/
+│   ├── time/                  ← server actions (timer + manual entries)
 │   └── email/
 ├── agents/                    ← system prompt definitions per agent
 │   ├── router/
@@ -252,7 +253,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - [x] Dashboard shell — sidebar, main app layout, header (search / Cmd+K stub), protected routes + placeholder pages (`feat/dashboard-shell` → `main`)
 - [x] Clients — CRUD, list, detail page
 - [x] Projects — linked to client, status, project-scoped tasks
-- [ ] todo · Time tracker — start/stop, manual entry
+- [x] Time tracker — `/time` running timer (start/stop/pause/resume), manual entry with 12h popover time + date-before-time gate; `lib/time/actions`, migrations `time_entries` (+ pause/description); merged `main` (`feat/time-tracker`)
 
 ### Phase 2 — Documents & Finance (Weeks 4–6)
 
@@ -305,6 +306,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - 2026-05-11: Onboarding 3-step shipped and merged to `main`; shadcn **base-luma** (mist) + UI tokens; Git workflow section expanded in this file.
 - 2026-05-11: **Dashboard shell** merged to `main` — sidebar + header + dashboard home + placeholder section routes (`feat/dashboard-shell`). Phase 1 next focus: **Clients** CRUD.
 - 2026-05-11: **Clients CRM** — list `/clients`, new + detail/edit/delete, Vitest for `parseClientCreateInput`, spec `docs/specs/clients-crm.md` (`feat/clients-crm`).
+- 2026-05-17: **Time tracker** merged to `main` — `/time` live + paused timers, manual log (`FormTimePopover`, gate time until date), server actions + Zod `lib/validations/time-entry`, migrations `20260516120000_time_entries.sql` / pause+description follow-up; branch `feat/time-tracker` removed after merge; root layout `suppressHydrationWarning` on `<body>` for extension-induced hydration noise.
 
 ---
 
