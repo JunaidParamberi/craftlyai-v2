@@ -251,7 +251,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - [x] Onboarding — 3-step: profile, brand kit, first client (routes, RLS, server actions, merged to `main`)
 - [x] Dashboard shell — sidebar, main app layout, header (search / Cmd+K stub), protected routes + placeholder pages (`feat/dashboard-shell` → `main`)
 - [x] Clients — CRUD, list, detail page
-- [ ] todo · Projects — linked to client, status, tasks
+- [x] Projects — linked to client, status, project-scoped tasks
 - [ ] todo · Time tracker — start/stop, manual entry
 
 ### Phase 2 — Documents & Finance (Weeks 4–6)
