@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
 
+import { branding } from "@/config/branding";
 import { siteConfig } from "@/config/site";
 
 import "@/styles/globals.css";
@@ -17,9 +18,32 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
+const metadataBase =
+  process.env.NEXT_PUBLIC_APP_URL != null &&
+  process.env.NEXT_PUBLIC_APP_URL.length > 0
+    ? new URL(process.env.NEXT_PUBLIC_APP_URL)
+    : undefined;
+
 export const metadata: Metadata = {
+  metadataBase,
   title: siteConfig.name,
   description: siteConfig.description,
+  icons: {
+    icon: [{ url: branding.appIcon, type: "image/png" }],
+    apple: [{ url: branding.appIcon, sizes: "180x180", type: "image/png" }],
+  },
+  openGraph: {
+    title: siteConfig.name,
+    description: siteConfig.description,
+    type: "website",
+    images: [{ url: branding.appIcon }],
+  },
+  twitter: {
+    card: "summary",
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: [branding.appIcon],
+  },
 };
 
 export default function RootLayout({

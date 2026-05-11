@@ -16,47 +16,22 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { BrandLockup } from "@/components/shared/brand-lockup";
 import { footerNav, isNavActive, primaryNav } from "@/lib/dashboard/nav";
-import { cn } from "@/lib/utils";
-import { Plus } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
 
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="gap-3 border-b border-sidebar-border/70 pb-4">
+      <SidebarHeader className="border-b border-sidebar-border/70 pb-4">
         <Link
           href="/dashboard"
-          className="flex items-center gap-3 px-2 transition-opacity hover:opacity-90 group-data-[collapsible=icon]:justify-center"
+          aria-label="Craftly AI home"
+          className="flex items-center px-2 transition-opacity hover:opacity-90 group-data-[collapsible=icon]:justify-center"
         >
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary font-heading text-lg font-semibold text-primary-foreground shadow-sm">
-            C
-          </div>
-          <div className="flex min-w-0 flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
-            <span className="truncate font-heading text-base font-semibold tracking-tight text-sidebar-foreground">
-              CraftlyAI
-            </span>
-            <span className="truncate text-xs text-muted-foreground">
-              Freelancer OS
-            </span>
-          </div>
+          <BrandLockup wordmarkWrapperClassName="group-data-[collapsible=icon]:hidden" />
         </Link>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="New Project"
-              render={<Link href="/projects/new" />}
-              className={cn(
-                "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground",
-                "data-active:bg-primary data-active:text-primary-foreground",
-              )}
-            >
-              <Plus />
-              <span>New Project</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent className="gap-0">

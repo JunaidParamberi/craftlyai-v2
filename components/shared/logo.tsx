@@ -1,5 +1,5 @@
-import { siteConfig } from "@/config/site";
+import { BrandLockup } from "@/components/shared/brand-lockup";
 
-export function Logo() {
-  return <span className="font-semibold">{siteConfig.name}</span>;
+export function Logo({ className }: { className?: string }) {
+  return <BrandLockup className={className} />;
 }
