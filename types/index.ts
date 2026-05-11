@@ -103,3 +103,28 @@ export type TaskRow = {
   created_at: string;
   updated_at: string;
 };
+
+/**
+ * Row shape for `public.time_entries` (see supabase/migrations/*_time_entries.sql).
+ */
+export type TimeEntryRow = {
+  id: string;
+  user_id: string;
+  project_id: string;
+  task_id: string | null;
+  description: string | null;
+  started_at: string;
+  ended_at: string | null;
+  paused_at: string | null;
+  total_paused_seconds: number;
+  duration_seconds: number | null;
+  billed: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+/** Time entry with joined project/task titles from list queries. */
+export type TimeEntryListRow = TimeEntryRow & {
+  project: { id: string; title: string } | null;
+  task: { id: string; title: string } | null;
+};

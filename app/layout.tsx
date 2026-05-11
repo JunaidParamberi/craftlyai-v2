@@ -58,6 +58,7 @@ export default function RootLayout({
       className={cn("font-sans", inter.variable, fraunces.variable)}
     >
       <body
+        suppressHydrationWarning
         className={cn(
           "min-h-dvh font-sans antialiased",
           inter.variable,
