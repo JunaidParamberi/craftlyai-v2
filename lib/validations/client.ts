@@ -14,7 +14,7 @@ export const clientCreateSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "Name is required.")
+    .min(1, "Display name is required.")
     .max(CLIENT_LIMITS.name),
   email: z.string().trim().max(CLIENT_LIMITS.email),
   phone: z.string().trim().max(CLIENT_LIMITS.phone),

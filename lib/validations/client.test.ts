@@ -92,5 +92,9 @@ describe("parseClientCreateInput", () => {
       name: "   ",
     });
     expect(result.success).toBe(false);
+    if (!result.success) {
+      const nameIssue = result.error.flatten().fieldErrors.name?.[0];
+      expect(nameIssue).toBe("Display name is required.");
+    }
   });
 });

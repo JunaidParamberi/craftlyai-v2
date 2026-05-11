@@ -72,10 +72,18 @@ function ClientFormCardSkeleton() {
       <CardContent
         className={cn("flex flex-col gap-6 pt-2", FORM_CARD_CONTENT_BEFORE_FOOTER)}
       >
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-4 w-40" />
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+            <Skeleton className="h-10 flex-1 rounded-lg sm:max-w-[14rem]" />
+            <Skeleton className="h-10 flex-1 rounded-lg sm:max-w-[14rem]" />
+          </div>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2 sm:col-span-2">
-            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-44" />
             <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-3 w-full max-w-xl" />
           </div>
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-16" />
@@ -87,8 +95,9 @@ function ClientFormCardSkeleton() {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-52" />
           <Skeleton className="h-9 w-full rounded-4xl" />
+          <Skeleton className="h-3 w-full max-w-lg" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-16" />

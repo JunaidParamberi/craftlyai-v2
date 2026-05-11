@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { ArrowRightIcon } from "lucide-react";
 
+import {
+  clientNameFormCopy,
+  initialClientNameFormKind,
+  type ClientNameFormKind,
+} from "@/lib/clients/client-name-form-copy";
 import { completeOnboarding } from "@/lib/onboarding/actions";
 import { createClient } from "@/lib/clients/actions";
 import { CLIENT_LIMITS } from "@/lib/validations/client";
@@ -47,6 +52,10 @@ export function FirstClientOnboardingForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [nameKind, setNameKind] = useState<ClientNameFormKind>(() =>
+    initialClientNameFormKind(defaults.company),
+  );
+  const nameCopy = useMemo(() => clientNameFormCopy(nameKind), [nameKind]);
 
   const {
     register,
@@ -142,18 +151,66 @@ export function FirstClientOnboardingForm() {
           >
             <CardTitle className="sr-only">First client</CardTitle>
             <div className="flex flex-col gap-6">
+              <fieldset className="flex flex-col gap-3 border-0 p-0">
+                <legend className="mb-0 text-sm leading-none font-medium text-foreground">
+                  {nameCopy.kindLegend}
+                </legend>
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
+                  <label
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
+                      nameKind === "person"
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-border text-muted-foreground hover:bg-muted/60",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="onboarding_client_name_kind_ui"
+                      className="size-4 shrink-0 accent-primary"
+                      checked={nameKind === "person"}
+                      onChange={() => setNameKind("person")}
+                    />
+                    {nameCopy.kindPersonLabel}
+                  </label>
+                  <label
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
+                      nameKind === "organization"
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-border text-muted-foreground hover:bg-muted/60",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="onboarding_client_name_kind_ui"
+                      className="size-4 shrink-0 accent-primary"
+                      checked={nameKind === "organization"}
+                      onChange={() => setNameKind("organization")}
+                    />
+                    {nameCopy.kindOrgLabel}
+                  </label>
+                </div>
+              </fieldset>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2 sm:col-span-2">
                   <Label htmlFor="client_name">
-                    Client name <span className="text-destructive">*</span>
+                    {nameCopy.nameLabel} <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="client_name"
-                    autoComplete="organization"
+                    autoComplete={nameCopy.nameAutocomplete}
                     maxLength={CLIENT_LIMITS.name}
+                    placeholder={nameCopy.namePlaceholder}
                     aria-invalid={Boolean(errors.name)}
-                    {...register("name", { required: "Name is required." })}
+                    {...register("name", {
+                      required: "Display name is required.",
+                    })}
                   />
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    {nameCopy.nameHelper}
+                  </p>
                   {errors.name ? (
                     <p className="text-xs text-destructive">
                       {errors.name.message}
@@ -198,7 +255,7 @@ export function FirstClientOnboardingForm() {
               <Separator />
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor="client_company">Company</Label>
+                <Label htmlFor="client_company">{nameCopy.companyLabel}</Label>
                 <Input
                   id="client_company"
                   autoComplete="organization"
@@ -206,6 +263,9 @@ export function FirstClientOnboardingForm() {
                   aria-invalid={Boolean(errors.company)}
                   {...register("company")}
                 />
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  {nameCopy.companyHelper}
+                </p>
                 {errors.company ? (
                   <p className="text-xs text-destructive">
                     {errors.company.message}
