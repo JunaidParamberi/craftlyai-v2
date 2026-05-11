@@ -13,6 +13,7 @@ function normalizeClientRow(row: {
   id: string;
   user_id: string;
   name: string;
+  contact_name?: string | null;
   email: string | null;
   phone: string | null;
   company: string | null;
@@ -25,6 +26,7 @@ function normalizeClientRow(row: {
 }): ClientRow {
   return {
     ...row,
+    contact_name: row.contact_name ?? null,
     currency: row.currency?.trim().toUpperCase() ?? null,
   };
 }
@@ -122,6 +124,7 @@ export async function createClient(input: unknown): Promise<CreateClientResult> 
   const payload = {
     user_id: user.id,
     name: parsed.data.name,
+    contact_name: parsed.data.contact_name,
     email: parsed.data.email,
     phone: parsed.data.phone,
     company: parsed.data.company,
@@ -188,6 +191,7 @@ export async function updateClient(
 
   const payload = {
     name: parsed.data.name,
+    contact_name: parsed.data.contact_name,
     email: parsed.data.email,
     phone: parsed.data.phone,
     company: parsed.data.company,

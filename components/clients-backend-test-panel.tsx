@@ -63,6 +63,7 @@ export function ClientsBackendTestPanel({ initialClients }: Props) {
         email,
         phone,
         company,
+        contact_name: "",
         address,
         currency,
         notes,

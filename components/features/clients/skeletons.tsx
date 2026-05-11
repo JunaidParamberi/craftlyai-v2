@@ -10,6 +10,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function ClientsPageSkeleton() {
@@ -72,11 +73,11 @@ function ClientFormCardSkeleton() {
       <CardContent
         className={cn("flex flex-col gap-6 pt-2", FORM_CARD_CONTENT_BEFORE_FOOTER)}
       >
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-0">
           <Skeleton className="h-4 w-40" />
-          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-            <Skeleton className="h-10 flex-1 rounded-lg sm:max-w-[14rem]" />
-            <Skeleton className="h-10 flex-1 rounded-lg sm:max-w-[14rem]" />
+          <div className="mt-5 flex flex-col gap-4 sm:mt-6 sm:flex-row sm:gap-x-5 sm:gap-y-3">
+            <Skeleton className="h-11 flex-1 rounded-lg sm:basis-0 sm:min-w-0" />
+            <Skeleton className="h-11 flex-1 rounded-lg sm:basis-0 sm:min-w-0" />
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -94,10 +95,16 @@ function ClientFormCardSkeleton() {
             <Skeleton className="h-9 w-full rounded-4xl" />
           </div>
         </div>
+        <Separator />
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-9 w-full rounded-4xl" />
+          <Skeleton className="h-3 w-full max-w-lg" />
+        </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-52" />
           <Skeleton className="h-9 w-full rounded-4xl" />
-          <Skeleton className="h-3 w-full max-w-lg" />
+          <Skeleton className="h-3 w-full max-w-md" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-16" />

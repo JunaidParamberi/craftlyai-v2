@@ -5,6 +5,7 @@ import type { ClientRow } from "@/types";
 export function clientRowToFormValues(row: ClientRow): ClientCreateFormInput {
   return {
     name: row.name,
+    contact_name: row.contact_name ?? "",
     email: row.email ?? "",
     phone: row.phone ?? "",
     company: row.company ?? "",

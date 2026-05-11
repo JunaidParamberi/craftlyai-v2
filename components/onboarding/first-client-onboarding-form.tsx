@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { ArrowRightIcon } from "lucide-react";
 
@@ -30,6 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export type FirstClientFormValues = {
   name: string;
+  contact_name: string;
   email: string;
   phone: string;
   company: string;
@@ -40,6 +41,7 @@ export type FirstClientFormValues = {
 
 const defaults: FirstClientFormValues = {
   name: "",
+  contact_name: "",
   email: "",
   phone: "",
   company: "",
@@ -53,7 +55,10 @@ export function FirstClientOnboardingForm() {
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
   const [nameKind, setNameKind] = useState<ClientNameFormKind>(() =>
-    initialClientNameFormKind(defaults.company),
+    initialClientNameFormKind({
+      company: defaults.company,
+      contact_name: defaults.contact_name,
+    }),
   );
   const nameCopy = useMemo(() => clientNameFormCopy(nameKind), [nameKind]);
 
@@ -63,10 +68,17 @@ export function FirstClientOnboardingForm() {
     setError,
     clearErrors,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FirstClientFormValues>({
     defaultValues: defaults,
   });
+
+  useEffect(() => {
+    if (nameKind === "person") {
+      setValue("contact_name", "", { shouldDirty: true });
+    }
+  }, [nameKind, setValue]);
 
   function skipToDashboard() {
     setServerError(null);
@@ -151,14 +163,14 @@ export function FirstClientOnboardingForm() {
           >
             <CardTitle className="sr-only">First client</CardTitle>
             <div className="flex flex-col gap-6">
-              <fieldset className="flex flex-col gap-3 border-0 p-0">
-                <legend className="mb-0 text-sm leading-none font-medium text-foreground">
+              <fieldset className="flex flex-col gap-0 border-0 p-0">
+                <legend className="mb-0 w-full text-sm leading-none font-medium text-foreground">
                   {nameCopy.kindLegend}
                 </legend>
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
+                <div className="mt-5 flex flex-col gap-4 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-3">
                   <label
                     className={cn(
-                      "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
+                      "flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition-colors sm:flex-1 sm:basis-0",
                       nameKind === "person"
                         ? "border-primary bg-primary/5 text-foreground"
                         : "border-border text-muted-foreground hover:bg-muted/60",
@@ -175,7 +187,7 @@ export function FirstClientOnboardingForm() {
                   </label>
                   <label
                     className={cn(
-                      "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors",
+                      "flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition-colors sm:flex-1 sm:basis-0",
                       nameKind === "organization"
                         ? "border-primary bg-primary/5 text-foreground"
                         : "border-border text-muted-foreground hover:bg-muted/60",
@@ -253,6 +265,30 @@ export function FirstClientOnboardingForm() {
               </div>
 
               <Separator />
+
+              {nameKind === "organization" ? (
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="client_contact_name">
+                    {nameCopy.contactNameLabel}
+                  </Label>
+                  <Input
+                    id="client_contact_name"
+                    autoComplete="name"
+                    maxLength={CLIENT_LIMITS.contact_name}
+                    placeholder={nameCopy.contactNamePlaceholder}
+                    aria-invalid={Boolean(errors.contact_name)}
+                    {...register("contact_name")}
+                  />
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    {nameCopy.contactNameHelper}
+                  </p>
+                  {errors.contact_name ? (
+                    <p className="text-xs text-destructive">
+                      {errors.contact_name.message}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
 
               <div className="flex flex-col gap-2">
                 <Label htmlFor="client_company">{nameCopy.companyLabel}</Label>

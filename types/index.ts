@@ -42,6 +42,7 @@ export type ClientRow = {
   id: string;
   user_id: string;
   name: string;
+  contact_name: string | null;
   email: string | null;
   phone: string | null;
   company: string | null;

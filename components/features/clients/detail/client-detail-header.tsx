@@ -67,6 +67,11 @@ export function ClientDetailHeader({ client }: ClientDetailHeaderProps) {
                 </h1>
                 <ClientHealthBadge healthScore={client.health_score} />
               </div>
+              {client.contact_name?.trim() ? (
+                <p className="text-muted-foreground text-sm">
+                  Primary contact: {client.contact_name.trim()}
+                </p>
+              ) : null}
               {client.company ? (
                 <p className="text-muted-foreground text-sm">{client.company}</p>
               ) : null}

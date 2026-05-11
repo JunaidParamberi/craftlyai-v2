@@ -3,6 +3,7 @@ import { z } from "zod";
 /** Align with DB constraints (migration `*_clients.sql`). */
 export const CLIENT_LIMITS = {
   name: 300,
+  contact_name: 200,
   email: 320,
   phone: 50,
   company: 200,
@@ -19,6 +20,7 @@ export const clientCreateSchema = z.object({
   email: z.string().trim().max(CLIENT_LIMITS.email),
   phone: z.string().trim().max(CLIENT_LIMITS.phone),
   company: z.string().trim().max(CLIENT_LIMITS.company),
+  contact_name: z.string().trim().max(CLIENT_LIMITS.contact_name),
   address: z.string().trim().max(CLIENT_LIMITS.address),
   currency: z.string().trim(),
   notes: z.string().trim().max(CLIENT_LIMITS.notes),
@@ -29,6 +31,7 @@ export type ClientCreateFormInput = z.input<typeof clientCreateSchema>;
 /** Normalized payload for insert (empty strings → null). */
 export type ClientCreatePayload = {
   name: string;
+  contact_name: string | null;
   email: string | null;
   phone: string | null;
   company: string | null;
@@ -87,6 +90,7 @@ export function parseClientCreateInput(
     success: true,
     data: {
       name: d.name.trim(),
+      contact_name: emptyToNull(d.contact_name),
       email,
       phone: emptyToNull(d.phone),
       company: emptyToNull(d.company),

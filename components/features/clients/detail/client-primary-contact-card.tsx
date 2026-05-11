@@ -47,9 +47,11 @@ export function ClientPrimaryContactCard({ client }: ClientPrimaryContactCardPro
           </div>
           <div className="min-w-0">
             <CardTitle className="text-base font-medium leading-snug">
-              {client.name}
+              {client.contact_name?.trim() || client.name}
             </CardTitle>
-            {client.company ? (
+            {client.contact_name?.trim() ? (
+              <p className="text-muted-foreground text-sm">{client.name}</p>
+            ) : client.company ? (
               <p className="text-muted-foreground text-sm">{client.company}</p>
             ) : (
               <p className="text-muted-foreground text-sm">Billing contact</p>

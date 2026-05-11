@@ -8,6 +8,7 @@ function validBase() {
     email: "",
     phone: "",
     company: "",
+    contact_name: "",
     address: "",
     currency: "",
     notes: "",
@@ -20,6 +21,7 @@ describe("parseClientCreateInput", () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.name).toBe("Acme Corp");
+      expect(result.data.contact_name).toBeNull();
       expect(result.data.email).toBeNull();
       expect(result.data.currency).toBeNull();
     }
@@ -32,6 +34,7 @@ describe("parseClientCreateInput", () => {
       email: "  hello@example.com  ",
       phone: " +1 ",
       company: " Co ",
+      contact_name: "  Pat  ",
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -39,6 +42,7 @@ describe("parseClientCreateInput", () => {
       expect(result.data.email).toBe("hello@example.com");
       expect(result.data.phone).toBe("+1");
       expect(result.data.company).toBe("Co");
+      expect(result.data.contact_name).toBe("Pat");
     }
   });
 
@@ -74,8 +78,17 @@ describe("parseClientCreateInput", () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.phone).toBeNull();
+      expect(result.data.contact_name).toBeNull();
       expect(result.data.notes).toBeNull();
     }
+  });
+
+  it("rejects contact_name over max length", () => {
+    const result = parseClientCreateInput({
+      ...validBase(),
+      contact_name: "x".repeat(CLIENT_LIMITS.contact_name + 1),
+    });
+    expect(result.success).toBe(false);
   });
 
   it("rejects name over max length", () => {
