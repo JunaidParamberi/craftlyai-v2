@@ -12,7 +12,7 @@ import {
   type ClientNameFormKind,
 } from "@/lib/clients/client-name-form-copy";
 import { completeOnboarding } from "@/lib/onboarding/actions";
-import { createClient } from "@/lib/clients/actions";
+import { createClient } from "@/lib/clients/client-mutations";
 import { CLIENT_LIMITS } from "@/lib/validations/client";
 import {
   FORM_CARD_CONTENT_BEFORE_FOOTER,

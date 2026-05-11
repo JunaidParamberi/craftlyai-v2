@@ -6,10 +6,10 @@ import { useMemo, useState, useTransition } from "react";
 
 import {
   createClient,
+  listClientsAction,
   type CreateClientResult,
-  listClients,
   type ListClientsResult,
-} from "@/lib/clients/actions";
+} from "@/lib/clients/client-mutations";
 import type { ClientRow } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -46,7 +46,7 @@ export function ClientsBackendTestPanel({ initialClients }: Props) {
 
   function refreshList() {
     startTransition(async () => {
-      const result = await listClients();
+      const result = await listClientsAction();
       setLastListResult(result);
       if (result.ok) {
         setClients(result.clients);
@@ -78,7 +78,7 @@ export function ClientsBackendTestPanel({ initialClients }: Props) {
         setCurrency("");
         setNotes("");
         router.refresh();
-        const list = await listClients();
+        const list = await listClientsAction();
         setLastListResult(list);
         if (list.ok) {
           setClients(list.clients);

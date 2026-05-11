@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
-import { createClient, updateClient } from "@/lib/clients/actions";
+import { createClient, updateClient } from "@/lib/clients/client-mutations";
 import {
   clientNameFormCopy,
   initialClientNameFormKind,

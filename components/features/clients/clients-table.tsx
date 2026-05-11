@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 
-import { deleteClient } from "@/lib/clients/actions";
+import { deleteClient } from "@/lib/clients/client-mutations";
 import {
   type ClientHealthBucket,
   clientHealthBucket,

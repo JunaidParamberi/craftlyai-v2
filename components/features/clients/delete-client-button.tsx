@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { deleteClient } from "@/lib/clients/actions";
+import { deleteClient } from "@/lib/clients/client-mutations";
 
 import { Button } from "@/components/ui/button";
 import {
