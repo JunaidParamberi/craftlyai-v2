@@ -66,7 +66,7 @@ export function BrandLockupLink({
   return (
     <Link
       href={href}
-      aria-label="Craftly AI home"
+      aria-label="CraftlyAI home"
       className={cn(
         "inline-flex shrink-0 items-end transition-opacity hover:opacity-90",
         className,

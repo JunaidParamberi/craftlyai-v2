@@ -1,4 +1,4 @@
 export const siteConfig = {
-  name: "Craftly AI",
+  name: "CraftlyAI",
   description: "Application",
 } as const;

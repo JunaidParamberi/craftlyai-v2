@@ -27,7 +27,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border/70 pb-4">
         <Link
           href="/dashboard"
-          aria-label="Craftly AI home"
+          aria-label="CraftlyAI home"
           className="flex items-center px-2 transition-opacity hover:opacity-90 group-data-[collapsible=icon]:justify-center"
         >
           <BrandLockup wordmarkWrapperClassName="group-data-[collapsible=icon]:hidden" />
