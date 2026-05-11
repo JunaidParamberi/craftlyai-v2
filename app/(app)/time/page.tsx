@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 
+import { TimePageSkeleton } from "@/components/features/time/skeletons";
 import { listProjects } from "@/lib/projects/actions";
 import { listTimeEntries } from "@/lib/time/actions";
 
@@ -10,12 +11,7 @@ const TimeTracker = dynamic(
       default: m.TimeTracker,
     })),
   {
-    loading: () => (
-      <div className="flex flex-col gap-4 py-2">
-        <div className="h-9 max-w-md animate-pulse rounded-md bg-muted" />
-        <div className="h-48 animate-pulse rounded-xl bg-muted" />
-      </div>
-    ),
+    loading: () => <TimePageSkeleton />,
   },
 );
 
