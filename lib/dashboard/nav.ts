@@ -4,7 +4,6 @@ import {
   FolderKanban,
   LayoutDashboard,
   LifeBuoy,
-  Settings,
   Timer,
   Users,
   Wallet,
@@ -16,7 +15,7 @@ export type NavItem = {
   icon: LucideIcon;
 };
 
-export const primaryNav: NavItem[] = [
+export const workNav: NavItem[] = [
   {
     title: "Dashboard",
     href: "/dashboard",
@@ -28,13 +27,15 @@ export const primaryNav: NavItem[] = [
     icon: FolderKanban,
   },
   { title: "Clients", href: "/clients", icon: Users },
-  { title: "Finance", href: "/finance", icon: Wallet },
-  { title: "Documents", href: "/documents", icon: FileText },
   { title: "Time", href: "/time", icon: Timer },
 ];
 
+export const businessNav: NavItem[] = [
+  { title: "Documents", href: "/documents", icon: FileText },
+  { title: "Finance", href: "/finance", icon: Wallet },
+];
+
 export const footerNav: NavItem[] = [
-  { title: "Settings", href: "/settings", icon: Settings },
   { title: "Support", href: "/support", icon: LifeBuoy },
 ];
 

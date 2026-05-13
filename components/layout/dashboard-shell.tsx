@@ -35,13 +35,13 @@ export function DashboardShell({
     <SidebarProvider className="h-svh min-h-0 overflow-hidden">
       <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
       <AppSidebar />
-      <SidebarInset className="min-h-0 overflow-hidden md:peer-data-[variant=inset]:m-0">
+      <SidebarInset className="min-h-0 overflow-hidden">
         <AppHeader
           userEmail={userEmail}
           userInitials={userInitials}
           onOpenSearch={() => setCommandOpen(true)}
         />
-        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-4 md:p-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden p-4 md:p-6">
           {children}
         </div>
       </SidebarInset>

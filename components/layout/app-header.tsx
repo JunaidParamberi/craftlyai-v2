@@ -15,8 +15,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SHELL_HEADER_CLASS } from "@/lib/dashboard/shell";
 import { createClient } from "@/lib/supabase/client";
-import { Bell, LifeBuoy, Search, Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { LifeBuoy, Search, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type AppHeaderProps = {
@@ -39,42 +41,37 @@ export function AppHeader({
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b border-border/60 bg-background/80 px-3 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 md:gap-4 md:px-6">
-      <SidebarTrigger className="md:-ms-1" />
+    <header
+      className={cn(
+        SHELL_HEADER_CLASS,
+        "sticky top-0 z-20 flex items-center gap-3 border-b border-sidebar-border/70 bg-background/80 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 md:gap-4 md:px-6",
+      )}
+    >
+      <SidebarTrigger className="shrink-0" />
 
       <Button
         type="button"
         variant="outline"
-        className="hidden h-9 max-w-md flex-1 justify-start gap-2 text-muted-foreground md:flex"
+        className="hidden h-9 min-w-0 max-w-lg flex-1 justify-start gap-2 px-3 text-muted-foreground md:flex"
         onClick={onOpenSearch}
       >
         <Search data-icon="inline-start" />
-        <span className="text-muted-foreground">Search…</span>
-        <kbd className="pointer-events-none ms-auto hidden h-5 items-center gap-0.5 rounded-md border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground select-none sm:inline-flex">
+        <span className="truncate text-muted-foreground">Search…</span>
+        <kbd className="pointer-events-none ms-auto hidden h-5 shrink-0 items-center gap-0.5 rounded-md border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground select-none sm:inline-flex">
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
 
-      <Button
-        type="button"
-        variant="outline"
-        size="icon-sm"
-        className="md:hidden"
-        onClick={onOpenSearch}
-        aria-label="Open search"
-      >
-        <Search />
-      </Button>
-
-      <div className="ms-auto flex items-center gap-1">
+      <div className="ms-auto flex shrink-0 items-center gap-2 md:gap-3">
         <Button
           type="button"
           variant="ghost"
-          size="icon"
-          className="text-muted-foreground"
-          aria-label="Notifications"
+          size="icon-sm"
+          className="md:hidden"
+          onClick={onOpenSearch}
+          aria-label="Open search"
         >
-          <Bell />
+          <Search />
         </Button>
         <ThemeToggle />
         <DropdownMenu>
@@ -82,13 +79,13 @@ export function AppHeader({
             render={
               <Button
                 variant="ghost"
-                size="icon"
+                size="icon-sm"
                 className="rounded-full p-0"
                 aria-label="Account menu"
               />
             }
           >
-            <Avatar className="size-9">
+            <Avatar className="size-8">
               <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>

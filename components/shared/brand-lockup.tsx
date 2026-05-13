@@ -56,11 +56,13 @@ export function BrandLockup({
 
 type BrandLockupLinkProps = BrandLockupProps & {
   href?: string;
+  linkClassName?: string;
 };
 
 export function BrandLockupLink({
   href = "/dashboard",
   className,
+  linkClassName,
   wordmarkWrapperClassName,
 }: BrandLockupLinkProps) {
   return (
@@ -68,11 +70,14 @@ export function BrandLockupLink({
       href={href}
       aria-label="CraftlyAI home"
       className={cn(
-        "inline-flex shrink-0 items-end transition-opacity hover:opacity-90",
-        className,
+        "inline-flex shrink-0 items-center transition-opacity hover:opacity-90",
+        linkClassName,
       )}
     >
-      <BrandLockup wordmarkWrapperClassName={wordmarkWrapperClassName} />
+      <BrandLockup
+        className={className}
+        wordmarkWrapperClassName={wordmarkWrapperClassName}
+      />
     </Link>
   );
 }

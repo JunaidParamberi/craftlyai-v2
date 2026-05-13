@@ -7,7 +7,7 @@ export default function AuthLayout({
 }>) {
   return (
     <div className="flex min-h-svh w-full flex-col items-center justify-center gap-10 p-6 md:p-10">
-      <BrandLockupLink href="/" className="shrink-0" />
+      <BrandLockupLink href="/" linkClassName="shrink-0" />
       <div className="w-full max-w-sm">{children}</div>
     </div>
   );

@@ -16,50 +16,71 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { BrandLockup } from "@/components/shared/brand-lockup";
-import { footerNav, isNavActive, primaryNav } from "@/lib/dashboard/nav";
+import { BrandLockupLink } from "@/components/shared/brand-lockup";
+import {
+  businessNav,
+  footerNav,
+  isNavActive,
+  type NavItem,
+  workNav,
+} from "@/lib/dashboard/nav";
+import { SHELL_HEADER_CLASS, SIDEBAR_NAV_BUTTON_CLASS } from "@/lib/dashboard/shell";
+import { cn } from "@/lib/utils";
+
+function SidebarNavGroup({ label, items }: { label: string; items: NavItem[] }) {
+  const pathname = usePathname();
+
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground">
+        {label}
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => {
+            const Icon = item.icon;
+            const active = isNavActive(pathname, item.href);
+            return (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  isActive={active}
+                  tooltip={item.title}
+                  className={SIDEBAR_NAV_BUTTON_CLASS}
+                  render={<Link href={item.href} />}
+                >
+                  <Icon />
+                  <span>{item.title}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}
 
 export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="border-b border-sidebar-border/70 pb-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-1 group-data-[collapsible=icon]:pb-3">
-        <Link
-          href="/dashboard"
-          aria-label="CraftlyAI home"
-          className="flex items-center px-2 transition-opacity hover:opacity-90 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-        >
-          <BrandLockup wordmarkWrapperClassName="group-data-[collapsible=icon]:hidden" />
-        </Link>
+    <Sidebar collapsible="icon" variant="sidebar">
+      <SidebarHeader
+        className={cn(
+          SHELL_HEADER_CLASS,
+          "flex flex-row items-center gap-0 border-b border-sidebar-border/70 px-2 py-0 group-data-[collapsible=icon]:justify-center",
+        )}
+      >
+        <BrandLockupLink
+          className="items-center"
+          linkClassName="flex h-full items-center px-2 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+          wordmarkWrapperClassName="group-data-[collapsible=icon]:hidden"
+        />
       </SidebarHeader>
 
       <SidebarContent className="gap-0">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground">
-            Workspace
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {primaryNav.map((item) => {
-                const Icon = item.icon;
-                const active = isNavActive(pathname, item.href);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={active}
-                      tooltip={item.title}
-                      render={<Link href={item.href} />}
-                    >
-                      <Icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarNavGroup label="Work" items={workNav} />
+        <SidebarNavGroup label="Business" items={businessNav} />
       </SidebarContent>
 
       <SidebarFooter className="gap-3 border-t border-sidebar-border/70 pt-4">
@@ -72,6 +93,7 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   isActive={active}
                   tooltip={item.title}
+                  className={SIDEBAR_NAV_BUTTON_CLASS}
                   render={<Link href={item.href} />}
                 >
                   <Icon />
