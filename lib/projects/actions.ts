@@ -4,6 +4,7 @@ import { cache } from "react";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { pickEmbed } from "@/lib/supabase/pick-embed";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import {
   parseProjectCreateInput,
@@ -47,43 +48,54 @@ function normalizeProjectRow(row: ProjectRowRaw): ProjectRow {
   };
 }
 
-function pickClientEmbed(
-  raw: unknown,
-): { id: string; name: string } | null {
-  if (raw == null) {
-    return null;
-  }
-  if (Array.isArray(raw)) {
-    const first = raw[0];
-    if (
-      first &&
-      typeof first === "object" &&
-      "id" in first &&
-      "name" in first
-    ) {
-      return {
-        id: String((first as { id: unknown }).id),
-        name: String((first as { name: unknown }).name),
-      };
-    }
-    return null;
-  }
-  if (typeof raw === "object" && raw !== null && "id" in raw && "name" in raw) {
-    return {
-      id: String((raw as { id: unknown }).id),
-      name: String((raw as { name: unknown }).name),
-    };
-  }
-  return null;
-}
-
 function normalizeProjectListRow(
   row: ProjectRowRaw & { clients?: unknown },
 ): ProjectListRow {
+  const clientEmbed = pickEmbed(row.clients, "name");
   return {
     ...normalizeProjectRow(row),
-    client: pickClientEmbed(row.clients),
+    client: clientEmbed
+      ? { id: clientEmbed.id, name: clientEmbed.name }
+      : null,
   };
+}
+
+async function hydrateProjectsWithClients(
+  supabase: Awaited<ReturnType<typeof createSupabaseClient>>,
+  userId: string,
+  projects: ProjectListRow[],
+): Promise<ProjectListRow[]> {
+  const missingIds = [
+    ...new Set(
+      projects
+        .filter((p) => !p.client && p.client_id)
+        .map((p) => p.client_id),
+    ),
+  ];
+  if (missingIds.length === 0) {
+    return projects;
+  }
+
+  const { data: clients, error } = await supabase
+    .from("clients")
+    .select("id, name")
+    .eq("user_id", userId)
+    .in("id", missingIds);
+
+  if (error || !clients?.length) {
+    return projects;
+  }
+
+  const byId = new Map(clients.map((c) => [c.id, c]));
+  return projects.map((p) => {
+    if (p.client) {
+      return p;
+    }
+    const client = byId.get(p.client_id);
+    return client
+      ? { ...p, client: { id: client.id, name: client.name } }
+      : p;
+  });
 }
 
 async function clientBelongsToUser(
@@ -105,7 +117,8 @@ export type ListProjectsResult =
   | { ok: true; projects: ProjectListRow[] }
   | { ok: false; message: string };
 
-const projectSelectWithClient = "*, clients ( id, name )";
+const projectSelectWithClient =
+  "*, clients:client_id ( id, name )";
 
 export async function listProjects(): Promise<ListProjectsResult> {
   const supabase = await createSupabaseClient();
@@ -128,11 +141,13 @@ export async function listProjects(): Promise<ListProjectsResult> {
     return { ok: false, message: error.message };
   }
 
+  const projects = (data ?? []).map((row) =>
+    normalizeProjectListRow(row as ProjectRowRaw & { clients?: unknown }),
+  );
+
   return {
     ok: true,
-    projects: (data ?? []).map((row) =>
-      normalizeProjectListRow(row as ProjectRowRaw & { clients?: unknown }),
-    ),
+    projects: await hydrateProjectsWithClients(supabase, user.id, projects),
   };
 }
 
@@ -163,7 +178,13 @@ export const getProjectById = cache(async (id: string): Promise<ProjectListRow |
     return null;
   }
 
-  return normalizeProjectListRow(data as ProjectRowRaw & { clients?: unknown });
+  const project = normalizeProjectListRow(
+    data as ProjectRowRaw & { clients?: unknown },
+  );
+  const [hydrated] = await hydrateProjectsWithClients(supabase, user.id, [
+    project,
+  ]);
+  return hydrated;
 });
 
 export type CreateProjectResult =

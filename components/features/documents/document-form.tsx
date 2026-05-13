@@ -77,6 +77,18 @@ export function DocumentForm(props: DocumentFormProps) {
     (p) => !watchedClient || p.client_id === watchedClient,
   );
 
+  const selectedClientLabel =
+    watchedClient && watchedClient !== ""
+      ? (props.clients.find((c) => c.id === watchedClient)?.name ??
+        "Unknown client")
+      : undefined;
+  const selectedProjectLabel =
+    watchedProject && watchedProject !== ""
+      ? (filteredProjects.find((p) => p.id === watchedProject)?.title ??
+        props.projects.find((p) => p.id === watchedProject)?.title ??
+        "Unknown project")
+      : undefined;
+
   const onSubmit = handleSubmit((values) => {
     setError(null);
     startTransition(async () => {
@@ -208,7 +220,9 @@ export function DocumentForm(props: DocumentFormProps) {
                   }}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="None" />
+                    <SelectValue placeholder="None">
+                      {selectedClientLabel}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE_VALUE}>None</SelectItem>
@@ -235,7 +249,9 @@ export function DocumentForm(props: DocumentFormProps) {
                   disabled={filteredProjects.length === 0}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="None" />
+                    <SelectValue placeholder="None">
+                      {selectedProjectLabel}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE_VALUE}>None</SelectItem>

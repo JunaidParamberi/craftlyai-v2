@@ -41,9 +41,72 @@ export async function listDocuments(): Promise<ListDocumentsResult> {
     return { ok: false, message: error.message };
   }
 
+  let documents = (data ?? []).map((row) => normalizeDocumentListRow(row));
+
+  const missingClientIds = [
+    ...new Set(
+      documents
+        .filter((d) => !d.client && d.client_id)
+        .map((d) => d.client_id as string),
+    ),
+  ];
+  const missingProjectIds = [
+    ...new Set(
+      documents
+        .filter((d) => !d.project && d.project_id)
+        .map((d) => d.project_id as string),
+    ),
+  ];
+
+  if (missingClientIds.length > 0 || missingProjectIds.length > 0) {
+    const [clientsRes, projectsRes] = await Promise.all([
+      missingClientIds.length > 0
+        ? supabase
+            .from("clients")
+            .select("id, name")
+            .eq("user_id", user.id)
+            .in("id", missingClientIds)
+        : Promise.resolve({ data: [], error: null }),
+      missingProjectIds.length > 0
+        ? supabase
+            .from("projects")
+            .select("id, title")
+            .eq("user_id", user.id)
+            .in("id", missingProjectIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    const clientsById = new Map(
+      (clientsRes.data ?? []).map((c) => [c.id, c]),
+    );
+    const projectsById = new Map(
+      (projectsRes.data ?? []).map((p) => [p.id, p]),
+    );
+
+    documents = documents.map((doc) => {
+      let next = doc;
+      if (!next.client && doc.client_id) {
+        const client = clientsById.get(doc.client_id);
+        if (client) {
+          next = { ...next, client: { id: client.id, name: client.name } };
+        }
+      }
+      if (!next.project && doc.project_id) {
+        const project = projectsById.get(doc.project_id);
+        if (project) {
+          next = {
+            ...next,
+            project: { id: project.id, title: project.title },
+          };
+        }
+      }
+      return next;
+    });
+  }
+
   return {
     ok: true,
-    documents: (data ?? []).map((row) => normalizeDocumentListRow(row)),
+    documents,
   };
 }
 

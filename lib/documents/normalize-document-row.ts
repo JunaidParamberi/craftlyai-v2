@@ -1,3 +1,4 @@
+import { pickEmbed } from "@/lib/supabase/pick-embed";
 import type {
   DocumentListRow,
   DocumentRow,
@@ -40,28 +41,6 @@ export function normalizeDocumentRow(row: DocumentRowRaw): DocumentRow {
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
-}
-
-function pickEmbed<TKey extends string>(
-  raw: unknown,
-  labelKey: TKey,
-): { id: string; [k: string]: string } | null {
-  if (raw == null) {
-    return null;
-  }
-  const node = Array.isArray(raw) ? raw[0] : raw;
-  if (
-    node &&
-    typeof node === "object" &&
-    "id" in node &&
-    labelKey in node
-  ) {
-    return {
-      id: String((node as Record<string, unknown>).id),
-      [labelKey]: String((node as Record<string, unknown>)[labelKey]),
-    } as { id: string; [k: string]: string };
-  }
-  return null;
 }
 
 export function normalizeDocumentListRow(

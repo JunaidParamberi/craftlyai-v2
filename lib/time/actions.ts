@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { pickEmbed } from "@/lib/supabase/pick-embed";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import {
   parseTimeEntryManualCompleteInput,
@@ -97,30 +98,101 @@ function normalizeTimeEntryRow(row: TimeEntryRowRaw): TimeEntryRow {
 
 function normalizeTimeEntryListRow(
   raw: TimeEntryRowRaw & {
-    projects?: { id: string; title: string } | null;
-    tasks?: { id: string; title: string } | null;
+    projects?: unknown;
+    tasks?: unknown;
   },
 ): TimeEntryListRow {
   const base = normalizeTimeEntryRow(raw);
-  const p = raw.projects;
-  const t = raw.tasks;
+  const projectEmbed = pickEmbed(raw.projects, "title");
+  const taskEmbed = pickEmbed(raw.tasks, "title");
   return {
     ...base,
-    project:
-      p && typeof p === "object" && "id" in p && "title" in p
-        ? { id: String(p.id), title: String(p.title) }
-        : null,
-    task:
-      t && typeof t === "object" && "id" in t && "title" in t
-        ? { id: String(t.id), title: String(t.title) }
-        : null,
+    project: projectEmbed
+      ? { id: projectEmbed.id, title: projectEmbed.title }
+      : null,
+    task: taskEmbed ? { id: taskEmbed.id, title: taskEmbed.title } : null,
   };
+}
+
+async function hydrateTimeEntriesWithRelations(
+  supabase: Awaited<ReturnType<typeof createSupabaseClient>>,
+  userId: string,
+  entries: TimeEntryListRow[],
+): Promise<TimeEntryListRow[]> {
+  const missingProjectIds = [
+    ...new Set(
+      entries
+        .filter((e) => !e.project && e.project_id)
+        .map((e) => e.project_id),
+    ),
+  ];
+  const missingTaskIds = [
+    ...new Set(
+      entries
+        .filter((e) => !e.task && e.task_id)
+        .map((e) => e.task_id as string),
+    ),
+  ];
+
+  if (missingProjectIds.length === 0 && missingTaskIds.length === 0) {
+    return entries;
+  }
+
+  const [projectsRes, tasksRes] = await Promise.all([
+    missingProjectIds.length > 0
+      ? supabase
+          .from("projects")
+          .select("id, title")
+          .eq("user_id", userId)
+          .in("id", missingProjectIds)
+      : Promise.resolve({ data: [], error: null }),
+    missingTaskIds.length > 0
+      ? supabase.from("tasks").select("id, title").in("id", missingTaskIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  const projectsById = new Map(
+    (projectsRes.data ?? []).map((p) => [p.id, p]),
+  );
+  const tasksById = new Map((tasksRes.data ?? []).map((t) => [t.id, t]));
+
+  return entries.map((entry) => {
+    let next = entry;
+    if (!next.project) {
+      const project = projectsById.get(entry.project_id);
+      if (project) {
+        next = {
+          ...next,
+          project: { id: project.id, title: project.title },
+        };
+      }
+    }
+    if (!next.task && entry.task_id) {
+      const task = tasksById.get(entry.task_id);
+      if (task) {
+        next = { ...next, task: { id: task.id, title: task.title } };
+      }
+    }
+    return next;
+  });
+}
+
+async function normalizeHydratedTimeEntry(
+  supabase: Awaited<ReturnType<typeof createSupabaseClient>>,
+  userId: string,
+  raw: TimeEntryRowRaw & { projects?: unknown; tasks?: unknown },
+): Promise<TimeEntryListRow> {
+  const entry = normalizeTimeEntryListRow(raw);
+  const [hydrated] = await hydrateTimeEntriesWithRelations(supabase, userId, [
+    entry,
+  ]);
+  return hydrated;
 }
 
 const timeEntrySelect = `
   *,
-  projects ( id, title ),
-  tasks ( id, title )
+  projects:project_id ( id, title ),
+  tasks:task_id ( id, title )
 `;
 
 export type ListTimeEntriesResult =
@@ -148,14 +220,15 @@ export async function listTimeEntries(): Promise<ListTimeEntriesResult> {
     return { ok: false, message: error.message };
   }
 
+  const entries = (data ?? []).map((row) =>
+    normalizeTimeEntryListRow(
+      row as TimeEntryRowRaw & { projects?: unknown; tasks?: unknown },
+    ),
+  );
+
   return {
     ok: true,
-    entries: (data ?? []).map((row) =>
-      normalizeTimeEntryListRow(row as TimeEntryRowRaw & {
-        projects?: { id: string; title: string } | null;
-        tasks?: { id: string; title: string } | null;
-      }),
-    ),
+    entries: await hydrateTimeEntriesWithRelations(supabase, user.id, entries),
   };
 }
 
@@ -228,10 +301,11 @@ export async function createManualTimeEntry(
 
   return {
     ok: true,
-    entry: normalizeTimeEntryListRow(data as TimeEntryRowRaw & {
-      projects?: { id: string; title: string } | null;
-      tasks?: { id: string; title: string } | null;
-    }),
+    entry: await normalizeHydratedTimeEntry(
+      supabase,
+      user.id,
+      data as TimeEntryRowRaw & { projects?: unknown; tasks?: unknown },
+    ),
   };
 }
 
@@ -310,10 +384,11 @@ export async function startTimer(input: unknown): Promise<StartTimerResult> {
 
   return {
     ok: true,
-    entry: normalizeTimeEntryListRow(data as TimeEntryRowRaw & {
-      projects?: { id: string; title: string } | null;
-      tasks?: { id: string; title: string } | null;
-    }),
+    entry: await normalizeHydratedTimeEntry(
+      supabase,
+      user.id,
+      data as TimeEntryRowRaw & { projects?: unknown; tasks?: unknown },
+    ),
   };
 }
 
@@ -380,10 +455,11 @@ export async function stopTimer(): Promise<StopTimerResult> {
 
   return {
     ok: true,
-    entry: normalizeTimeEntryListRow(data as TimeEntryRowRaw & {
-      projects?: { id: string; title: string } | null;
-      tasks?: { id: string; title: string } | null;
-    }),
+    entry: await normalizeHydratedTimeEntry(
+      supabase,
+      user.id,
+      data as TimeEntryRowRaw & { projects?: unknown; tasks?: unknown },
+    ),
   };
 }
 
@@ -452,10 +528,11 @@ export async function updateRunningTimerDescription(
 
   return {
     ok: true,
-    entry: normalizeTimeEntryListRow(data as TimeEntryRowRaw & {
-      projects?: { id: string; title: string } | null;
-      tasks?: { id: string; title: string } | null;
-    }),
+    entry: await normalizeHydratedTimeEntry(
+      supabase,
+      user.id,
+      data as TimeEntryRowRaw & { projects?: unknown; tasks?: unknown },
+    ),
   };
 }
 
@@ -514,10 +591,11 @@ export async function pauseTimer(): Promise<PauseTimerResult> {
 
   return {
     ok: true,
-    entry: normalizeTimeEntryListRow(data as TimeEntryRowRaw & {
-      projects?: { id: string; title: string } | null;
-      tasks?: { id: string; title: string } | null;
-    }),
+    entry: await normalizeHydratedTimeEntry(
+      supabase,
+      user.id,
+      data as TimeEntryRowRaw & { projects?: unknown; tasks?: unknown },
+    ),
   };
 }
 
@@ -585,9 +663,10 @@ export async function resumeTimer(): Promise<ResumeTimerResult> {
 
   return {
     ok: true,
-    entry: normalizeTimeEntryListRow(data as TimeEntryRowRaw & {
-      projects?: { id: string; title: string } | null;
-      tasks?: { id: string; title: string } | null;
-    }),
+    entry: await normalizeHydratedTimeEntry(
+      supabase,
+      user.id,
+      data as TimeEntryRowRaw & { projects?: unknown; tasks?: unknown },
+    ),
   };
 }
