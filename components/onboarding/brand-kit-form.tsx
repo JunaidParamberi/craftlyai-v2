@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRightIcon, ImageIcon } from "lucide-react";
+import { ArrowRightIcon, CheckIcon, ImageIcon } from "lucide-react";
 
 import { skipBrandOnboarding } from "@/lib/onboarding/actions";
 import { saveBrandKit } from "@/lib/brand-kit/actions";
@@ -22,7 +22,14 @@ import { cn } from "@/lib/utils";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -72,6 +79,7 @@ export function BrandKitForm({
     Record<string, string[] | undefined> | undefined
   >();
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+  const [savedOk, setSavedOk] = useState(false);
 
   const backHref =
     backHrefProp ??
@@ -115,6 +123,7 @@ export function BrandKitForm({
   function onSubmit(values: BrandKitFormValues) {
     setLastError(null);
     setFieldErrors(undefined);
+    setSavedOk(false);
     startTransition(async () => {
       const fd = new FormData();
       fd.append("primary_color", values.primary_color);
@@ -142,6 +151,8 @@ export function BrandKitForm({
             : "/onboarding/client";
       if (next) {
         router.push(next);
+      } else {
+        setSavedOk(true);
       }
     });
   }
@@ -302,14 +313,26 @@ export function BrandKitForm({
       </div>
     ) : (
       <div className="flex flex-col gap-2">
-        <Label htmlFor="font">Font name</Label>
-        <Input
-          id="font"
-          autoComplete="off"
-          placeholder="Inter"
-          aria-invalid={Boolean(errors.font)}
-          {...register("font")}
-        />
+        <Label htmlFor="font-select-settings">Brand font</Label>
+        <Select
+          value={font}
+          onValueChange={(v) => {
+            if (v) setValue("font", v, { shouldValidate: true, shouldDirty: true });
+          }}
+        >
+          <SelectTrigger id="font-select-settings" className="w-full min-w-0">
+            <SelectValue placeholder="Select a font" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {FONT_OPTIONS.map((f) => (
+                <SelectItem key={f} value={f}>
+                  <span className="font-medium">Aa</span>&nbsp;{f}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         {errors.font ? (
           <p className="text-xs text-destructive">{errors.font.message}</p>
         ) : null}
@@ -463,12 +486,20 @@ export function BrandKitForm({
       <Button type="submit" disabled={isPending}>
         {isPending ? "Saving…" : submitLabel}
       </Button>
-      <Link
-        href={backHref}
-        className={cn(buttonVariants({ variant: "outline" }), "inline-flex")}
-      >
-        {backLabel}
-      </Link>
+      {backHrefProp ? (
+        <Link
+          href={backHref}
+          className={cn(buttonVariants({ variant: "outline" }), "inline-flex")}
+        >
+          {backLabel}
+        </Link>
+      ) : null}
+      {savedOk ? (
+        <span className="flex items-center gap-1 text-sm text-muted-foreground">
+          <CheckIcon className="size-4 text-green-600" aria-hidden />
+          Saved.
+        </span>
+      ) : null}
     </div>
   );
 
@@ -529,40 +560,127 @@ export function BrandKitForm({
     );
   }
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-      {initialBrandKit?.logo_url ? (
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-muted-foreground">
-            Current logo
-          </span>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={initialBrandKit.logo_url}
-            alt="Brand logo"
-            className="h-20 w-20 rounded-md border border-border bg-muted object-contain p-1"
+  const settingsPreview = (
+    <div className="sticky top-6 flex flex-col gap-2">
+      <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+        Preview
+      </Label>
+      <Card className="overflow-hidden shadow-sm ring-1 ring-border/60">
+        <div className="flex flex-col">
+          <div
+            className="h-1 w-full"
+            style={{ backgroundColor: primaryColor }}
           />
+          <CardContent className="flex flex-col gap-4 p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
+                {previewLogoSrc ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- blob + Supabase URLs
+                  <img
+                    src={previewLogoSrc}
+                    alt=""
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <ImageIcon className="size-4 text-muted-foreground" />
+                )}
+              </div>
+              <span
+                className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
+                style={{ fontFamily: font }}
+              >
+                Invoice
+              </span>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <div
+                className="h-2 w-3/4 rounded-full"
+                style={{ backgroundColor: primaryColor, opacity: 0.15 }}
+              />
+              <div className="h-1.5 w-full rounded-full bg-muted/60" />
+              <div className="h-1.5 w-5/6 rounded-full bg-muted/60" />
+              <div className="h-1.5 w-2/3 rounded-full bg-muted/40" />
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-1">
+                <div className="h-1.5 w-16 rounded-full bg-muted/60" />
+                <div className="h-1.5 w-12 rounded-full bg-muted/40" />
+              </div>
+              <div
+                className="rounded-md px-3 py-1.5 text-[10px] font-semibold"
+                style={{ backgroundColor: primaryColor, color: secondaryColor }}
+              >
+                Pay now
+              </div>
+            </div>
+          </CardContent>
         </div>
-      ) : null}
+      </Card>
+      <p className="text-xs text-muted-foreground">
+        How your brand appears on documents.
+      </p>
+    </div>
+  );
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="logo-flat">Logo</Label>
-        <input
-          ref={logoInputRef}
-          id="logo-flat"
-          name="logo"
-          type="file"
-          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-          className="text-sm file:me-3 file:rounded-md file:border file:border-input file:bg-background file:px-2 file:py-1"
-        />
-        <p className="text-xs text-muted-foreground">
-          PNG, JPEG, WebP, GIF, or SVG. Max 5 MB. Optional.
-        </p>
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
+        <div className="flex flex-col gap-4">
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Logo</CardTitle>
+              <CardDescription>
+                Appears on invoices, proposals, and your client portal.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4 pt-0">
+              {logoDropzone}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Colors</CardTitle>
+              <CardDescription>
+                Primary color for accents; secondary for contrast surfaces.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {colorFields}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Typography</CardTitle>
+              <CardDescription>
+                Applied to document headings and portal copy.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {fontField}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Email signature</CardTitle>
+              <CardDescription>
+                Appended to emails sent through CraftlyAI.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {emailSignatureField}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="hidden lg:block">
+          {settingsPreview}
+        </div>
       </div>
 
-      {colorFields}
-      {fontField}
-      {emailSignatureField}
       {errorBlock}
       {defaultFooter}
     </form>
