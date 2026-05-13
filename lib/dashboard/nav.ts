@@ -3,7 +3,6 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
-  LifeBuoy,
   Timer,
   Users,
   Wallet,
@@ -33,10 +32,6 @@ export const workNav: NavItem[] = [
 export const businessNav: NavItem[] = [
   { title: "Documents", href: "/documents", icon: FileText },
   { title: "Finance", href: "/finance", icon: Wallet },
-];
-
-export const footerNav: NavItem[] = [
-  { title: "Support", href: "/support", icon: LifeBuoy },
 ];
 
 /** Active nav item: dashboard also matches app root `/` before redirect. */

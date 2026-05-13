@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -19,7 +18,6 @@ import {
 import { BrandLockupLink } from "@/components/shared/brand-lockup";
 import {
   businessNav,
-  footerNav,
   isNavActive,
   type NavItem,
   workNav,
@@ -61,8 +59,6 @@ function SidebarNavGroup({ label, items }: { label: string; items: NavItem[] }) 
 }
 
 export function AppSidebar() {
-  const pathname = usePathname();
-
   return (
     <Sidebar collapsible="icon" variant="sidebar">
       <SidebarHeader
@@ -82,28 +78,6 @@ export function AppSidebar() {
         <SidebarNavGroup label="Work" items={workNav} />
         <SidebarNavGroup label="Business" items={businessNav} />
       </SidebarContent>
-
-      <SidebarFooter className="gap-3 border-t border-sidebar-border/70 pt-4">
-        <SidebarMenu>
-          {footerNav.map((item) => {
-            const Icon = item.icon;
-            const active = isNavActive(pathname, item.href);
-            return (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  isActive={active}
-                  tooltip={item.title}
-                  className={SIDEBAR_NAV_BUTTON_CLASS}
-                  render={<Link href={item.href} />}
-                >
-                  <Icon />
-                  <span>{item.title}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
-      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

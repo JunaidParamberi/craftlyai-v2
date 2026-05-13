@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
@@ -19,6 +20,8 @@ export function DashboardShell({
   userInitials,
 }: DashboardShellProps) {
   const [commandOpen, setCommandOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -31,18 +34,25 @@ export function DashboardShell({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [pathname]);
+
   return (
-    <SidebarProvider className="h-svh min-h-0 overflow-hidden">
+    <SidebarProvider className="flex h-dvh min-h-0 w-full overflow-hidden">
       <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
       <AppSidebar />
-      <SidebarInset className="min-h-0 overflow-hidden">
-        <AppHeader
-          userEmail={userEmail}
-          userInitials={userInitials}
-          onOpenSearch={() => setCommandOpen(true)}
-        />
-        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden p-4 md:p-6">
-          {children}
+      <SidebarInset className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden">
+        <div
+          ref={scrollRef}
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
+        >
+          <AppHeader
+            userEmail={userEmail}
+            userInitials={userInitials}
+            onOpenSearch={() => setCommandOpen(true)}
+          />
+          <div className="flex flex-col gap-6 p-4 md:p-6">{children}</div>
         </div>
       </SidebarInset>
     </SidebarProvider>
