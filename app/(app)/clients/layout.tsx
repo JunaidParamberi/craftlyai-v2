@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { sectionTitleTemplate } from "@/lib/metadata";
+
 export const metadata: Metadata = {
   title: {
     default: "Clients",
-    template: "%s · Clients",
+    template: sectionTitleTemplate("Clients"),
   },
 };
 

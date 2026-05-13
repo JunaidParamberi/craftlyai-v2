@@ -10,11 +10,12 @@ import {
   onboardingStepFromPath,
   stepLabel,
 } from "@/lib/onboarding/status";
+import { sectionTitleTemplate } from "@/lib/metadata";
 
 export const metadata: Metadata = {
   title: {
     default: "Onboarding",
-    template: "%s · Onboarding",
+    template: sectionTitleTemplate("Onboarding"),
   },
 };
 
