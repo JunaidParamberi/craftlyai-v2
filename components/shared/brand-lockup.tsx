@@ -18,14 +18,14 @@ export function BrandLockup({
   wordmarkWrapperClassName,
 }: BrandLockupProps) {
   return (
-    <div className={cn("flex min-w-0 items-end gap-2", className)}>
+    <div className={cn("flex shrink-0 items-end gap-2", className)}>
       <Image
         src={branding.mark}
         alt=""
-        width={26}
-        height={31}
+        width={32}
+        height={32}
         unoptimized
-        className="h-6 w-auto shrink-0 sm:h-7"
+        className="size-6 shrink-0 object-contain sm:size-7 group-data-[collapsible=icon]:size-8"
       />
       <span
         className={cn(

@@ -24,11 +24,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="border-b border-sidebar-border/70 pb-4">
+      <SidebarHeader className="border-b border-sidebar-border/70 pb-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-1 group-data-[collapsible=icon]:pb-3">
         <Link
           href="/dashboard"
           aria-label="CraftlyAI home"
-          className="flex items-center px-2 transition-opacity hover:opacity-90 group-data-[collapsible=icon]:justify-center"
+          className="flex items-center px-2 transition-opacity hover:opacity-90 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
         >
           <BrandLockup wordmarkWrapperClassName="group-data-[collapsible=icon]:hidden" />
         </Link>
