@@ -1,8 +1,11 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_LOGO_ALLOWED_MIME, brandKitFormSchema } from "@/lib/validations/brand-kit";
 import type { BrandKitRow } from "@/types";
+import { extractLogoStoragePath } from "./utils";
 
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 
@@ -169,6 +172,8 @@ export async function saveBrandKit(formData: FormData): Promise<SaveBrandKitResu
   }
 
   if (existing.data) {
+    const oldLogoUrl = existing.data.logo_url;
+
     const { data, error } = await supabase
       .from("brand_kits")
       .update(payload)
@@ -182,6 +187,16 @@ export async function saveBrandKit(formData: FormData): Promise<SaveBrandKitResu
     if (!data) {
       return { ok: false, message: "Brand kit could not be saved." };
     }
+
+    if (logoUrlToSet && oldLogoUrl) {
+      const oldPath = extractLogoStoragePath(oldLogoUrl);
+      if (oldPath) {
+        await supabase.storage.from("brand-logos").remove([oldPath]);
+      }
+    }
+
+    revalidatePath("/settings/brand");
+    revalidatePath("/onboarding/brand");
     return { ok: true, brandKit: normalizeBrandKitRow(data) };
   }
 
@@ -210,5 +225,7 @@ export async function saveBrandKit(formData: FormData): Promise<SaveBrandKitResu
     return { ok: false, message: profileLinkError.message };
   }
 
+  revalidatePath("/settings/brand");
+  revalidatePath("/onboarding/brand");
   return { ok: true, brandKit: normalizeBrandKitRow(inserted) };
 }
