@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
-  title: "Brand kit backend test · CraftlyAI",
+  title: "Brand kit test",
 };
 
 export default async function BrandKitBackendTestPage() {

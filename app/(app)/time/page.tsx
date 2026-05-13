@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 
 import { TimePageSkeleton } from "@/components/features/time/skeletons";
+
+export const metadata: Metadata = {
+  title: "Time",
+};
 import { listProjects } from "@/lib/projects/actions";
 import { listTimeEntries } from "@/lib/time/actions";
 

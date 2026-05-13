@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ProjectForm } from "@/components/features/projects/project-form";
+
+export const metadata: Metadata = {
+  title: "New project",
+};
 import { FormPageShell } from "@/components/shared/form-page-shell";
 import { listClients } from "@/lib/clients/actions";
 import { buttonVariants } from "@/components/ui/button";

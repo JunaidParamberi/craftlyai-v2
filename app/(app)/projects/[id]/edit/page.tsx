@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -6,15 +7,24 @@ import { FormPageShell } from "@/components/shared/form-page-shell";
 import { listClients } from "@/lib/clients/actions";
 import { projectRowToFormValues } from "@/lib/projects/form-values";
 import { getProjectById } from "@/lib/projects/actions";
+import { pageTitle } from "@/lib/metadata";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
 
-export default async function EditProjectPage({
-  params,
-}: {
+type PageProps = {
   params: Promise<{ id: string }>;
-}) {
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const project = await getProjectById(id);
+  return {
+    title: project ? pageTitle("Edit", project.title) : "Edit",
+  };
+}
+
+export default async function EditProjectPage({ params }: PageProps) {
   const { id } = await params;
   const project = await getProjectById(id);
   if (!project) {

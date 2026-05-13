@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -21,6 +22,10 @@ import {
   Sparkles,
   TriangleAlert,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 
 export default async function DashboardPage() {
   const result = await getProfile();

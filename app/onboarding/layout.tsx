@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -9,6 +10,13 @@ import {
   onboardingStepFromPath,
   stepLabel,
 } from "@/lib/onboarding/status";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Onboarding",
+    template: "%s · Onboarding",
+  },
+};
 
 export default async function OnboardingLayout({
   children,

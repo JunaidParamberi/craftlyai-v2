@@ -6,7 +6,7 @@ import { listClients } from "@/lib/clients/actions";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Clients backend test · CraftlyAI",
+  title: "Clients test",
 };
 
 export default async function ClientsBackendTestPage() {

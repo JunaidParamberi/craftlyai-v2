@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ClientForm } from "@/components/features/clients/client-form";
+
+export const metadata: Metadata = {
+  title: "New client",
+};
 import { FormPageShell } from "@/components/shared/form-page-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

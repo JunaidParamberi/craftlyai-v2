@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -5,15 +6,24 @@ import { ClientForm } from "@/components/features/clients/client-form";
 import { FormPageShell } from "@/components/shared/form-page-shell";
 import { getClientById } from "@/lib/clients/actions";
 import { clientRowToFormValues } from "@/lib/clients/form-values";
+import { pageTitle } from "@/lib/metadata";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
 
-export default async function EditClientPage({
-  params,
-}: {
+type PageProps = {
   params: Promise<{ id: string }>;
-}) {
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const client = await getClientById(id);
+  return {
+    title: client ? pageTitle("Edit", client.name) : "Edit",
+  };
+}
+
+export default async function EditClientPage({ params }: PageProps) {
   const { id } = await params;
   const client = await getClientById(id);
   if (!client) {

@@ -4,7 +4,7 @@ import { ProfileOnboardingForm } from "@/components/onboarding/profile-onboardin
 import { getProfile } from "@/lib/profile/actions";
 
 export const metadata = {
-  title: "Profile · Onboarding · CraftlyAI",
+  title: "Profile",
 };
 
 export default async function OnboardingProfilePage() {

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { z } from "zod";
 
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
@@ -11,7 +12,7 @@ export type ListClientsResult =
   | { ok: true; clients: ClientRow[] }
   | { ok: false; message: string };
 
-export async function getClientById(id: string): Promise<ClientRow | null> {
+export const getClientById = cache(async (id: string): Promise<ClientRow | null> => {
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) {
     return null;
@@ -39,7 +40,7 @@ export async function getClientById(id: string): Promise<ClientRow | null> {
   }
 
   return normalizeClientRow(data);
-}
+});
 
 export async function listClients(): Promise<ListClientsResult> {
   const supabase = await createSupabaseClient();

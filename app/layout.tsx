@@ -3,6 +3,7 @@ import { Fraunces, Inter } from "next/font/google";
 
 import { branding } from "@/config/branding";
 import { siteConfig } from "@/config/site";
+import { appTitleTemplate } from "@/lib/metadata";
 
 import "@/styles/globals.css";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,10 @@ const metadataBase =
 
 export const metadata: Metadata = {
   metadataBase,
-  title: siteConfig.name,
+  title: {
+    default: siteConfig.name,
+    template: appTitleTemplate,
+  },
   description: siteConfig.description,
   icons: {
     icon: [{ url: branding.appIcon, type: "image/png" }],

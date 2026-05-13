@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const metadata = {
-  title: "Brand kit · Onboarding · CraftlyAI",
+  title: "Brand kit",
 };
 
 export default async function OnboardingBrandPage() {

@@ -8,10 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export const metadata = {
-  title: "Settings · CraftlyAI",
-};
-
 const SETTINGS_SECTIONS = [
   {
     href: "/settings/brand",

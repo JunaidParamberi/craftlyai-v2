@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -135,7 +136,7 @@ export async function listProjects(): Promise<ListProjectsResult> {
   };
 }
 
-export async function getProjectById(id: string): Promise<ProjectListRow | null> {
+export const getProjectById = cache(async (id: string): Promise<ProjectListRow | null> => {
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) {
     return null;
@@ -163,7 +164,7 @@ export async function getProjectById(id: string): Promise<ProjectListRow | null>
   }
 
   return normalizeProjectListRow(data as ProjectRowRaw & { clients?: unknown });
-}
+});
 
 export type CreateProjectResult =
   | { ok: true; project: ProjectRow }

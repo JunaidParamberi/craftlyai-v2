@@ -1,7 +1,7 @@
 import { CompleteOnboardingPanel } from "@/components/onboarding/complete-onboarding-panel";
 
 export const metadata = {
-  title: "First client · Onboarding · CraftlyAI",
+  title: "First client",
 };
 
 export default function OnboardingClientPage() {
