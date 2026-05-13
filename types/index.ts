@@ -128,3 +128,72 @@ export type TimeEntryListRow = TimeEntryRow & {
   project: { id: string; title: string } | null;
   task: { id: string; title: string } | null;
 };
+
+/** Matches `document_type` enum in `*_documents.sql`. */
+export type DocumentType = "proposal" | "quote" | "invoice" | "other";
+
+/** Matches `document_status` enum in `*_documents.sql`. */
+export type DocumentStatus =
+  | "draft"
+  | "sent"
+  | "viewed"
+  | "signed"
+  | "paid"
+  | "archived";
+
+/**
+ * Tiptap JSON document shape. Loosely typed; full validation happens inside
+ * the editor. Stored verbatim in `documents.content_json` / `document_templates.content_json`.
+ */
+export type TiptapDoc = {
+  type: string;
+  content?: TiptapNode[];
+  [key: string]: unknown;
+};
+
+export type TiptapNode = {
+  type: string;
+  text?: string;
+  attrs?: Record<string, unknown>;
+  content?: TiptapNode[];
+  marks?: Array<{ type: string; attrs?: Record<string, unknown> }>;
+  [key: string]: unknown;
+};
+
+/**
+ * Row shape for `public.documents` (see supabase/migrations/*_documents.sql).
+ */
+export type DocumentRow = {
+  id: string;
+  user_id: string;
+  client_id: string | null;
+  project_id: string | null;
+  type: DocumentType;
+  status: DocumentStatus;
+  title: string;
+  content_json: TiptapDoc;
+  created_at: string;
+  updated_at: string;
+};
+
+/** Document row with joined client/project labels from list queries. */
+export type DocumentListRow = DocumentRow & {
+  client: { id: string; name: string } | null;
+  project: { id: string; title: string } | null;
+};
+
+/**
+ * Row shape for `public.document_templates` (see supabase/migrations/*_document_templates.sql).
+ * `user_id` is null for system templates (is_system = true).
+ */
+export type DocumentTemplateRow = {
+  id: string;
+  user_id: string | null;
+  type: DocumentType;
+  name: string;
+  description: string | null;
+  content_json: TiptapDoc;
+  is_system: boolean;
+  created_at: string;
+  updated_at: string;
+};
