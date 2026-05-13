@@ -259,7 +259,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 
 - [x] Document Studio — Tiptap editor + system/user templates + `{{variable}}` substitution (`/documents`, `lib/documents/*`, spec `docs/specs/document-studio.md`)
 - [x] Brand kit — logo upload, colors, fonts, applied globally (/settings/brand)
-- [ ] todo · PDF generation
+- [x] PDF generation
 - [ ] todo · Invoice flow — create, send (Resend), mark paid
 - [ ] todo · Quote flow — create, send, approval tracking
 - [ ] todo · Proposal flow — multi-section, client approval
@@ -318,10 +318,11 @@ Agents and humans follow the same flow: **`main` is always deployable**; real wo
 
 ### Non-negotiables
 
-- Never do feature work directly on `main` (except trivial docs/meta when unavoidable).
+- **ALWAYS create a branch before touching any code.** No exceptions — not even one file. Branch first, then work.
+- Never do feature work directly on `main` or `dev`.
 - **One branch per task** — name it by intent: `feat/onboarding-scroll`, `fix/middleware-css`, `chore/bump-deps`.
-- **Commit and push** that branch, **open a PR into `main`**, merge when checks pass.
-- **Delete the branch** after merge (local + remote). Keeping old `feat/*` branches does not help isolate bugs once merged — `main` already contains the work; use a **new** `fix/*` branch from `main` for follow-ups.
+- **Commit and push** that branch, **open a PR into `dev`**, merge when checks pass.
+- **Delete the branch** after merge (local + remote). Keeping old `feat/*` branches does not help isolate bugs once merged — use a **new** `fix/*` branch for follow-ups.
 
 ### Standard loop (copy-paste)
 

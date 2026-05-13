@@ -172,6 +172,10 @@ export type DocumentRow = {
   status: DocumentStatus;
   title: string;
   content_json: TiptapDoc;
+  pdf_url: string | null;
+  sent_at: string | null;
+  viewed_at: string | null;
+  signed_at: string | null;
   created_at: string;
   updated_at: string;
 };

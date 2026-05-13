@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Pencil } from "lucide-react";
+import { ChevronLeft, Download, Pencil } from "lucide-react";
 
 import { getClientById } from "@/lib/clients/client-queries";
 import { getDocumentById } from "@/lib/documents/document-queries";
@@ -47,7 +47,20 @@ export default async function DocumentDetailPage({ params }: PageProps) {
           <ChevronLeft className="size-3.5" />
           Back to documents
         </Link>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center gap-2 justify-end">
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={
+              <a
+                href={`/api/documents/${document.id}/pdf`}
+                download={`${document.title.replace(/[^a-zA-Z0-9_\-. ]/g, "").trim() || "document"}.pdf`}
+              />
+            }
+          >
+            <Download className="size-4" />
+            Download PDF
+          </Button>
           <Button
             variant="outline"
             nativeButton={false}

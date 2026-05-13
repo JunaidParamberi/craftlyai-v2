@@ -17,6 +17,10 @@ type DocumentRowRaw = {
   status: string;
   title: string;
   content_json: unknown;
+  pdf_url?: string | null;
+  sent_at?: string | null;
+  viewed_at?: string | null;
+  signed_at?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -38,6 +42,10 @@ export function normalizeDocumentRow(row: DocumentRowRaw): DocumentRow {
     status: row.status as DocumentStatus,
     title: row.title,
     content_json: coerceContent(row.content_json),
+    pdf_url: row.pdf_url ?? null,
+    sent_at: row.sent_at ?? null,
+    viewed_at: row.viewed_at ?? null,
+    signed_at: row.signed_at ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };

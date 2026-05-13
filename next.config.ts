@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
    * (e.g. "Cannot find module './vendor-chunks/@supabase.js'") on server routes
    * that use `lib/supabase/server` + Server Components.
    */
-  serverExternalPackages: ["@supabase/supabase-js", "@supabase/ssr"],
+  serverExternalPackages: ["@supabase/supabase-js", "@supabase/ssr", "@react-pdf/renderer"],
 };
 
 export default nextConfig;
