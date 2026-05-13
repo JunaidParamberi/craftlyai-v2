@@ -257,7 +257,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 
 ### Phase 2 — Documents & Finance (Weeks 4–6)
 
-- [ ] todo · Document Studio — Tiptap editor, templates, variables
+- [x] Document Studio — Tiptap editor + system/user templates + `{{variable}}` substitution (`/documents`, `lib/documents/*`, spec `docs/specs/document-studio.md`)
 - [x] Brand kit — logo upload, colors, fonts, applied globally (/settings/brand)
 - [ ] todo · PDF generation
 - [ ] todo · Invoice flow — create, send (Resend), mark paid
@@ -308,6 +308,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - 2026-05-11: **Clients CRM** — list `/clients`, new + detail/edit/delete, Vitest for `parseClientCreateInput`, spec `docs/specs/clients-crm.md` (`feat/clients-crm`).
 - 2026-05-17: **Time tracker** merged to `main` — `/time` live + paused timers, manual log (`FormTimePopover`, gate time until date), server actions + Zod `lib/validations/time-entry`, migrations `20260516120000_time_entries.sql` / pause+description follow-up; branch `feat/time-tracker` removed after merge; root layout `suppressHydrationWarning` on `<body>` for extension-induced hydration noise.
 - 2026-05-18: **Brand Kit settings** merged to `dev` — `/settings/brand` page, settings nav index, logo cleanup via path extraction, two-column form layout with sticky preview, font dropdown, inline save confirmation. Phase 2 progress: 1/8 tasks done. (`feat/brand-kit` → `dev`)
+- 2026-05-18: **Document Studio** merged to `dev` — Tiptap editor (StarterKit + Placeholder + Link + Typography), system-seeded templates (Simple Proposal / Basic Quote / Standard Invoice / Blank) plus user `saveAsTemplate`, mustache `{{variable}}` engine grouped Client/Project/Brand/Date, server-only `buildVariableContext` reading clients + projects + brand kit + profile. Migrations `20260518120000_documents.sql`, `20260518120100_document_templates.sql`, `20260518120200_document_templates_seed.sql`; 15 Zod tests in `lib/validations/document.test.ts`; routes `/documents`, `/documents/new`, `/documents/[id]`, `/documents/[id]/edit`; shared `.doc-prose` / `.doc-render` styles in `styles/globals.css`. Branch was first cut from stale `main`, then rebased onto `dev` to pick up Brand Kit + base-luma refresh + metadata templates; `feat/document-studio` removed after merge. PDF, send-via-email, signing, line items, portal links remain stubbed for later Phase 2 tasks. Phase 2 progress: 2/8 tasks done.
 
 ---
 
