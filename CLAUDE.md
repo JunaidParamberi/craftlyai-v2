@@ -1,7 +1,7 @@
 # CLAUDE.md — CraftlyAI Project Context
 
-Last updated: 2026-05-17
-Current phase: Phase 1 — Foundation complete; Phase 2 — Documents & Finance next
+Last updated: 2026-05-18
+Current phase: Phase 1 — Foundation complete; Phase 2 — Documents & Finance in-progress
 
 Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
 
@@ -258,7 +258,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 ### Phase 2 — Documents & Finance (Weeks 4–6)
 
 - [ ] todo · Document Studio — Tiptap editor, templates, variables
-- [ ] todo · Brand kit — logo upload, colors, fonts, applied globally
+- [x] Brand kit — logo upload, colors, fonts, applied globally (/settings/brand)
 - [ ] todo · PDF generation
 - [ ] todo · Invoice flow — create, send (Resend), mark paid
 - [ ] todo · Quote flow — create, send, approval tracking
@@ -307,6 +307,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - 2026-05-11: **Dashboard shell** merged to `main` — sidebar + header + dashboard home + placeholder section routes (`feat/dashboard-shell`). Phase 1 next focus: **Clients** CRUD.
 - 2026-05-11: **Clients CRM** — list `/clients`, new + detail/edit/delete, Vitest for `parseClientCreateInput`, spec `docs/specs/clients-crm.md` (`feat/clients-crm`).
 - 2026-05-17: **Time tracker** merged to `main` — `/time` live + paused timers, manual log (`FormTimePopover`, gate time until date), server actions + Zod `lib/validations/time-entry`, migrations `20260516120000_time_entries.sql` / pause+description follow-up; branch `feat/time-tracker` removed after merge; root layout `suppressHydrationWarning` on `<body>` for extension-induced hydration noise.
+- 2026-05-18: **Brand Kit settings** merged to `dev` — `/settings/brand` page, settings nav index, logo cleanup via path extraction, two-column form layout with sticky preview, font dropdown, inline save confirmation. Phase 2 progress: 1/8 tasks done. (`feat/brand-kit` → `dev`)
 
 ---
 
