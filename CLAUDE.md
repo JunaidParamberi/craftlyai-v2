@@ -296,7 +296,9 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 
 ## Known issues / gotchas
 
-- [ ] (add as discovered)
+- [x] **shadcn `<SelectValue>` renders raw sentinel when children are `undefined`** — Radix only shows `placeholder` when `value` is empty/undefined. If you use a non-empty sentinel (e.g. `NONE_VALUE = "__none"`) and children resolve to `undefined`, Radix prints the raw sentinel string (`__none`, UUID, etc.) instead of the placeholder. **Rule:** whenever `value` can be a non-empty sentinel, always supply explicit fallback children — `{label ?? "None"}` not `{label ?? undefined}`. Two safe patterns:
+  - Optional FK (client/project): `value={field.value || undefined}` + `{field.value ? label : undefined}` — Radix handles placeholder natively when value is falsy.
+  - Sentinel pattern: `value={NONE_VALUE}` + `{label ?? "None"}` — always explicit fallback string.
 
 ---
 

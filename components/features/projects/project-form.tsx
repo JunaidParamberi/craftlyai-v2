@@ -270,10 +270,8 @@ export function ProjectForm(props: ProjectFormProps) {
                     className="w-full min-w-0"
                     size="default"
                   >
-                    <SelectValue>
-                      {field.value
-                        ? projectStatusLabel(field.value)
-                        : undefined}
+                    <SelectValue placeholder="Select status">
+                      {field.value ? projectStatusLabel(field.value) : undefined}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>

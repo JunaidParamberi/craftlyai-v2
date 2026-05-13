@@ -221,7 +221,7 @@ export function DocumentForm(props: DocumentFormProps) {
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="None">
-                      {selectedClientLabel}
+                      {selectedClientLabel ?? "None"}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -250,7 +250,7 @@ export function DocumentForm(props: DocumentFormProps) {
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="None">
-                      {selectedProjectLabel}
+                      {selectedProjectLabel ?? "None"}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
