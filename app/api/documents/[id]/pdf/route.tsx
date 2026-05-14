@@ -4,6 +4,7 @@ import React from "react";
 import { getBrandKit } from "@/lib/brand-kit/actions";
 import { getDocumentById } from "@/lib/documents/document-queries";
 import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
+import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 import { substituteInTiptapDoc } from "@/lib/documents/variables";
 import { buildVariableContext } from "@/lib/documents/variables-server";
 import { DocumentPdf } from "@/lib/pdf/document-pdf";
@@ -42,9 +43,15 @@ export async function GET(
       ? await getInvoiceWithLineItems(id)
       : null;
 
-  // Fetch client currency for invoice.
+  // Fetch quote data if applicable.
+  const quoteData =
+    document.type === "quote"
+      ? await getQuoteWithLineItems(id)
+      : null;
+
+  // Fetch client currency for invoice or quote.
   const clientCurrency =
-    document.type === "invoice" && document.client_id
+    (document.type === "invoice" || document.type === "quote") && document.client_id
       ? await fetchClientCurrency(document.client_id, supabase)
       : "USD";
 
@@ -100,6 +107,19 @@ export async function GET(
               }
             : null
         }
+        quoteData={
+          quoteData
+            ? {
+                quote_number: quoteData.quote_number,
+                valid_until: quoteData.valid_until,
+                notes_footer: quoteData.notes_footer,
+                line_items: quoteData.line_items,
+                currency: clientCurrency,
+                discount_value: quoteData.discount_value ?? 0,
+                discount_type: quoteData.discount_type ?? 'percent',
+              }
+            : null
+        }
       />,
     );
   } catch (err) {
@@ -110,7 +130,15 @@ export async function GET(
   // Upload to Storage asynchronously (non-blocking, best-effort).
   uploadDocumentPdf(user.id, document.id, pdfBuffer).catch(() => {});
 
-  const safeTitle = document.title.replace(/[^a-zA-Z0-9_\-. ]/g, "").trim() || "document";
+  const docNumber =
+    document.type === "invoice"
+      ? (invoiceData?.invoice_number ?? null)
+      : document.type === "quote"
+      ? (quoteData?.quote_number ?? null)
+      : null;
+  const safeTitle = (docNumber ?? document.title)
+    .replace(/[^a-zA-Z0-9_\-. ]/g, "")
+    .trim() || "document";
 
   return new Response(new Uint8Array(pdfBuffer), {
     status: 200,
