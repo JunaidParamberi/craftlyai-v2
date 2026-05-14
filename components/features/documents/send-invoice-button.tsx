@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Mail } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,16 +31,13 @@ export function SendInvoiceButton({
   const [open, setOpen] = useState(false);
   const [recipientEmail, setRecipientEmail] = useState(defaultEmail);
   const [subject, setSubject] = useState("Invoice from Your Business");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
-    "idle"
-  );
+  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [, startTransition] = useTransition();
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (!next) {
-      // Reset on close
       setStatus("idle");
       setErrorMessage("");
       setRecipientEmail(defaultEmail);
@@ -56,11 +54,11 @@ export function SendInvoiceButton({
         subject: subject || undefined,
       });
       if (result.ok) {
-        setStatus("success");
-        setTimeout(() => {
-          setOpen(false);
-          setStatus("idle");
-        }, 1500);
+        setOpen(false);
+        setStatus("idle");
+        toast.success("Invoice sent!", {
+          description: `Sent to ${recipientEmail}`,
+        });
       } else {
         setStatus("error");
         setErrorMessage(result.error ?? "Failed to send invoice.");
@@ -86,72 +84,62 @@ export function SendInvoiceButton({
           </DialogDescription>
         </DialogHeader>
 
-        {status === "success" ? (
-          <div className="py-6 text-center">
-            <p className="text-sm font-medium text-green-600 dark:text-green-400">
-              Invoice sent!
-            </p>
+        <div className="space-y-4 py-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="send-email">Recipient Email</Label>
+            <Input
+              id="send-email"
+              type="email"
+              value={recipientEmail}
+              onChange={(e) => setRecipientEmail(e.target.value)}
+              placeholder="client@example.com"
+              autoFocus
+            />
           </div>
-        ) : (
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="send-email">Recipient Email</Label>
-              <Input
-                id="send-email"
-                type="email"
-                value={recipientEmail}
-                onChange={(e) => setRecipientEmail(e.target.value)}
-                placeholder="client@example.com"
-                autoFocus
-              />
-            </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="send-subject">Subject</Label>
-              <Input
-                id="send-subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Invoice from Your Business"
-              />
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="send-subject">Subject</Label>
+            <Input
+              id="send-subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Invoice from Your Business"
+            />
+          </div>
 
-            {status === "error" && (
-              <p className="text-xs text-destructive">{errorMessage}</p>
+          {status === "error" && (
+            <p className="text-xs text-destructive">{errorMessage}</p>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setOpen(false)}
+            disabled={status === "loading"}
+          >
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleSend}
+            disabled={status === "loading" || !recipientEmail}
+            className="gap-2"
+          >
+            {status === "loading" ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Sending…
+              </>
+            ) : (
+              <>
+                <Mail className="h-4 w-4" />
+                Send
+              </>
             )}
-          </div>
-        )}
-
-        {status !== "success" && (
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setOpen(false)}
-              disabled={status === "loading"}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSend}
-              disabled={status === "loading" || !recipientEmail}
-              className="gap-2"
-            >
-              {status === "loading" ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Sending…
-                </>
-              ) : (
-                <>
-                  <Mail className="h-4 w-4" />
-                  Send
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

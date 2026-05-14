@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
+import { Toaster } from "sonner";
 
 import { branding } from "@/config/branding";
 import { siteConfig } from "@/config/site";
@@ -71,6 +72,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <TooltipProvider delay={200}>{children}</TooltipProvider>
+          <Toaster position="bottom-right" richColors />
         </ThemeProvider>
       </body>
     </html>

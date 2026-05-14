@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { resend } from "@/lib/email";
+import { formatEmailError } from "@/lib/email/email-error";
 import InvoiceEmail from "@/emails/invoice";
 import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
 import React from "react";
@@ -25,76 +26,92 @@ type ClientRow = {
 export async function sendInvoice(
   input: SendInvoiceInput
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await createClient();
+  try {
+    if (!input.recipientEmail) {
+      return { ok: false, error: "Recipient email is required." };
+    }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Unauthenticated" };
+    const supabase = await createClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, company_name")
-    .eq("id", user.id)
-    .single();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { ok: false, error: "You must be logged in to send invoices." };
 
-  const typedProfile = profile as ProfileRow | null;
-  const businessName =
-    typedProfile?.company_name ?? typedProfile?.full_name ?? "Your Business";
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, company_name")
+      .eq("id", user.id)
+      .single();
 
-  const invoice = await getInvoiceWithLineItems(input.documentId);
-  if (!invoice) return { ok: false, error: "Invoice not found" };
+    const typedProfile = profile as ProfileRow | null;
+    const businessName =
+      typedProfile?.company_name ?? typedProfile?.full_name ?? "Your Business";
 
-  const { data: client } = invoice.client_id
-    ? await supabase
-        .from("clients")
-        .select("name, currency")
-        .eq("id", invoice.client_id)
-        .single()
-    : { data: null };
+    const invoice = await getInvoiceWithLineItems(input.documentId);
+    if (!invoice) return { ok: false, error: "Invoice not found." };
 
-  const typedClient = client as ClientRow | null;
+    const { data: client } = invoice.client_id
+      ? await supabase
+          .from("clients")
+          .select("name, currency")
+          .eq("id", invoice.client_id)
+          .single()
+      : { data: null };
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const payUrl = invoice.pay_token
-    ? `${appUrl}/pay/${invoice.pay_token}`
-    : appUrl;
+    const typedClient = client as ClientRow | null;
 
-  const subject =
-    input.subject ??
-    `Invoice ${invoice.invoice_number ?? ""} from ${businessName}`.trim();
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const payUrl = invoice.pay_token
+      ? `${appUrl}/pay/${invoice.pay_token}`
+      : appUrl;
 
-  const { error } = await resend.emails.send({
-    from: `${businessName} via CraftlyAI <invoices@craftlyai.app>`,
-    replyTo: user.email ?? undefined,
-    to: [input.recipientEmail],
-    subject,
-    react: React.createElement(InvoiceEmail, {
-      invoiceNumber: invoice.invoice_number ?? "—",
-      businessName,
-      clientName: typedClient?.name ?? "Client",
-      dueDate: invoice.due_date,
-      paymentTerms: invoice.payment_terms,
-      notesFooter: invoice.notes_footer,
-      lineItems: invoice.line_items.map((li) => ({
-        description: li.description,
-        quantity: Number(li.quantity),
-        unit_price: Number(li.unit_price),
-        tax_rate: Number(li.tax_rate),
-      })),
-      currency: typedClient?.currency ?? "USD",
-      payUrl,
-      discountValue: Number(invoice.discount_value ?? 0),
-      discountType: (invoice.discount_type ?? 'percent') as 'percent' | 'flat',
-    }),
-  });
+    const subject =
+      input.subject ??
+      `Invoice ${invoice.invoice_number ?? ""} from ${businessName}`.trim();
 
-  if (error) return { ok: false, error: error.message };
+    const { error: sendError } = await resend.emails.send({
+      from: `${businessName} via CraftlyAI <invoices@craftlyai.app>`,
+      replyTo: user.email ?? undefined,
+      to: [input.recipientEmail],
+      subject,
+      react: React.createElement(InvoiceEmail, {
+        invoiceNumber: invoice.invoice_number ?? "—",
+        businessName,
+        clientName: typedClient?.name ?? "Client",
+        dueDate: invoice.due_date,
+        paymentTerms: invoice.payment_terms,
+        notesFooter: invoice.notes_footer,
+        lineItems: invoice.line_items.map((li) => ({
+          description: li.description,
+          quantity: Number(li.quantity),
+          unit_price: Number(li.unit_price),
+          tax_rate: Number(li.tax_rate),
+        })),
+        currency: typedClient?.currency ?? "USD",
+        payUrl,
+        discountValue: Number(invoice.discount_value ?? 0),
+        discountType: (invoice.discount_type ?? "percent") as "percent" | "flat",
+      }),
+    });
 
-  await supabase
-    .from("documents")
-    .update({ status: "sent", sent_at: new Date().toISOString() })
-    .eq("id", input.documentId);
+    if (sendError) {
+      return { ok: false, error: formatEmailError(sendError.message) };
+    }
 
-  return { ok: true };
+    const { error: updateError } = await supabase
+      .from("documents")
+      .update({ status: "sent", sent_at: new Date().toISOString() })
+      .eq("id", input.documentId);
+
+    if (updateError) {
+      console.error("[sendInvoice] status update failed:", updateError.message);
+    }
+
+    return { ok: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[sendInvoice] unexpected error:", message);
+    return { ok: false, error: formatEmailError(message) };
+  }
 }
