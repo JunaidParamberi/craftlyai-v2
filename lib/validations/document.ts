@@ -27,6 +27,8 @@ export const DOCUMENT_STATUSES = [
   "signed",
   "paid",
   "archived",
+  "approved",
+  "declined",
 ] as const satisfies readonly DocumentStatus[];
 
 export const documentTypeSchema = z.enum(DOCUMENT_TYPES);
@@ -179,6 +181,16 @@ export function parseTemplateInput(
     },
   };
 }
+
+export const quoteMetaSchema = z.object({
+  quote_number:   z.string().max(100).optional().nullable(),
+  valid_until:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  notes_footer:   z.string().max(1000).optional().nullable(),
+  discount_value: z.coerce.number().min(0).default(0).optional(),
+  discount_type:  z.enum(['percent', 'flat']).default('percent').optional(),
+});
+
+export type QuoteMetaInput = z.infer<typeof quoteMetaSchema>;
 
 export const invoiceMetaSchema = z.object({
   invoice_number: z.string().max(100).optional().nullable(),

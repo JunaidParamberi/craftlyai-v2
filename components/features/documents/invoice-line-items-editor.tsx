@@ -14,6 +14,7 @@ interface InvoiceLineItemsEditorProps {
   currency?: string;
   discountValue?: number;
   discountType?: 'percent' | 'flat';
+  onDiscountSave?: (value: number, type: 'percent' | 'flat') => void;
 }
 
 interface LocalLineItem {
@@ -67,6 +68,7 @@ export function InvoiceLineItemsEditor({
   currency = "USD",
   discountValue = 0,
   discountType: initialDiscountType = 'percent',
+  onDiscountSave,
 }: InvoiceLineItemsEditorProps) {
   const [items, setItems] = useState<LocalLineItem[]>(
     initialItems.map(toLocal)
@@ -144,13 +146,21 @@ export function InvoiceLineItemsEditor({
   const handleTypeChange = (newType: 'percent' | 'flat') => {
     setDiscountType(newType);
     startTransition(async () => {
-      await updateInvoiceMeta(documentId, { discount_type: newType, discount_value: discountVal });
+      if (onDiscountSave) {
+        onDiscountSave(discountVal, newType);
+      } else {
+        await updateInvoiceMeta(documentId, { discount_type: newType, discount_value: discountVal });
+      }
     });
   };
 
   const handleDiscountBlur = () => {
     startTransition(async () => {
-      await updateInvoiceMeta(documentId, { discount_type: discountType, discount_value: discountVal });
+      if (onDiscountSave) {
+        onDiscountSave(discountVal, discountType);
+      } else {
+        await updateInvoiceMeta(documentId, { discount_type: discountType, discount_value: discountVal });
+      }
     });
   };
 

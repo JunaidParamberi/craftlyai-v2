@@ -2,11 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { resend } from "@/lib/email";
-import InvoiceEmail from "@/emails/invoice";
-import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
+import QuoteEmail from "@/emails/quote";
+import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 import React from "react";
 
-interface SendInvoiceInput {
+interface SendQuoteInput {
   documentId: string;
   recipientEmail: string;
   subject?: string;
@@ -22,8 +22,8 @@ type ClientRow = {
   currency: string;
 };
 
-export async function sendInvoice(
-  input: SendInvoiceInput
+export async function sendQuote(
+  input: SendQuoteInput
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient();
 
@@ -42,50 +42,59 @@ export async function sendInvoice(
   const businessName =
     typedProfile?.company_name ?? typedProfile?.full_name ?? "Your Business";
 
-  const invoice = await getInvoiceWithLineItems(input.documentId);
-  if (!invoice) return { ok: false, error: "Invoice not found" };
+  const quote = await getQuoteWithLineItems(input.documentId);
+  if (!quote) return { ok: false, error: "Quote not found" };
 
-  const { data: client } = invoice.client_id
+  const { data: client } = quote.client_id
     ? await supabase
         .from("clients")
         .select("name, currency")
-        .eq("id", invoice.client_id)
+        .eq("id", quote.client_id)
         .single()
     : { data: null };
 
   const typedClient = client as ClientRow | null;
 
+  // Generate approval token if not already set
+  let approvalToken = quote.approval_token;
+  if (!approvalToken) {
+    const bytes = new Uint8Array(24);
+    crypto.getRandomValues(bytes);
+    approvalToken = Buffer.from(bytes).toString("hex");
+    await supabase
+      .from("documents")
+      .update({ approval_token: approvalToken })
+      .eq("id", input.documentId);
+  }
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const payUrl = invoice.pay_token
-    ? `${appUrl}/pay/${invoice.pay_token}`
-    : appUrl;
+  const approvalUrl = `${appUrl}/quote/${approvalToken}`;
 
   const subject =
     input.subject ??
-    `Invoice ${invoice.invoice_number ?? ""} from ${businessName}`.trim();
+    `Quote ${quote.quote_number ?? ""} from ${businessName}`.trim();
 
   const { error } = await resend.emails.send({
     from: `${businessName} via CraftlyAI <invoices@craftlyai.app>`,
     replyTo: user.email ?? undefined,
     to: [input.recipientEmail],
     subject,
-    react: React.createElement(InvoiceEmail, {
-      invoiceNumber: invoice.invoice_number ?? "—",
+    react: React.createElement(QuoteEmail, {
+      quoteNumber: quote.quote_number ?? "—",
       businessName,
       clientName: typedClient?.name ?? "Client",
-      dueDate: invoice.due_date,
-      paymentTerms: invoice.payment_terms,
-      notesFooter: invoice.notes_footer,
-      lineItems: invoice.line_items.map((li) => ({
+      validUntil: quote.valid_until,
+      notesFooter: quote.notes_footer,
+      lineItems: quote.line_items.map((li) => ({
         description: li.description,
         quantity: Number(li.quantity),
         unit_price: Number(li.unit_price),
         tax_rate: Number(li.tax_rate),
       })),
       currency: typedClient?.currency ?? "USD",
-      payUrl,
-      discountValue: Number(invoice.discount_value ?? 0),
-      discountType: (invoice.discount_type ?? 'percent') as 'percent' | 'flat',
+      approvalUrl,
+      discountValue: Number(quote.discount_value ?? 0),
+      discountType: (quote.discount_type ?? 'percent') as 'percent' | 'flat',
     }),
   });
 

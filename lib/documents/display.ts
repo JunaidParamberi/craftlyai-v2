@@ -14,6 +14,8 @@ export const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
   signed: "Signed",
   paid: "Paid",
   archived: "Archived",
+  approved: "Approved",
+  declined: "Declined",
 };
 
 export type DocumentStatusVariant =
@@ -32,6 +34,8 @@ export const DOCUMENT_STATUS_VARIANTS: Record<
   signed: "default",
   paid: "default",
   archived: "outline",
+  approved: "default",
+  declined: "destructive",
 };
 
 export function documentTypeLabel(type: DocumentType): string {
