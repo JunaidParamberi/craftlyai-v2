@@ -5,11 +5,14 @@ import { ChevronLeft } from "lucide-react";
 
 import { listClients } from "@/lib/clients/client-queries";
 import { getDocumentById } from "@/lib/documents/document-queries";
+import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
 import { documentToFormValues } from "@/lib/documents/form-values";
 import { buildVariableContext } from "@/lib/documents/variables-server";
 import { listProjects } from "@/lib/projects/actions";
+import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 
 import { DocumentForm } from "@/components/features/documents/document-form";
+import { InvoiceEditForm } from "@/components/features/documents/invoice-edit-form";
 
 export const metadata: Metadata = {
   title: "Edit document",
@@ -34,6 +37,59 @@ export default async function EditDocumentPage({ params }: PageProps) {
   const clients = clientsResult.ok ? clientsResult.clients : [];
   const projects = projectsResult.ok ? projectsResult.projects : [];
 
+  // Invoice path: dedicated structured editor
+  if (document.type === "invoice") {
+    const invoiceData = await getInvoiceWithLineItems(id);
+
+    // Resolve client currency
+    let currency = "USD";
+    if (document.client_id) {
+      const supabase = await createSupabaseClient();
+      const { data: client } = await supabase
+        .from("clients")
+        .select("currency")
+        .eq("id", document.client_id)
+        .single();
+      currency = (client as { currency: string } | null)?.currency ?? "USD";
+    }
+
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <Link
+            href={`/documents/${document.id}`}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="size-3.5" />
+            Back to invoice
+          </Link>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
+            Edit invoice
+          </h1>
+        </div>
+
+        <InvoiceEditForm
+          documentId={document.id}
+          initialTitle={document.title}
+          initialStatus={document.status}
+          initialClientId={document.client_id}
+          initialProjectId={document.project_id}
+          clients={clients}
+          projects={projects}
+          invoiceData={{
+            invoice_number: invoiceData?.invoice_number ?? null,
+            due_date: invoiceData?.due_date ?? null,
+            payment_terms: invoiceData?.payment_terms ?? null,
+            notes_footer: invoiceData?.notes_footer ?? null,
+            line_items: invoiceData?.line_items ?? [],
+            currency,
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Non-invoice: rich-text document editor
   const variableContext = await buildVariableContext({
     clientId: document.client_id,
     projectId: document.project_id,
