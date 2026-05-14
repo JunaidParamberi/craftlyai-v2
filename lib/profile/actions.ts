@@ -16,6 +16,7 @@ function normalizeProfileRow(row: {
   address_region: string | null;
   address_postal_code: string | null;
   address_country: string | null;
+  default_currency?: string | null;
   brand_kit_id?: string | null;
   onboarding_brand_skipped?: boolean;
   onboarding_completed_at?: string | null;
@@ -28,6 +29,7 @@ function normalizeProfileRow(row: {
     onboarding_brand_skipped: row.onboarding_brand_skipped ?? false,
     onboarding_completed_at: row.onboarding_completed_at ?? null,
     address_country: row.address_country ? row.address_country.trim().toUpperCase() : null,
+    default_currency: row.default_currency ?? "USD",
   };
 }
 
@@ -126,6 +128,7 @@ export async function updateProfile(patchInput: unknown): Promise<UpdateProfileR
     address_region: merged.data.address_region,
     address_postal_code: merged.data.address_postal_code,
     address_country: merged.data.address_country,
+    default_currency: merged.data.default_currency,
   };
 
   const { data, error } = await supabase

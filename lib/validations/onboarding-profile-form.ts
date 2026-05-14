@@ -21,6 +21,7 @@ export const onboardingProfileFormSchema = z
     address_region: z.string().max(PROFILE_LIMITS.region),
     address_postal_code: z.string().max(PROFILE_LIMITS.postalCode),
     address_country: z.string().max(2),
+    default_currency: z.string().length(3),
   })
   .superRefine((data, ctx) => {
     if (data.vat_registered) {

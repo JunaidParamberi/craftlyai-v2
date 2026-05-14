@@ -13,6 +13,7 @@ export type ProfileRow = {
   address_region: string | null;
   address_postal_code: string | null;
   address_country: string | null;
+  default_currency: string;
   brand_kit_id: string | null;
   onboarding_brand_skipped: boolean;
   onboarding_completed_at: string | null;

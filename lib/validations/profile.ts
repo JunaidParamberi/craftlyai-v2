@@ -33,6 +33,14 @@ const optionalCountryCode = z.preprocess((val: unknown) => {
   return t.toUpperCase();
 }, z.union([z.undefined(), z.null(), z.string().length(2).regex(/^[A-Z]{2}$/, "Use a 2-letter ISO country code")]));
 
+const optionalCurrencyCode = z.preprocess((val: unknown) => {
+  if (val === undefined) return undefined;
+  if (typeof val !== "string") return val;
+  const t = val.trim();
+  if (t === "") return undefined;
+  return t.toUpperCase();
+}, z.union([z.undefined(), z.string().length(3).regex(/^[A-Z]{3}$/, "Use a 3-letter ISO currency code")]));
+
 /**
  * Partial update from client. Omitted keys keep existing DB values after merge.
  */
@@ -48,6 +56,7 @@ export const profilePatchSchema = z
     address_region: optionalNullableTrimmed(PROFILE_LIMITS.region),
     address_postal_code: optionalNullableTrimmed(PROFILE_LIMITS.postalCode),
     address_country: optionalCountryCode,
+    default_currency: optionalCurrencyCode,
   })
   .strict();
 
@@ -64,6 +73,7 @@ export type MergedProfile = {
   address_region: string | null;
   address_postal_code: string | null;
   address_country: string | null;
+  default_currency: string;
 };
 
 const mergedProfileSchema = z
@@ -81,6 +91,7 @@ const mergedProfileSchema = z
       z.string().length(2).regex(/^[A-Z]{2}$/),
       z.null(),
     ]),
+    default_currency: z.string().length(3).regex(/^[A-Z]{3}$/),
   })
   .superRefine((data, ctx) => {
     if (!data.vat_registered) return;
@@ -108,6 +119,7 @@ function rowToMerged(row: ProfileRow): MergedProfile {
     address_country: row.address_country
       ? row.address_country.trim().toUpperCase()
       : null,
+    default_currency: row.default_currency,
   };
 }
 
@@ -122,6 +134,7 @@ const emptyMerged = (): MergedProfile => ({
   address_region: null,
   address_postal_code: null,
   address_country: null,
+  default_currency: "USD",
 });
 
 function applyProfilePatch(base: MergedProfile, patch: ProfilePatchInput): MergedProfile {
@@ -147,6 +160,7 @@ function coerceUndefinedToNull(m: MergedProfile): MergedProfile {
     address_region: m.address_region ?? null,
     address_postal_code: m.address_postal_code ?? null,
     address_country: m.address_country ?? null,
+    default_currency: m.default_currency ?? "USD",
   };
 }
 

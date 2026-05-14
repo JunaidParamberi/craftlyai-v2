@@ -8,6 +8,7 @@ import { getDocumentById } from "@/lib/documents/document-queries";
 import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
 import { documentToFormValues } from "@/lib/documents/form-values";
 import { buildVariableContext } from "@/lib/documents/variables-server";
+import { getProfile } from "@/lib/profile/actions";
 import { listProjects } from "@/lib/projects/actions";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 
@@ -41,8 +42,14 @@ export default async function EditDocumentPage({ params }: PageProps) {
   if (document.type === "invoice") {
     const invoiceData = await getInvoiceWithLineItems(id);
 
-    // Resolve client currency
-    let currency = "USD";
+    // Resolve currency: client currency → profile default → "USD"
+    const profileResult = await getProfile();
+    const profileCurrency =
+      profileResult.ok && profileResult.profile
+        ? (profileResult.profile.default_currency ?? "USD")
+        : "USD";
+
+    let currency = profileCurrency;
     if (document.client_id) {
       const supabase = await createSupabaseClient();
       const { data: client } = await supabase
@@ -50,7 +57,7 @@ export default async function EditDocumentPage({ params }: PageProps) {
         .select("currency")
         .eq("id", document.client_id)
         .single();
-      currency = (client as { currency: string } | null)?.currency ?? "USD";
+      currency = (client as { currency: string } | null)?.currency ?? profileCurrency;
     }
 
     return (

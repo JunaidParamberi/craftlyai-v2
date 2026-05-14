@@ -24,6 +24,13 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 
 import { CountryCombobox } from "@/components/onboarding/country-combobox";
@@ -60,6 +67,7 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
       address_region: toInput(initialProfile?.address_region ?? null),
       address_postal_code: toInput(initialProfile?.address_postal_code ?? null),
       address_country: toInput(initialProfile?.address_country ?? null),
+      default_currency: initialProfile?.default_currency ?? "USD",
     }),
     [initialProfile],
   );
@@ -77,6 +85,7 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
 
   const vatRegistered = watch("vat_registered");
   const addressCountry = watch("address_country");
+  const defaultCurrency = watch("default_currency");
 
   function onSubmit(values: OnboardingProfileFormValues) {
     setServerResult(null);
@@ -94,6 +103,7 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
         address_region: emptyToNull(values.address_region),
         address_postal_code: emptyToNull(values.address_postal_code),
         address_country: emptyToNull(values.address_country)?.toUpperCase() ?? null,
+        default_currency: values.default_currency,
       };
 
       const result = await updateProfile(patch);
@@ -263,6 +273,53 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
                   </p>
                 ) : null}
               </div>
+            </div>
+
+            <Separator />
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="default_currency">Default currency</Label>
+              <Select
+                value={defaultCurrency ?? "USD"}
+                onValueChange={(val) => {
+                  if (val !== null) {
+                    setValue("default_currency", val, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                  }
+                }}
+              >
+                <SelectTrigger id="default_currency">
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(
+                    [
+                      "USD",
+                      "EUR",
+                      "GBP",
+                      "AED",
+                      "SAR",
+                      "QAR",
+                      "KWD",
+                      "BHD",
+                      "OMR",
+                      "EGP",
+                      "CAD",
+                      "AUD",
+                      "INR",
+                    ] as const
+                  ).map((code) => (
+                    <SelectItem key={code} value={code}>
+                      {code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Used for invoices when no client currency is set.
+              </p>
             </div>
 
             {serverResult && !serverResult.ok ? (
