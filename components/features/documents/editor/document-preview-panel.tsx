@@ -39,7 +39,15 @@ export function DocumentPreviewPanel({
   const hasMetaBlock = clientName || clientCompany || projectTitle;
 
   return (
-    <div className="overflow-y-auto rounded-2xl border border-border/70 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.02),0_24px_48px_-32px_rgba(15,23,42,0.18)] h-full flex flex-col">
+    <div
+      className="overflow-y-auto rounded-2xl border border-border/70 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.02),0_24px_48px_-32px_rgba(15,23,42,0.18)] h-full flex flex-col"
+      style={{
+        "--foreground": "oklch(0.145 0 0)",
+        "--muted-foreground": "oklch(0.556 0 0)",
+        "--muted": "oklch(0.97 0 0)",
+        "--border": "oklch(0.922 0 0)",
+      } as React.CSSProperties}
+    >
       {/* PDF Header */}
       <div className="flex items-start justify-between px-10 pt-10 pb-5 border-b border-border/40">
         <div>
