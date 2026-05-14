@@ -6,6 +6,7 @@ import {
   invoiceMetaSchema,
   parseDocumentInput,
   parseTemplateInput,
+  proposalMetaSchema,
   quoteMetaSchema,
 } from "@/lib/validations/document";
 
@@ -314,5 +315,66 @@ describe("invoiceMetaSchema", () => {
       expect(result.data.discount_value).toBe(0);
       expect(result.data.discount_type).toBe("percent");
     }
+  });
+});
+
+describe("proposalMetaSchema", () => {
+  it("accepts all optional fields absent", () => {
+    const result = proposalMetaSchema.safeParse({});
+    expect(result.success).toBe(true);
+    expect(result.data?.discount_value).toBe(0);
+    expect(result.data?.discount_type).toBe("percent");
+  });
+
+  it("accepts valid proposal_number", () => {
+    const result = proposalMetaSchema.safeParse({ proposal_number: "PRO-0001" });
+    expect(result.success).toBe(true);
+    expect(result.data?.proposal_number).toBe("PRO-0001");
+  });
+
+  it("rejects proposal_number over 100 chars", () => {
+    const result = proposalMetaSchema.safeParse({ proposal_number: "P".repeat(101) });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts valid date for valid_until", () => {
+    const result = proposalMetaSchema.safeParse({ valid_until: "2026-12-31" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects invalid date format", () => {
+    const result = proposalMetaSchema.safeParse({ valid_until: "31-12-2026" });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts discount_type flat", () => {
+    const result = proposalMetaSchema.safeParse({ discount_type: "flat", discount_value: 500 });
+    expect(result.success).toBe(true);
+    expect(result.data?.discount_type).toBe("flat");
+  });
+
+  it("rejects invalid discount_type", () => {
+    const result = proposalMetaSchema.safeParse({ discount_type: "unknown" });
+    expect(result.success).toBe(false);
+  });
+
+  it("coerces discount_value from string", () => {
+    const result = proposalMetaSchema.safeParse({ discount_value: "10.5" });
+    expect(result.success).toBe(true);
+    expect(result.data?.discount_value).toBe(10.5);
+  });
+
+  it("rejects negative discount_value", () => {
+    const result = proposalMetaSchema.safeParse({ discount_value: -1 });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts null for all nullable fields", () => {
+    const result = proposalMetaSchema.safeParse({
+      proposal_number: null,
+      valid_until: null,
+      notes_footer: null,
+    });
+    expect(result.success).toBe(true);
   });
 });

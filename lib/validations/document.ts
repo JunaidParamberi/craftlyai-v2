@@ -202,3 +202,17 @@ export const invoiceMetaSchema = z.object({
 });
 
 export type InvoiceMetaInput = z.infer<typeof invoiceMetaSchema>;
+
+export const proposalMetaSchema = z.object({
+  proposal_number: z.string().max(100).optional().nullable(),
+  valid_until: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-MM-DD")
+    .optional()
+    .nullable(),
+  notes_footer: z.string().max(1000).optional().nullable(),
+  discount_value: z.coerce.number().min(0).optional().default(0),
+  discount_type: z.enum(["percent", "flat"]).optional().default("percent"),
+});
+
+export type ProposalMetaInput = z.infer<typeof proposalMetaSchema>;
