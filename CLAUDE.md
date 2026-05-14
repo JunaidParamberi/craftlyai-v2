@@ -156,6 +156,7 @@ craftlyai.app/
 - **Auth checks:** server component or middleware. Never client-side only.
 - **Streaming:** all AI responses stream to UI via Server-Sent Events (SSE). Never block UI waiting for full response.
 - **RLS:** every Supabase table has Row Level Security. Users can only access their own data.
+- **Testing:** every feature ships with Vitest tests for all Zod schemas, validation logic, normalizers, and pure utility functions. No new feature is complete without tests. Co-locate test files next to the file under test (`foo.ts` → `foo.test.ts`). Server actions and DB queries are not unit-tested (they require Supabase); test the pure logic layers instead. Run `npm run test` before marking a feature done.
 
 ## Coding patterns — NEVER do these
 
@@ -260,8 +261,8 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - [x] Document Studio — Tiptap editor + system/user templates + `{{variable}}` substitution (`/documents`, `lib/documents/*`, spec `docs/specs/document-studio.md`)
 - [x] Brand kit — logo upload, colors, fonts, applied globally (/settings/brand)
 - [x] PDF generation
-- [ ] todo · Invoice flow — create, send (Resend), mark paid
-- [ ] todo · Quote flow — create, send, approval tracking
+- [x] Invoice flow — create, send (Resend), mark paid
+- [x] Quote flow — create, send, approval tracking, convert to invoice
 - [ ] todo · Proposal flow — multi-section, client approval
 - [ ] todo · Client portal — public link, no login, payment embed
 - [ ] todo · Financial dashboard — revenue, outstanding, expenses
@@ -311,6 +312,8 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - 2026-05-17: **Time tracker** merged to `main` — `/time` live + paused timers, manual log (`FormTimePopover`, gate time until date), server actions + Zod `lib/validations/time-entry`, migrations `20260516120000_time_entries.sql` / pause+description follow-up; branch `feat/time-tracker` removed after merge; root layout `suppressHydrationWarning` on `<body>` for extension-induced hydration noise.
 - 2026-05-18: **Brand Kit settings** merged to `dev` — `/settings/brand` page, settings nav index, logo cleanup via path extraction, two-column form layout with sticky preview, font dropdown, inline save confirmation. Phase 2 progress: 1/8 tasks done. (`feat/brand-kit` → `dev`)
 - 2026-05-18: **Document Studio** merged to `dev` — Tiptap editor (StarterKit + Placeholder + Link + Typography), system-seeded templates (Simple Proposal / Basic Quote / Standard Invoice / Blank) plus user `saveAsTemplate`, mustache `{{variable}}` engine grouped Client/Project/Brand/Date, server-only `buildVariableContext` reading clients + projects + brand kit + profile. Migrations `20260518120000_documents.sql`, `20260518120100_document_templates.sql`, `20260518120200_document_templates_seed.sql`; 15 Zod tests in `lib/validations/document.test.ts`; routes `/documents`, `/documents/new`, `/documents/[id]`, `/documents/[id]/edit`; shared `.doc-prose` / `.doc-render` styles in `styles/globals.css`. Branch was first cut from stale `main`, then rebased onto `dev` to pick up Brand Kit + base-luma refresh + metadata templates; `feat/document-studio` removed after merge. PDF, send-via-email, signing, line items, portal links remain stubbed for later Phase 2 tasks. Phase 2 progress: 2/8 tasks done.
+- 2026-05-18: **Invoice flow** complete on `dev` — dedicated `invoice-edit-form`, line items editor (add/edit/delete/reorder), invoice meta fields (number, due date, terms, notes), discount toggle (percent/flat), PDF renderer with line items table, Resend email (`lib/email/send-invoice.ts`, `emails/invoice.tsx`), public pay page (`/pay/[token]`) with `MockPaymentForm`, mark-paid button, `pay_token` on documents. Mutations in `lib/documents/invoice-mutations.ts`, queries in `lib/documents/invoice-queries.ts`. Phase 2 progress: 3/8 tasks done.
+- 2026-05-18: **Quote flow** on `feat/quote-flow` — migration adds `approved`/`declined` to `document_status` enum + `quote_number`, `valid_until`, `approval_token`, `approved_at`, `declined_at`, `approval_message` columns. `QuoteEditForm`, `QuoteMetaFields`, `SendQuoteButton`, `QuoteApprovalStatus` components. `lib/documents/quote-mutations.ts` (generateQuoteNumber, updateQuoteMeta, markQuoteApproved/Declined, convertQuoteToInvoice), `lib/email/send-quote.ts`, `emails/quote.tsx`. Public approval page `/quote/[token]` + `QuoteRespondForm`. `POST /api/quotes/respond`. `InvoiceLineItemsEditor` gets `onDiscountSave` prop. Build passes. Phase 2 progress: 4/8 tasks done.
 
 ---
 

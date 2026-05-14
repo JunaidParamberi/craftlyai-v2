@@ -140,7 +140,9 @@ export type DocumentStatus =
   | "viewed"
   | "signed"
   | "paid"
-  | "archived";
+  | "archived"
+  | "approved"
+  | "declined";
 
 /**
  * Tiptap JSON document shape. Loosely typed; full validation happens inside
@@ -185,6 +187,12 @@ export type DocumentRow = {
   pay_token: string | null;
   discount_value: number;
   discount_type: 'percent' | 'flat';
+  quote_number: string | null;
+  valid_until: string | null;
+  approval_token: string | null;
+  approved_at: string | null;
+  declined_at: string | null;
+  approval_message: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -218,6 +226,11 @@ export type InvoiceDocumentRow = DocumentRow & {
   notes_footer: string | null;
   paid_at: string | null;
   pay_token: string | null;
+  line_items: LineItemRow[];
+};
+
+/** DocumentRow extended with embedded line items for quotes. */
+export type QuoteDocumentRow = DocumentRow & {
   line_items: LineItemRow[];
 };
 

@@ -20,6 +20,18 @@ const TYPE_LABELS: Record<DocumentType, string> = {
   other: "Document",
 };
 
+type StructuredDocData = {
+  number: string | null;
+  due_or_valid_date: string | null;
+  date_label: string;
+  payment_terms?: string | null;
+  notes_footer: string | null;
+  line_items: LineItemRow[];
+  currency: string;
+  discount_value?: number;
+  discount_type?: 'percent' | 'flat';
+};
+
 type DocumentPdfProps = {
   document: Pick<DocumentRow, "id" | "type" | "title" | "created_at">;
   content: TiptapDoc;
@@ -38,6 +50,15 @@ type DocumentPdfProps = {
     discount_value?: number;
     discount_type?: 'percent' | 'flat';
   } | null;
+  quoteData?: {
+    quote_number: string | null;
+    valid_until: string | null;
+    notes_footer: string | null;
+    line_items: LineItemRow[];
+    currency: string;
+    discount_value?: number;
+    discount_type?: 'percent' | 'flat';
+  } | null;
 };
 
 export function DocumentPdf({
@@ -49,6 +70,7 @@ export function DocumentPdf({
   brandFont,
   businessName,
   invoiceData,
+  quoteData,
 }: DocumentPdfProps) {
   const color = primaryColor || "#6366f1";
   const fontFamily = resolvePdfFont(brandFont);
@@ -153,7 +175,27 @@ export function DocumentPdf({
           </View>
         ) : null}
 
-        {/* Line items table */}
+        {/* Quote metadata band */}
+        {document.type === "quote" && quoteData ? (
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12, padding: "8 0" }}>
+            {quoteData.quote_number ? (
+              <View>
+                <Text style={styles.metaLabel}>Quote #</Text>
+                <Text style={{ ...styles.metaValue, fontFamily, fontSize: 11 }}>{quoteData.quote_number}</Text>
+              </View>
+            ) : null}
+            {quoteData.valid_until ? (
+              <View>
+                <Text style={styles.metaLabel}>Valid until</Text>
+                <Text style={styles.metaValue}>
+                  {new Date(quoteData.valid_until + "T12:00:00").toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
+        {/* Line items table — invoice */}
         {document.type === "invoice" && invoiceData && invoiceData.line_items.length > 0 ? (
           <InvoiceLineItemsPdf
             lineItems={invoiceData.line_items}
@@ -165,7 +207,19 @@ export function DocumentPdf({
           />
         ) : null}
 
-        {/* Notes footer */}
+        {/* Line items table — quote */}
+        {document.type === "quote" && quoteData && quoteData.line_items.length > 0 ? (
+          <InvoiceLineItemsPdf
+            lineItems={quoteData.line_items}
+            currency={quoteData.currency}
+            styles={styles}
+            color={color}
+            discountValue={quoteData.discount_value ?? 0}
+            discountType={quoteData.discount_type ?? 'percent'}
+          />
+        ) : null}
+
+        {/* Notes footer — invoice */}
         {document.type === "invoice" && invoiceData?.notes_footer ? (
           <View style={{ marginTop: 12, padding: "8 0", borderTop: "1 solid #e5e7eb" }}>
             <Text style={{ ...styles.metaLabel, marginBottom: 4 }}>Notes</Text>
@@ -173,8 +227,16 @@ export function DocumentPdf({
           </View>
         ) : null}
 
-        {/* Body content (Tiptap) — only for non-invoice documents */}
-        {document.type !== "invoice" ? (
+        {/* Notes footer — quote */}
+        {document.type === "quote" && quoteData?.notes_footer ? (
+          <View style={{ marginTop: 12, padding: "8 0", borderTop: "1 solid #e5e7eb" }}>
+            <Text style={{ ...styles.metaLabel, marginBottom: 4 }}>Notes</Text>
+            <Text style={{ fontSize: 9, color: "#666", lineHeight: 1.5 }}>{quoteData.notes_footer}</Text>
+          </View>
+        ) : null}
+
+        {/* Body content (Tiptap) — proposal, other */}
+        {document.type !== "invoice" && document.type !== "quote" ? (
           renderTiptapContent(content.content, { styles, primaryColor: color })
         ) : null}
 

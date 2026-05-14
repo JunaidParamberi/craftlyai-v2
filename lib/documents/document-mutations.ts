@@ -75,6 +75,16 @@ export async function createDocument(
       .eq("id", data.id);
   }
 
+  // If quote, auto-assign quote number
+  if (data.type === "quote") {
+    const { generateQuoteNumber } = await import("@/lib/documents/quote-mutations");
+    const quoteNumber = await generateQuoteNumber(data.user_id);
+    await supabase
+      .from("documents")
+      .update({ quote_number: quoteNumber })
+      .eq("id", data.id);
+  }
+
   revalidatePath("/documents");
 
   return { ok: true, document: normalizeDocumentRow(data) };

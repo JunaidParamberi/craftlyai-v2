@@ -14,6 +14,8 @@ import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 
 import { DocumentForm } from "@/components/features/documents/document-form";
 import { InvoiceEditForm } from "@/components/features/documents/invoice-edit-form";
+import { QuoteEditForm } from "@/components/features/documents/quote-edit-form";
+import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 
 export const metadata: Metadata = {
   title: "Edit document",
@@ -98,7 +100,65 @@ export default async function EditDocumentPage({ params }: PageProps) {
     );
   }
 
-  // Non-invoice: rich-text document editor
+  // Quote path: dedicated structured editor
+  if (document.type === "quote") {
+    const quoteData = await getQuoteWithLineItems(id);
+
+    const profileResult = await getProfile();
+    const profileCurrency =
+      profileResult.ok && profileResult.profile
+        ? (profileResult.profile.default_currency ?? "USD")
+        : "USD";
+
+    let currency = profileCurrency;
+    if (document.client_id) {
+      const supabase = await createSupabaseClient();
+      const { data: client } = await supabase
+        .from("clients")
+        .select("currency")
+        .eq("id", document.client_id)
+        .single();
+      currency = (client as { currency: string } | null)?.currency ?? profileCurrency;
+    }
+
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <Link
+            href={`/documents/${document.id}`}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="size-3.5" />
+            Back to quote
+          </Link>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
+            Edit quote
+          </h1>
+        </div>
+
+        <QuoteEditForm
+          documentId={document.id}
+          initialTitle={document.title}
+          initialStatus={document.status}
+          initialClientId={document.client_id}
+          initialProjectId={document.project_id}
+          clients={clients}
+          projects={projects}
+          quoteData={{
+            quote_number: quoteData?.quote_number ?? null,
+            valid_until: quoteData?.valid_until ?? null,
+            notes_footer: quoteData?.notes_footer ?? null,
+            line_items: quoteData?.line_items ?? [],
+            currency,
+            discount_value: quoteData?.discount_value ?? 0,
+            discount_type: (quoteData?.discount_type ?? 'percent') as 'percent' | 'flat',
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Non-invoice/quote: rich-text document editor
   const variableContext = await buildVariableContext({
     clientId: document.client_id,
     projectId: document.project_id,

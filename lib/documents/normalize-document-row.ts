@@ -29,6 +29,12 @@ type DocumentRowRaw = {
   pay_token?: string | null;
   discount_value?: number;
   discount_type?: string;
+  quote_number?: string | null;
+  valid_until?: string | null;
+  approval_token?: string | null;
+  approved_at?: string | null;
+  declined_at?: string | null;
+  approval_message?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -62,6 +68,12 @@ export function normalizeDocumentRow(row: DocumentRowRaw): DocumentRow {
     pay_token: row.pay_token ?? null,
     discount_value: row.discount_value ?? 0,
     discount_type: (row.discount_type ?? 'percent') as 'percent' | 'flat',
+    quote_number: row.quote_number ?? null,
+    valid_until: row.valid_until ?? null,
+    approval_token: row.approval_token ?? null,
+    approved_at: row.approved_at ?? null,
+    declined_at: row.declined_at ?? null,
+    approval_message: row.approval_message ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
