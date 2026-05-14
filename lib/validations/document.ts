@@ -179,3 +179,12 @@ export function parseTemplateInput(
     },
   };
 }
+
+export const invoiceMetaSchema = z.object({
+  invoice_number: z.string().max(100).optional().nullable(),
+  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  payment_terms: z.string().max(200).optional().nullable(),
+  notes_footer: z.string().max(1000).optional().nullable(),
+});
+
+export type InvoiceMetaInput = z.infer<typeof invoiceMetaSchema>;
