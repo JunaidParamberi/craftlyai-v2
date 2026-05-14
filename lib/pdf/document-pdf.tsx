@@ -8,7 +8,7 @@ import {
   View,
 } from "@react-pdf/renderer";
 
-import type { DocumentRow, DocumentType, TiptapDoc } from "@/types";
+import type { DocumentRow, DocumentType, LineItemRow, TiptapDoc } from "@/types";
 import type { VariableContext } from "@/lib/documents/variables";
 import { makePdfStyles, resolvePdfFont } from "./styles";
 import { renderTiptapContent } from "./tiptap-to-pdf";
@@ -28,6 +28,14 @@ type DocumentPdfProps = {
   primaryColor?: string | null;
   brandFont?: string | null;
   businessName?: string | null;
+  invoiceData?: {
+    invoice_number: string | null;
+    due_date: string | null;
+    payment_terms: string | null;
+    notes_footer: string | null;
+    line_items: LineItemRow[];
+    currency: string;
+  } | null;
 };
 
 export function DocumentPdf({
@@ -38,6 +46,7 @@ export function DocumentPdf({
   primaryColor,
   brandFont,
   businessName,
+  invoiceData,
 }: DocumentPdfProps) {
   const color = primaryColor || "#6366f1";
   const fontFamily = resolvePdfFont(brandFont);
@@ -116,8 +125,54 @@ export function DocumentPdf({
         {/* Divider */}
         <View style={styles.divider} />
 
-        {/* Body content */}
-        {renderTiptapContent(content.content, { styles, primaryColor: color })}
+        {/* Invoice metadata band */}
+        {document.type === "invoice" && invoiceData ? (
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12, padding: "8 0" }}>
+            {invoiceData.invoice_number ? (
+              <View>
+                <Text style={styles.metaLabel}>Invoice #</Text>
+                <Text style={{ ...styles.metaValue, fontFamily, fontSize: 11 }}>{invoiceData.invoice_number}</Text>
+              </View>
+            ) : null}
+            {invoiceData.due_date ? (
+              <View>
+                <Text style={styles.metaLabel}>Due date</Text>
+                <Text style={styles.metaValue}>
+                  {new Date(invoiceData.due_date + "T12:00:00").toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
+                </Text>
+              </View>
+            ) : null}
+            {invoiceData.payment_terms ? (
+              <View>
+                <Text style={styles.metaLabel}>Terms</Text>
+                <Text style={styles.metaValue}>{invoiceData.payment_terms}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
+        {/* Line items table */}
+        {document.type === "invoice" && invoiceData && invoiceData.line_items.length > 0 ? (
+          <InvoiceLineItemsPdf
+            lineItems={invoiceData.line_items}
+            currency={invoiceData.currency}
+            styles={styles}
+            color={color}
+          />
+        ) : null}
+
+        {/* Notes footer */}
+        {document.type === "invoice" && invoiceData?.notes_footer ? (
+          <View style={{ marginTop: 12, padding: "8 0", borderTop: "1 solid #e5e7eb" }}>
+            <Text style={{ ...styles.metaLabel, marginBottom: 4 }}>Notes</Text>
+            <Text style={{ fontSize: 9, color: "#666", lineHeight: 1.5 }}>{invoiceData.notes_footer}</Text>
+          </View>
+        ) : null}
+
+        {/* Body content (Tiptap) — only for non-invoice documents */}
+        {document.type !== "invoice" ? (
+          renderTiptapContent(content.content, { styles, primaryColor: color })
+        ) : null}
 
         {/* Footer */}
         <View style={styles.footer} fixed>
@@ -131,5 +186,90 @@ export function DocumentPdf({
         </View>
       </Page>
     </Document>
+  );
+}
+
+function InvoiceLineItemsPdf({
+  lineItems,
+  currency,
+  styles,
+  color,
+}: {
+  lineItems: LineItemRow[];
+  currency: string;
+  styles: ReturnType<typeof makePdfStyles>;
+  color: string;
+}) {
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+    }).format(n);
+
+  const subtotal = lineItems.reduce(
+    (sum, li) => sum + Number(li.quantity) * Number(li.unit_price),
+    0,
+  );
+  const taxTotal = lineItems.reduce(
+    (sum, li) =>
+      sum +
+      Number(li.quantity) * Number(li.unit_price) * (Number(li.tax_rate) / 100),
+    0,
+  );
+  const total = subtotal + taxTotal;
+
+  const colDesc = { flex: 3 };
+  const colNum = { flex: 1, textAlign: "right" as const };
+  const cellStyle = { fontSize: 9, paddingVertical: 5, paddingHorizontal: 4 };
+  const headerCell = { ...cellStyle, color: "#888", fontSize: 8, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: 0.5 };
+
+  return (
+    <View style={{ marginBottom: 12 }}>
+      {/* Table header */}
+      <View style={{ flexDirection: "row", borderBottom: `1 solid ${color}`, paddingBottom: 4, marginBottom: 2 }}>
+        <Text style={{ ...headerCell, ...colDesc }}>Description</Text>
+        <Text style={{ ...headerCell, ...colNum }}>Qty</Text>
+        <Text style={{ ...headerCell, ...colNum }}>Unit price</Text>
+        <Text style={{ ...headerCell, ...colNum }}>Tax %</Text>
+        <Text style={{ ...headerCell, ...colNum }}>Amount</Text>
+      </View>
+      {/* Rows */}
+      {lineItems.map((li, i) => (
+        <View
+          key={li.id}
+          style={{
+            flexDirection: "row",
+            borderBottom: "1 solid #f0f0f0",
+            backgroundColor: i % 2 === 0 ? "#fafafa" : "#fff",
+          }}
+        >
+          <Text style={{ ...cellStyle, ...colDesc }}>{li.description}</Text>
+          <Text style={{ ...cellStyle, ...colNum }}>{Number(li.quantity)}</Text>
+          <Text style={{ ...cellStyle, ...colNum }}>{fmt(Number(li.unit_price))}</Text>
+          <Text style={{ ...cellStyle, ...colNum }}>{Number(li.tax_rate)}%</Text>
+          <Text style={{ ...cellStyle, ...colNum }}>
+            {fmt(Number(li.quantity) * Number(li.unit_price))}
+          </Text>
+        </View>
+      ))}
+      {/* Totals */}
+      <View style={{ alignItems: "flex-end", marginTop: 8, gap: 3 }}>
+        <View style={{ flexDirection: "row", gap: 24 }}>
+          <Text style={{ fontSize: 9, color: "#888" }}>Subtotal</Text>
+          <Text style={{ fontSize: 9 }}>{fmt(subtotal)}</Text>
+        </View>
+        {taxTotal > 0 ? (
+          <View style={{ flexDirection: "row", gap: 24 }}>
+            <Text style={{ fontSize: 9, color: "#888" }}>Tax</Text>
+            <Text style={{ fontSize: 9 }}>{fmt(taxTotal)}</Text>
+          </View>
+        ) : null}
+        <View style={{ flexDirection: "row", gap: 24, borderTop: "1 solid #e5e7eb", paddingTop: 4 }}>
+          <Text style={{ fontSize: 10, fontWeight: 700 }}>Total due</Text>
+          <Text style={{ fontSize: 10, fontWeight: 700, color }}>{fmt(total)}</Text>
+        </View>
+      </View>
+    </View>
   );
 }

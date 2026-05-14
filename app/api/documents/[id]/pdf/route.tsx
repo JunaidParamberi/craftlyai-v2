@@ -3,6 +3,7 @@ import React from "react";
 
 import { getBrandKit } from "@/lib/brand-kit/actions";
 import { getDocumentById } from "@/lib/documents/document-queries";
+import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
 import { substituteInTiptapDoc } from "@/lib/documents/variables";
 import { buildVariableContext } from "@/lib/documents/variables-server";
 import { DocumentPdf } from "@/lib/pdf/document-pdf";
@@ -34,6 +35,18 @@ export async function GET(
   if (!document) {
     return new Response("Not found", { status: 404 });
   }
+
+  // Fetch invoice data (line items + invoice fields) if applicable.
+  const invoiceData =
+    document.type === "invoice"
+      ? await getInvoiceWithLineItems(id)
+      : null;
+
+  // Fetch client currency for invoice.
+  const clientCurrency =
+    document.type === "invoice" && document.client_id
+      ? await fetchClientCurrency(document.client_id, supabase)
+      : "USD";
 
   // Fetch brand kit.
   const brandResult = await getBrandKit();
@@ -73,6 +86,18 @@ export async function GET(
         primaryColor={brandKit?.primary_color ?? null}
         brandFont={brandKit?.font ?? null}
         businessName={businessName}
+        invoiceData={
+          invoiceData
+            ? {
+                invoice_number: invoiceData.invoice_number,
+                due_date: invoiceData.due_date,
+                payment_terms: invoiceData.payment_terms,
+                notes_footer: invoiceData.notes_footer,
+                line_items: invoiceData.line_items,
+                currency: clientCurrency,
+              }
+            : null
+        }
       />,
     );
   } catch (err) {
@@ -93,4 +118,16 @@ export async function GET(
       "Cache-Control": "no-store",
     },
   });
+}
+
+async function fetchClientCurrency(
+  clientId: string,
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<string> {
+  const { data } = await supabase
+    .from("clients")
+    .select("currency")
+    .eq("id", clientId)
+    .single();
+  return (data as { currency: string } | null)?.currency ?? "USD";
 }
