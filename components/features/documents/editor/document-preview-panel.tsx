@@ -7,6 +7,16 @@ import { renderNode } from "@/components/features/documents/document-detail-view
 import type { VariableContext } from "@/lib/documents/variables";
 import type { DocumentType, TiptapDoc } from "@/types";
 
+// Explicit light-mode colors — never use CSS theme variables here.
+// This panel is always rendered as white paper regardless of app color scheme.
+const C = {
+  ink: "rgb(15 15 15)",
+  inkMid: "rgb(55 55 65)",
+  inkFaint: "rgb(115 115 130)",
+  border: "rgba(0,0,0,0.08)",
+  metaBg: "rgba(0,0,0,0.025)",
+} as const;
+
 type DocumentPreviewPanelProps = {
   title: string;
   type: DocumentType;
@@ -35,87 +45,115 @@ export function DocumentPreviewPanel({
   const clientName = client?.name ?? null;
   const clientCompany = client?.company ?? null;
   const projectTitle = project?.title ?? null;
-
-  const hasMetaBlock = clientName || clientCompany || projectTitle;
+  const hasMetaBlock = !!(clientName || clientCompany || projectTitle);
 
   return (
     <div
-      className="overflow-y-auto rounded-2xl border border-border/70 bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.02),0_24px_48px_-32px_rgba(15,23,42,0.18)] h-full flex flex-col"
+      className="overflow-y-auto rounded-2xl h-full flex flex-col bg-white"
       style={{
-        "--foreground": "oklch(0.145 0 0)",
-        "--muted-foreground": "oklch(0.556 0 0)",
-        "--muted": "oklch(0.97 0 0)",
-        "--border": "oklch(0.922 0 0)",
+        boxShadow: "0 0 0 1px rgba(0,0,0,0.07), 0 8px 40px -8px rgba(0,0,0,0.14)",
+        color: C.ink,
+        // Force light-mode CSS variables so doc-render class works correctly
+        "--foreground": C.ink,
+        "--muted-foreground": C.inkFaint,
+        "--color-foreground": C.ink,
+        "--color-muted-foreground": C.inkFaint,
       } as React.CSSProperties}
     >
-      {/* PDF Header */}
-      <div className="flex items-start justify-between px-10 pt-10 pb-5 border-b border-border/40">
+      {/* Brand accent line */}
+      <div style={{ height: 3, background: primaryColor, borderRadius: "12px 12px 0 0", flexShrink: 0 }} />
+
+      {/* Header */}
+      <div
+        className="flex items-center justify-between px-8 py-5"
+        style={{ borderBottom: `1px solid ${C.border}` }}
+      >
         <div>
           {logoUrl ? (
             <img src={logoUrl} alt="Brand logo" className="h-8 w-auto object-contain" />
           ) : (
-            <span className="text-sm font-bold" style={{ color: primaryColor }}>
+            <span
+              className="text-sm font-bold tracking-tight"
+              style={{ color: primaryColor }}
+            >
               {businessName ?? ""}
             </span>
           )}
         </div>
         <div className="text-right">
-          <p className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
+          <p
+            className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] mb-0.5"
+            style={{ color: C.inkFaint }}
+          >
             {documentTypeLabel(type)}
           </p>
-          <p className="text-sm font-semibold font-heading leading-snug max-w-[24ch]">
+          <p
+            className="text-sm font-semibold leading-snug max-w-[22ch]"
+            style={{ color: C.ink }}
+          >
             {title || "Untitled"}
           </p>
         </div>
       </div>
 
-      {/* PDF Meta block */}
-      {hasMetaBlock ? (
-        <div className="flex items-start justify-between px-10 py-5 bg-muted/30">
-          <div className="flex flex-col gap-3">
-            {clientName ? (
-              <div>
-                <p className="text-[0.6rem] uppercase tracking-[0.14em] text-muted-foreground mb-0.5">
-                  Prepared for
+      {/* Meta block */}
+      <div
+        className="flex items-start justify-between px-8 py-4"
+        style={{ background: C.metaBg, borderBottom: `1px solid ${C.border}` }}
+      >
+        <div className="flex gap-8">
+          {clientName ? (
+            <div>
+              <p
+                className="text-[0.58rem] font-semibold uppercase tracking-[0.16em] mb-1"
+                style={{ color: C.inkFaint }}
+              >
+                Prepared for
+              </p>
+              <p className="text-sm font-medium leading-tight" style={{ color: C.ink }}>
+                {clientName}
+              </p>
+              {clientCompany ? (
+                <p className="text-xs mt-0.5" style={{ color: C.inkMid }}>
+                  {clientCompany}
                 </p>
-                <p className="text-sm font-medium">{clientName}</p>
-                {clientCompany ? (
-                  <p className="text-xs text-muted-foreground">{clientCompany}</p>
-                ) : null}
-              </div>
-            ) : null}
-            {projectTitle ? (
-              <div>
-                <p className="text-[0.6rem] uppercase tracking-[0.14em] text-muted-foreground mb-0.5">
-                  Project
-                </p>
-                <p className="text-sm font-medium">{projectTitle}</p>
-              </div>
-            ) : null}
-          </div>
-          <div className="text-right">
-            <p className="text-[0.6rem] uppercase tracking-[0.14em] text-muted-foreground mb-0.5">
-              Date issued
+              ) : null}
+            </div>
+          ) : null}
+          {projectTitle ? (
+            <div>
+              <p
+                className="text-[0.58rem] font-semibold uppercase tracking-[0.16em] mb-1"
+                style={{ color: C.inkFaint }}
+              >
+                Project
+              </p>
+              <p className="text-sm font-medium leading-tight" style={{ color: C.ink }}>
+                {projectTitle}
+              </p>
+            </div>
+          ) : null}
+          {!hasMetaBlock ? (
+            <p className="text-xs italic" style={{ color: C.inkFaint }}>
+              No client or project linked
             </p>
-            <p className="text-sm font-medium">{issued}</p>
-          </div>
+          ) : null}
         </div>
-      ) : (
-        <div className="px-10 py-4 flex justify-end bg-muted/30">
-          <div className="text-right">
-            <p className="text-[0.6rem] uppercase tracking-[0.14em] text-muted-foreground mb-0.5">
-              Date issued
-            </p>
-            <p className="text-sm font-medium">{issued}</p>
-          </div>
+        <div className="text-right shrink-0">
+          <p
+            className="text-[0.58rem] font-semibold uppercase tracking-[0.16em] mb-1"
+            style={{ color: C.inkFaint }}
+          >
+            Date issued
+          </p>
+          <p className="text-sm font-medium" style={{ color: C.ink }}>
+            {issued}
+          </p>
         </div>
-      )}
-
-      {/* Divider */}
-      <div className="mx-10 border-t border-border/60" />
+      </div>
 
       {/* Body */}
-      <div className="flex-1 px-10 py-8">
+      <div className="flex-1 px-8 py-7" style={{ color: C.ink }}>
         <div className="doc-render">
           {(content.content ?? []).map((node, i) => (
             <Fragment key={i}>{renderNode(node, variableContext)}</Fragment>
@@ -123,10 +161,18 @@ export function DocumentPreviewPanel({
         </div>
       </div>
 
-      {/* PDF Footer */}
+      {/* Footer */}
       {businessName ? (
-        <div className="flex items-center justify-between px-10 py-4 border-t border-border/40 mt-auto">
-          <span className="text-xs text-muted-foreground">{businessName}</span>
+        <div
+          className="flex items-center justify-between px-8 py-3"
+          style={{ borderTop: `1px solid ${C.border}` }}
+        >
+          <span className="text-[0.65rem] font-medium" style={{ color: C.inkFaint }}>
+            {businessName}
+          </span>
+          <span className="text-[0.65rem]" style={{ color: C.inkFaint }}>
+            Preview
+          </span>
         </div>
       ) : null}
     </div>
