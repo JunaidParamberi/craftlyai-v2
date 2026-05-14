@@ -83,6 +83,7 @@ export async function sendInvoice(
       })),
       currency: typedClient?.currency ?? "USD",
       payUrl,
+      discountPercent: Number(invoice.discount_percent ?? 0),
     }),
   });
 

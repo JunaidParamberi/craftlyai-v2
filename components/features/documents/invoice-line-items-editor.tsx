@@ -4,13 +4,15 @@ import { useState, useTransition } from "react";
 import { Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { upsertLineItem, deleteLineItem } from "@/lib/documents/invoice-mutations";
+import { upsertLineItem, deleteLineItem, updateInvoiceMeta } from "@/lib/documents/invoice-mutations";
 import type { LineItemRow } from "@/types";
 
 interface InvoiceLineItemsEditorProps {
   documentId: string;
   initialItems: LineItemRow[];
   currency?: string;
+  discountPercent?: number;
+  onDiscountChange?: (v: number) => void;
 }
 
 interface LocalLineItem {
@@ -62,10 +64,13 @@ export function InvoiceLineItemsEditor({
   documentId,
   initialItems,
   currency = "USD",
+  discountPercent = 0,
+  onDiscountChange,
 }: InvoiceLineItemsEditorProps) {
   const [items, setItems] = useState<LocalLineItem[]>(
     initialItems.map(toLocal)
   );
+  const [discountPct, setDiscountPct] = useState<number>(discountPercent);
   const [, startTransition] = useTransition();
 
   const updateItem = (key: string, field: keyof LocalLineItem, value: string) => {
@@ -136,7 +141,9 @@ export function InvoiceLineItemsEditor({
 
   const subtotal = items.reduce((sum, item) => sum + rowAmount(item), 0);
   const totalTax = items.reduce((sum, item) => sum + rowTax(item), 0);
-  const totalDue = subtotal + totalTax;
+  const discount = subtotal * (discountPct / 100);
+  const discountedSubtotal = subtotal - discount;
+  const totalDue = discountedSubtotal + totalTax;
 
   return (
     <section className="space-y-4">
@@ -265,12 +272,46 @@ export function InvoiceLineItemsEditor({
               {formatCurrency(subtotal, currency)}
             </span>
           </div>
-          <div className="flex justify-between gap-8 text-muted-foreground">
-            <span>Tax</span>
-            <span className="tabular-nums">
-              {formatCurrency(totalTax, currency)}
-            </span>
+          <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
+            <span className="shrink-0">Discount</span>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                value={discountPct}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value) || 0;
+                  setDiscountPct(v);
+                  onDiscountChange?.(v);
+                }}
+                onBlur={() => {
+                  startTransition(async () => {
+                    await updateInvoiceMeta(documentId, { discount_percent: discountPct });
+                  });
+                }}
+                className="w-16 rounded border border-border bg-background px-2 py-0.5 text-right text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <span className="text-muted-foreground">%</span>
+            </div>
           </div>
+          {discount > 0 ? (
+            <div className="flex justify-between gap-8 text-destructive">
+              <span>Discount ({discountPct}%)</span>
+              <span className="tabular-nums">
+                -{formatCurrency(discount, currency)}
+              </span>
+            </div>
+          ) : null}
+          {totalTax > 0 ? (
+            <div className="flex justify-between gap-8 text-muted-foreground">
+              <span>Tax</span>
+              <span className="tabular-nums">
+                {formatCurrency(totalTax, currency)}
+              </span>
+            </div>
+          ) : null}
           <div className="flex justify-between gap-8 border-t border-border pt-1 text-base font-semibold text-foreground">
             <span>Total Due</span>
             <span className="tabular-nums">

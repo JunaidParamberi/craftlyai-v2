@@ -95,6 +95,7 @@ export async function GET(
                 notes_footer: invoiceData.notes_footer,
                 line_items: invoiceData.line_items,
                 currency: clientCurrency,
+                discount_percent: invoiceData.discount_percent ?? 0,
               }
             : null
         }

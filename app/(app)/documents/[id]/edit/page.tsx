@@ -90,6 +90,7 @@ export default async function EditDocumentPage({ params }: PageProps) {
             notes_footer: invoiceData?.notes_footer ?? null,
             line_items: invoiceData?.line_items ?? [],
             currency,
+            discount_percent: invoiceData?.discount_percent ?? 0,
           }}
         />
       </div>

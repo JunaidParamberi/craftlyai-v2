@@ -183,6 +183,7 @@ export type DocumentRow = {
   notes_footer: string | null;
   paid_at: string | null;
   pay_token: string | null;
+  discount_percent: number;
   created_at: string;
   updated_at: string;
 };

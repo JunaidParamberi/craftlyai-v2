@@ -35,6 +35,7 @@ type DocumentPdfProps = {
     notes_footer: string | null;
     line_items: LineItemRow[];
     currency: string;
+    discount_percent?: number;
   } | null;
 };
 
@@ -158,6 +159,7 @@ export function DocumentPdf({
             currency={invoiceData.currency}
             styles={styles}
             color={color}
+            discountPercent={invoiceData.discount_percent ?? 0}
           />
         ) : null}
 
@@ -194,11 +196,13 @@ function InvoiceLineItemsPdf({
   currency,
   styles,
   color,
+  discountPercent = 0,
 }: {
   lineItems: LineItemRow[];
   currency: string;
   styles: ReturnType<typeof makePdfStyles>;
   color: string;
+  discountPercent?: number;
 }) {
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", {
@@ -217,7 +221,9 @@ function InvoiceLineItemsPdf({
       Number(li.quantity) * Number(li.unit_price) * (Number(li.tax_rate) / 100),
     0,
   );
-  const total = subtotal + taxTotal;
+  const discount = subtotal * (discountPercent / 100);
+  const discountedSubtotal = subtotal - discount;
+  const total = discountedSubtotal + taxTotal;
 
   const colDesc = { flex: 3 };
   const colNum = { flex: 1, textAlign: "right" as const };
@@ -259,6 +265,12 @@ function InvoiceLineItemsPdf({
           <Text style={{ fontSize: 9, color: "#888" }}>Subtotal</Text>
           <Text style={{ fontSize: 9 }}>{fmt(subtotal)}</Text>
         </View>
+        {discount > 0 ? (
+          <View style={{ flexDirection: "row", gap: 24 }}>
+            <Text style={{ fontSize: 9, color: "#e53e3e" }}>Discount ({discountPercent}%)</Text>
+            <Text style={{ fontSize: 9, color: "#e53e3e" }}>-{fmt(discount)}</Text>
+          </View>
+        ) : null}
         {taxTotal > 0 ? (
           <View style={{ flexDirection: "row", gap: 24 }}>
             <Text style={{ fontSize: 9, color: "#888" }}>Tax</Text>

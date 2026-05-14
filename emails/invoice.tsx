@@ -30,6 +30,7 @@ interface InvoiceEmailProps {
   lineItems: LineItem[];
   currency: string;
   payUrl: string;
+  discountPercent?: number;
 }
 
 function fmt(amount: number, currency: string): string {
@@ -49,6 +50,7 @@ export default function InvoiceEmail({
   lineItems,
   currency,
   payUrl,
+  discountPercent = 0,
 }: InvoiceEmailProps) {
   const subtotal = lineItems.reduce(
     (sum, li) => sum + li.quantity * li.unit_price,
@@ -58,7 +60,9 @@ export default function InvoiceEmail({
     (sum, li) => sum + li.quantity * li.unit_price * (li.tax_rate / 100),
     0
   );
-  const total = subtotal + taxTotal;
+  const discount = subtotal * (discountPercent / 100);
+  const discountedSubtotal = subtotal - discount;
+  const total = discountedSubtotal + taxTotal;
 
   const formattedDueDate = dueDate
     ? new Date(dueDate).toLocaleDateString("en-US", {
@@ -197,6 +201,21 @@ export default function InvoiceEmail({
                 <Text style={styles.totalsValue}>{fmt(subtotal, currency)}</Text>
               </Column>
             </Row>
+
+            {discount > 0 && (
+              <Row style={styles.totalsRow}>
+                <Column style={styles.totalsLabelCol}>
+                  <Text style={{ ...styles.totalsLabel, color: "#ef4444" }}>
+                    Discount ({discountPercent}%)
+                  </Text>
+                </Column>
+                <Column style={styles.totalsValueCol}>
+                  <Text style={{ ...styles.totalsValue, color: "#ef4444" }}>
+                    -{fmt(discount, currency)}
+                  </Text>
+                </Column>
+              </Row>
+            )}
 
             {taxTotal > 0 && (
               <Row style={styles.totalsRow}>

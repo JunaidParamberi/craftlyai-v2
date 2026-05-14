@@ -40,6 +40,7 @@ interface InvoiceEditFormProps {
     notes_footer: string | null;
     line_items: LineItemRow[];
     currency: string;
+    discount_percent?: number;
   };
 }
 
@@ -78,7 +79,7 @@ export function InvoiceEditForm({
         project_id: projectId || "",
         content_json: { type: "doc", content: [] },
       });
-      router.refresh();
+      router.push(`/documents/${documentId}`);
     });
   };
 
@@ -119,6 +120,7 @@ export function InvoiceEditForm({
             documentId={documentId}
             initialItems={invoiceData.line_items}
             currency={currency}
+            discountPercent={invoiceData.discount_percent ?? 0}
           />
         </div>
 
@@ -145,7 +147,7 @@ export function InvoiceEditForm({
                         project_id: projectId || "",
                         content_json: { type: "doc", content: [] },
                       });
-                      router.refresh();
+                      router.push(`/documents/${documentId}`);
                     });
                   }}
                 >
