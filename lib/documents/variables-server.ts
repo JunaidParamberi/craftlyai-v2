@@ -29,6 +29,7 @@ export async function buildVariableContext(args: {
       business_name: null,
       primary_color: bk.primary_color,
       email_signature: bk.email_signature,
+      logo_url: bk.logo_url ?? null,
     };
   }
 
@@ -52,6 +53,7 @@ export async function buildVariableContext(args: {
         business_name: business,
         primary_color: ctx.brand?.primary_color ?? null,
         email_signature: ctx.brand?.email_signature ?? null,
+        logo_url: ctx.brand?.logo_url ?? null,
       };
     }
   }

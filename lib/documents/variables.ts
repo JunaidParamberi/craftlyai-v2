@@ -20,6 +20,7 @@ export type VariableContext = {
     business_name: string | null;
     primary_color: string | null;
     email_signature: string | null;
+    logo_url: string | null;
   } | null;
   now: Date;
 };

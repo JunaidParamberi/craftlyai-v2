@@ -102,6 +102,7 @@ describe("buildClientSideContext", () => {
         business_name: "My Studio",
         primary_color: "#7c3aed",
         email_signature: "Thanks,\nJane",
+        logo_url: null,
       },
     };
     const ctx = buildClientSideContext({
