@@ -156,6 +156,7 @@ craftlyai.app/
 - **Auth checks:** server component or middleware. Never client-side only.
 - **Streaming:** all AI responses stream to UI via Server-Sent Events (SSE). Never block UI waiting for full response.
 - **RLS:** every Supabase table has Row Level Security. Users can only access their own data.
+- **Testing:** every feature ships with Vitest tests for all Zod schemas, validation logic, normalizers, and pure utility functions. No new feature is complete without tests. Co-locate test files next to the file under test (`foo.ts` → `foo.test.ts`). Server actions and DB queries are not unit-tested (they require Supabase); test the pure logic layers instead. Run `npm run test` before marking a feature done.
 
 ## Coding patterns — NEVER do these
 

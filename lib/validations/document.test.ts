@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   DOCUMENT_LIMITS,
   emptyTiptapDoc,
+  invoiceMetaSchema,
   parseDocumentInput,
   parseTemplateInput,
+  quoteMetaSchema,
 } from "@/lib/validations/document";
 
 function validDocBase() {
@@ -111,6 +113,20 @@ describe("parseDocumentInput", () => {
       expect(result.data.status).toBe("sent");
     }
   });
+
+  it("accepts approved and declined statuses", () => {
+    for (const status of ["approved", "declined"] as const) {
+      const result = parseDocumentInput({ ...validDocBase(), status });
+      expect(result.success).toBe(true);
+      if (result.success) expect(result.data.status).toBe(status);
+    }
+  });
+
+  it("accepts quote as document type", () => {
+    const result = parseDocumentInput({ ...validDocBase(), type: "quote" });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.type).toBe("quote");
+  });
 });
 
 function validTemplateBase() {
@@ -163,5 +179,140 @@ describe("parseTemplateInput", () => {
       description: "x".repeat(DOCUMENT_LIMITS.template_description + 1),
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("quoteMetaSchema", () => {
+  it("accepts empty object — all fields optional", () => {
+    const result = quoteMetaSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts full valid payload", () => {
+    const result = quoteMetaSchema.safeParse({
+      quote_number: "QUO-0001",
+      valid_until: "2026-12-31",
+      notes_footer: "Valid for 30 days.",
+      discount_value: 10,
+      discount_type: "percent",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.quote_number).toBe("QUO-0001");
+      expect(result.data.valid_until).toBe("2026-12-31");
+      expect(result.data.discount_type).toBe("percent");
+    }
+  });
+
+  it("accepts flat discount type", () => {
+    const result = quoteMetaSchema.safeParse({ discount_type: "flat", discount_value: 50 });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.discount_type).toBe("flat");
+  });
+
+  it("rejects invalid discount_type", () => {
+    const result = quoteMetaSchema.safeParse({ discount_type: "fixed" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative discount_value", () => {
+    const result = quoteMetaSchema.safeParse({ discount_value: -5 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects malformed valid_until date", () => {
+    const result = quoteMetaSchema.safeParse({ valid_until: "31-12-2026" });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts valid_until as null", () => {
+    const result = quoteMetaSchema.safeParse({ valid_until: null });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects oversized quote_number", () => {
+    const result = quoteMetaSchema.safeParse({ quote_number: "x".repeat(101) });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects oversized notes_footer", () => {
+    const result = quoteMetaSchema.safeParse({ notes_footer: "x".repeat(1001) });
+    expect(result.success).toBe(false);
+  });
+
+  it("coerces discount_value from string", () => {
+    const result = quoteMetaSchema.safeParse({ discount_value: "15" });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.discount_value).toBe(15);
+  });
+
+  it("defaults discount_value to 0 when not provided", () => {
+    const result = quoteMetaSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.discount_value).toBe(0);
+  });
+
+  it("defaults discount_type to percent when not provided", () => {
+    const result = quoteMetaSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.discount_type).toBe("percent");
+  });
+});
+
+describe("invoiceMetaSchema", () => {
+  it("accepts empty object — all fields optional", () => {
+    const result = invoiceMetaSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts full valid payload", () => {
+    const result = invoiceMetaSchema.safeParse({
+      invoice_number: "INV-0042",
+      due_date: "2026-06-30",
+      payment_terms: "Net 30",
+      notes_footer: "Thank you!",
+      discount_value: 5,
+      discount_type: "percent",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.invoice_number).toBe("INV-0042");
+      expect(result.data.due_date).toBe("2026-06-30");
+      expect(result.data.payment_terms).toBe("Net 30");
+    }
+  });
+
+  it("rejects malformed due_date", () => {
+    const result = invoiceMetaSchema.safeParse({ due_date: "June 30 2026" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects negative discount_value", () => {
+    const result = invoiceMetaSchema.safeParse({ discount_value: -1 });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects oversized invoice_number", () => {
+    const result = invoiceMetaSchema.safeParse({ invoice_number: "x".repeat(101) });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects oversized payment_terms", () => {
+    const result = invoiceMetaSchema.safeParse({ payment_terms: "x".repeat(201) });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts due_date as null", () => {
+    const result = invoiceMetaSchema.safeParse({ due_date: null });
+    expect(result.success).toBe(true);
+  });
+
+  it("defaults discount_value to 0 and discount_type to percent", () => {
+    const result = invoiceMetaSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.discount_value).toBe(0);
+      expect(result.data.discount_type).toBe("percent");
+    }
   });
 });
