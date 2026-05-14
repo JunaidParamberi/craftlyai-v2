@@ -16,6 +16,8 @@ import { DocumentForm } from "@/components/features/documents/document-form";
 import { InvoiceEditForm } from "@/components/features/documents/invoice-edit-form";
 import { QuoteEditForm } from "@/components/features/documents/quote-edit-form";
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
+import { ProposalEditForm } from "@/components/features/documents/proposal-edit-form";
+import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
 
 export const metadata: Metadata = {
   title: "Edit document",
@@ -158,7 +160,48 @@ export default async function EditDocumentPage({ params }: PageProps) {
     );
   }
 
-  // Non-invoice/quote: rich-text document editor
+  // Proposal path: rich-text editor + line items + approval tracking
+  if (document.type === "proposal") {
+    const proposal = await getProposalWithLineItems(id);
+    if (!proposal) notFound();
+
+    let clientEmail: string | null = null;
+    if (document.client_id) {
+      const supabase = await createSupabaseClient();
+      const { data: clientData } = await supabase
+        .from("clients")
+        .select("email")
+        .eq("id", document.client_id)
+        .single();
+      clientEmail = (clientData as { email?: string } | null)?.email ?? null;
+    }
+
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <Link
+            href={`/documents/${document.id}`}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="size-3.5" />
+            Back to proposal
+          </Link>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
+            Edit proposal
+          </h1>
+        </div>
+
+        <ProposalEditForm
+          document={proposal}
+          clients={clients}
+          projects={projects}
+          clientEmail={clientEmail}
+        />
+      </div>
+    );
+  }
+
+  // Non-invoice/quote/proposal: rich-text document editor
   const variableContext = await buildVariableContext({
     clientId: document.client_id,
     projectId: document.project_id,
