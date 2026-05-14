@@ -21,7 +21,9 @@ import { buildClientSideContext } from "@/lib/documents/variables-client";
 import { emptyVariableContext, type VariableContext } from "@/lib/documents/variables";
 import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
-import type { ClientRow, ProjectListRow, TiptapDoc } from "@/types";
+import type { ClientRow, LineItemRow, ProjectListRow, TiptapDoc } from "@/types";
+import { InvoiceMetaFields } from "./invoice-meta-fields";
+import { InvoiceLineItemsEditor } from "./invoice-line-items-editor";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -60,6 +62,14 @@ type DocumentFormProps = (CreateProps | EditProps) & {
   clients: ClientRow[];
   projects: ProjectListRow[];
   initialVariableContext?: VariableContext;
+  invoiceData?: {
+    invoice_number: string | null;
+    due_date: string | null;
+    payment_terms: string | null;
+    notes_footer: string | null;
+    line_items: LineItemRow[];
+    currency?: string;
+  };
 };
 
 const NONE_VALUE = "__none";
@@ -93,6 +103,9 @@ export function DocumentForm(props: DocumentFormProps) {
       }),
     [watchedClient, watchedProject, props.clients, props.projects, props.initialVariableContext],
   );
+
+  const isEditMode = props.mode === "edit";
+  const documentId = isEditMode ? props.documentId : null;
 
   const filteredProjects = props.projects.filter(
     (p) => !watchedClient || p.client_id === watchedClient,
@@ -155,6 +168,18 @@ export function DocumentForm(props: DocumentFormProps) {
       >
         {/* Editor */}
         <div className="flex flex-col gap-4">
+          {isEditMode && watchedType === "invoice" && props.invoiceData ? (
+            <InvoiceMetaFields
+              documentId={documentId!}
+              initialValues={{
+                invoice_number: props.invoiceData.invoice_number,
+                due_date: props.invoiceData.due_date,
+                payment_terms: props.invoiceData.payment_terms,
+                notes_footer: props.invoiceData.notes_footer,
+              }}
+            />
+          ) : null}
+
           <div className="flex flex-col gap-2">
             <Label htmlFor="title" className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
               Document title
@@ -173,6 +198,14 @@ export function DocumentForm(props: DocumentFormProps) {
             onChange={(next) => setValue("content_json", next, { shouldDirty: true })}
             placeholder="Begin your document. Use {{variables}} to pull in client, project, and brand details."
           />
+
+          {isEditMode && watchedType === "invoice" && props.invoiceData ? (
+            <InvoiceLineItemsEditor
+              documentId={documentId!}
+              initialItems={props.invoiceData.line_items}
+              currency={props.invoiceData.currency}
+            />
+          ) : null}
         </div>
 
         {showPreview ? (

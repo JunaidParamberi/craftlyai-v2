@@ -65,6 +65,16 @@ export async function createDocument(
     return { ok: false, message: "Document could not be created." };
   }
 
+  // If invoice, auto-assign invoice number
+  if (data.type === "invoice") {
+    const { generateInvoiceNumber } = await import("@/lib/documents/invoice-mutations");
+    const invoiceNumber = await generateInvoiceNumber(data.user_id);
+    await supabase
+      .from("documents")
+      .update({ invoice_number: invoiceNumber })
+      .eq("id", data.id);
+  }
+
   revalidatePath("/documents");
 
   return { ok: true, document: normalizeDocumentRow(data) };
