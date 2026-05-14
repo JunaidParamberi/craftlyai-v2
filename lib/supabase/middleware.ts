@@ -26,6 +26,7 @@ function isPublicPath(pathname: string): boolean {
     "/pricing",
     "/about",
     "/blog",
+    "/pay",
   ];
   return publicPrefixes.some((prefix) => pathname.startsWith(prefix));
 }

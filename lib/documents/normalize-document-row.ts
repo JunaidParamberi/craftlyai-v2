@@ -21,6 +21,12 @@ type DocumentRowRaw = {
   sent_at?: string | null;
   viewed_at?: string | null;
   signed_at?: string | null;
+  invoice_number?: string | null;
+  due_date?: string | null;
+  payment_terms?: string | null;
+  notes_footer?: string | null;
+  paid_at?: string | null;
+  pay_token?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -46,6 +52,12 @@ export function normalizeDocumentRow(row: DocumentRowRaw): DocumentRow {
     sent_at: row.sent_at ?? null,
     viewed_at: row.viewed_at ?? null,
     signed_at: row.signed_at ?? null,
+    invoice_number: row.invoice_number ?? null,
+    due_date: row.due_date ?? null,
+    payment_terms: row.payment_terms ?? null,
+    notes_footer: row.notes_footer ?? null,
+    paid_at: row.paid_at ?? null,
+    pay_token: row.pay_token ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
