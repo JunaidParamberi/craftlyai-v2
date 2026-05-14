@@ -6,6 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import { listClients } from "@/lib/clients/client-queries";
 import { getDocumentById } from "@/lib/documents/document-queries";
 import { documentToFormValues } from "@/lib/documents/form-values";
+import { buildVariableContext } from "@/lib/documents/variables-server";
 import { listProjects } from "@/lib/projects/actions";
 
 import { DocumentForm } from "@/components/features/documents/document-form";
@@ -33,6 +34,11 @@ export default async function EditDocumentPage({ params }: PageProps) {
   const clients = clientsResult.ok ? clientsResult.clients : [];
   const projects = projectsResult.ok ? projectsResult.projects : [];
 
+  const variableContext = await buildVariableContext({
+    clientId: document.client_id,
+    projectId: document.project_id,
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
@@ -56,6 +62,7 @@ export default async function EditDocumentPage({ params }: PageProps) {
         defaultValues={documentToFormValues(document)}
         clients={clients}
         projects={projects}
+        initialVariableContext={variableContext}
       />
     </div>
   );
