@@ -15,11 +15,17 @@ import {
   Strikethrough,
   Undo2,
 } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 
 import { VariableMenu } from "./variable-menu";
@@ -37,21 +43,30 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
     [editor],
   );
 
-  const promptLink = useCallback(() => {
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+
+  const openLinkPopover = useCallback(() => {
     if (!editor) return;
     const prev = editor.getAttributes("link").href as string | undefined;
-    const url = window.prompt("Link URL", prev ?? "https://");
-    if (url === null) return;
-    if (url === "") {
+    setLinkUrl(prev ?? "");
+    setLinkOpen(true);
+  }, [editor]);
+
+  const applyLink = useCallback(() => {
+    if (!editor) return;
+    if (!linkUrl.trim()) {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
-      return;
+    } else {
+      editor.chain().focus().extendMarkRange("link").setLink({ href: linkUrl.trim() }).run();
     }
-    editor
-      .chain()
-      .focus()
-      .extendMarkRange("link")
-      .setLink({ href: url })
-      .run();
+    setLinkOpen(false);
+  }, [editor, linkUrl]);
+
+  const removeLink = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().extendMarkRange("link").unsetLink().run();
+    setLinkOpen(false);
   }, [editor]);
 
   if (!editor) {
@@ -146,9 +161,61 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
         <Minus className="size-4" />
       </ToolbarBtn>
       <ToolbarSep />
-      <ToolbarBtn label="Link" active={editor.isActive("link")} onClick={promptLink}>
-        <Link2 className="size-4" />
-      </ToolbarBtn>
+      <Popover open={linkOpen} onOpenChange={setLinkOpen}>
+        <PopoverTrigger
+          aria-label="Link"
+          title="Link"
+          onClick={openLinkPopover}
+          className={cn(
+            "size-8 rounded-md text-muted-foreground hover:bg-background hover:text-foreground inline-flex items-center justify-center",
+            editor.isActive("link") && "bg-background text-foreground shadow-[inset_0_0_0_1px_var(--border)]",
+          )}
+        >
+          <Link2 className="size-4" />
+        </PopoverTrigger>
+        <PopoverContent className="w-72 p-3" align="start">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Link URL</p>
+            <Input
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              placeholder="https://"
+              className="h-8 text-sm"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  applyLink();
+                }
+                if (e.key === "Escape") {
+                  setLinkOpen(false);
+                }
+              }}
+            />
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                size="sm"
+                className="flex-1 h-7 text-xs"
+                onClick={applyLink}
+              >
+                Apply
+              </Button>
+              {editor.isActive("link") ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-7 text-xs"
+                  onClick={removeLink}
+                >
+                  Remove
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
       <ToolbarSep />
       <VariableMenu onInsert={insertVariable} />
     </div>
