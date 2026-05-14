@@ -176,6 +176,12 @@ export type DocumentRow = {
   sent_at: string | null;
   viewed_at: string | null;
   signed_at: string | null;
+  invoice_number: string | null;
+  due_date: string | null;
+  payment_terms: string | null;
+  notes_footer: string | null;
+  paid_at: string | null;
+  pay_token: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -184,6 +190,32 @@ export type DocumentRow = {
 export type DocumentListRow = DocumentRow & {
   client: { id: string; name: string } | null;
   project: { id: string; title: string } | null;
+};
+
+/**
+ * Row shape for `public.line_items` (see supabase/migrations/*_invoice_line_items.sql).
+ */
+export type LineItemRow = {
+  id: string;
+  document_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  tax_rate: number;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+/** DocumentRow extended with invoice-specific fields and embedded line items. */
+export type InvoiceDocumentRow = DocumentRow & {
+  invoice_number: string | null;
+  due_date: string | null;
+  payment_terms: string | null;
+  notes_footer: string | null;
+  paid_at: string | null;
+  pay_token: string | null;
+  line_items: LineItemRow[];
 };
 
 /**
