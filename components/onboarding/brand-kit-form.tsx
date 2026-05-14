@@ -6,6 +6,7 @@ import { useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon, CheckIcon, ImageIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import { skipBrandOnboarding } from "@/lib/onboarding/actions";
 import { saveBrandKit } from "@/lib/brand-kit/actions";
@@ -153,6 +154,7 @@ export function BrandKitForm({
         router.push(next);
       } else {
         setSavedOk(true);
+        toast.success("Brand kit saved");
       }
     });
   }
