@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { createClient, updateClient } from "@/lib/clients/client-mutations";
 import {
@@ -115,6 +116,7 @@ export function ClientForm(props: ClientFormProps) {
           }
           return;
         }
+        toast.success("Client created");
         router.push(`/clients/${created.client.id}`);
         router.refresh();
         return;
@@ -139,6 +141,7 @@ export function ClientForm(props: ClientFormProps) {
         return;
       }
 
+      toast.success("Client updated");
       router.push(`/clients/${props.clientId}`);
       router.refresh();
     });

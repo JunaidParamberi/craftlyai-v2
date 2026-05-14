@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { deleteClient } from "@/lib/clients/client-mutations";
 
@@ -35,9 +36,11 @@ export function DeleteClientButton({
       const result = await deleteClient(clientId);
       if (!result.ok) {
         setError(result.message);
+        toast.error(result.message ?? "Failed to delete client.");
         return;
       }
       setOpen(false);
+      toast.success("Client deleted");
       router.push("/clients");
       router.refresh();
     });
