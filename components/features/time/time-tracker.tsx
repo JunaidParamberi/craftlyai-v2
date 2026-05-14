@@ -63,6 +63,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CalendarDays, Timer } from "lucide-react";
+import { toast } from "sonner";
 
 export type TimeTrackerProps = {
   projects: ProjectListRow[];
@@ -322,8 +323,10 @@ export function TimeTracker({ projects, entries }: TimeTrackerProps) {
       });
       if (!result.ok) {
         setError(result.message);
+        toast.error(result.message ?? "Failed to log time entry.");
         return;
       }
+      toast.success("Time entry logged");
       manualForm.reset({
         project_id: values.project_id,
         task_id: TASK_SELECT_NONE,
@@ -349,6 +352,7 @@ export function TimeTracker({ projects, entries }: TimeTrackerProps) {
       });
       if (!result.ok) {
         setError(result.message);
+        toast.error(result.message ?? "Failed to start timer.");
         return;
       }
       router.refresh();
@@ -361,6 +365,7 @@ export function TimeTracker({ projects, entries }: TimeTrackerProps) {
       const result = await stopTimer();
       if (!result.ok) {
         setError(result.message);
+        toast.error(result.message ?? "Failed to stop timer.");
         return;
       }
       router.refresh();
@@ -373,6 +378,7 @@ export function TimeTracker({ projects, entries }: TimeTrackerProps) {
       const result = await pauseTimer();
       if (!result.ok) {
         setError(result.message);
+        toast.error(result.message ?? "Failed to pause timer.");
         return;
       }
       router.refresh();
@@ -385,6 +391,7 @@ export function TimeTracker({ projects, entries }: TimeTrackerProps) {
       const result = await resumeTimer();
       if (!result.ok) {
         setError(result.message);
+        toast.error(result.message ?? "Failed to resume timer.");
         return;
       }
       router.refresh();
@@ -407,6 +414,7 @@ export function TimeTracker({ projects, entries }: TimeTrackerProps) {
       });
       if (!result.ok) {
         setError(result.message);
+        toast.error(result.message ?? "Failed to save description.");
         return;
       }
       router.refresh();
