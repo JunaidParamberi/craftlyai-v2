@@ -27,7 +27,8 @@ type DocumentRowRaw = {
   notes_footer?: string | null;
   paid_at?: string | null;
   pay_token?: string | null;
-  discount_percent?: number;
+  discount_value?: number;
+  discount_type?: string;
   created_at: string;
   updated_at: string;
 };
@@ -59,7 +60,8 @@ export function normalizeDocumentRow(row: DocumentRowRaw): DocumentRow {
     notes_footer: row.notes_footer ?? null,
     paid_at: row.paid_at ?? null,
     pay_token: row.pay_token ?? null,
-    discount_percent: row.discount_percent ?? 0,
+    discount_value: row.discount_value ?? 0,
+    discount_type: (row.discount_type ?? 'percent') as 'percent' | 'flat',
     created_at: row.created_at,
     updated_at: row.updated_at,
   };

@@ -83,7 +83,8 @@ export async function sendInvoice(
       })),
       currency: typedClient?.currency ?? "USD",
       payUrl,
-      discountPercent: Number(invoice.discount_percent ?? 0),
+      discountValue: Number(invoice.discount_value ?? 0),
+      discountType: (invoice.discount_type ?? 'percent') as 'percent' | 'flat',
     }),
   });
 

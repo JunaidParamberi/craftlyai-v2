@@ -40,7 +40,8 @@ interface InvoiceEditFormProps {
     notes_footer: string | null;
     line_items: LineItemRow[];
     currency: string;
-    discount_percent?: number;
+    discount_value?: number;
+    discount_type?: 'percent' | 'flat';
   };
 }
 
@@ -120,7 +121,8 @@ export function InvoiceEditForm({
             documentId={documentId}
             initialItems={invoiceData.line_items}
             currency={currency}
-            discountPercent={invoiceData.discount_percent ?? 0}
+            discountValue={invoiceData.discount_value ?? 0}
+            discountType={invoiceData.discount_type ?? 'percent'}
           />
         </div>
 

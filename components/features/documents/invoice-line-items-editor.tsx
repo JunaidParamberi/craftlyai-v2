@@ -5,14 +5,15 @@ import { Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { upsertLineItem, deleteLineItem, updateInvoiceMeta } from "@/lib/documents/invoice-mutations";
+import { cn } from "@/lib/utils";
 import type { LineItemRow } from "@/types";
 
 interface InvoiceLineItemsEditorProps {
   documentId: string;
   initialItems: LineItemRow[];
   currency?: string;
-  discountPercent?: number;
-  onDiscountChange?: (v: number) => void;
+  discountValue?: number;
+  discountType?: 'percent' | 'flat';
 }
 
 interface LocalLineItem {
@@ -64,13 +65,14 @@ export function InvoiceLineItemsEditor({
   documentId,
   initialItems,
   currency = "USD",
-  discountPercent = 0,
-  onDiscountChange,
+  discountValue = 0,
+  discountType: initialDiscountType = 'percent',
 }: InvoiceLineItemsEditorProps) {
   const [items, setItems] = useState<LocalLineItem[]>(
     initialItems.map(toLocal)
   );
-  const [discountPct, setDiscountPct] = useState<number>(discountPercent);
+  const [discountVal, setDiscountVal] = useState<number>(discountValue);
+  const [discountType, setDiscountType] = useState<'percent' | 'flat'>(initialDiscountType);
   const [, startTransition] = useTransition();
 
   const updateItem = (key: string, field: keyof LocalLineItem, value: string) => {
@@ -139,9 +141,24 @@ export function InvoiceLineItemsEditor({
     ]);
   };
 
+  const handleTypeChange = (newType: 'percent' | 'flat') => {
+    setDiscountType(newType);
+    startTransition(async () => {
+      await updateInvoiceMeta(documentId, { discount_type: newType, discount_value: discountVal });
+    });
+  };
+
+  const handleDiscountBlur = () => {
+    startTransition(async () => {
+      await updateInvoiceMeta(documentId, { discount_type: discountType, discount_value: discountVal });
+    });
+  };
+
   const subtotal = items.reduce((sum, item) => sum + rowAmount(item), 0);
   const totalTax = items.reduce((sum, item) => sum + rowTax(item), 0);
-  const discount = subtotal * (discountPct / 100);
+  const discount = discountType === 'flat'
+    ? Math.min(discountVal, subtotal)
+    : subtotal * (discountVal / 100);
   const discountedSubtotal = subtotal - discount;
   const totalDue = discountedSubtotal + totalTax;
 
@@ -275,30 +292,42 @@ export function InvoiceLineItemsEditor({
           <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
             <span className="shrink-0">Discount</span>
             <div className="flex items-center gap-1">
+              <div className="flex rounded border border-border overflow-hidden text-xs">
+                <button
+                  type="button"
+                  onClick={() => handleTypeChange('percent')}
+                  className={cn(
+                    "px-2 py-0.5 transition-colors",
+                    discountType === 'percent'
+                      ? "bg-foreground text-background"
+                      : "bg-background text-muted-foreground hover:bg-muted"
+                  )}
+                >%</button>
+                <button
+                  type="button"
+                  onClick={() => handleTypeChange('flat')}
+                  className={cn(
+                    "px-2 py-0.5 transition-colors border-l border-border",
+                    discountType === 'flat'
+                      ? "bg-foreground text-background"
+                      : "bg-background text-muted-foreground hover:bg-muted"
+                  )}
+                >$</button>
+              </div>
               <input
                 type="number"
                 min={0}
-                max={100}
                 step={0.01}
-                value={discountPct}
-                onChange={(e) => {
-                  const v = parseFloat(e.target.value) || 0;
-                  setDiscountPct(v);
-                  onDiscountChange?.(v);
-                }}
-                onBlur={() => {
-                  startTransition(async () => {
-                    await updateInvoiceMeta(documentId, { discount_percent: discountPct });
-                  });
-                }}
-                className="w-16 rounded border border-border bg-background px-2 py-0.5 text-right text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                value={discountVal}
+                onChange={(e) => setDiscountVal(parseFloat(e.target.value) || 0)}
+                onBlur={handleDiscountBlur}
+                className="w-20 rounded border border-border bg-background px-2 py-0.5 text-right text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               />
-              <span className="text-muted-foreground">%</span>
             </div>
           </div>
           {discount > 0 ? (
             <div className="flex justify-between gap-8 text-destructive">
-              <span>Discount ({discountPct}%)</span>
+              <span>{discountType === 'percent' ? `Discount (${discountVal}%)` : 'Discount'}</span>
               <span className="tabular-nums">
                 -{formatCurrency(discount, currency)}
               </span>

@@ -131,7 +131,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
 
           {/* Line items table */}
           {invoiceData.line_items.length > 0 ? (
-            <InvoiceLineItemsReadOnly lineItems={invoiceData.line_items} currency={client?.currency ?? "USD"} discountPercent={Number(invoiceData.discount_percent ?? 0)} />
+            <InvoiceLineItemsReadOnly lineItems={invoiceData.line_items} currency={client?.currency ?? "USD"} discountValue={Number(invoiceData.discount_value ?? 0)} discountType={(invoiceData.discount_type ?? 'percent') as 'percent' | 'flat'} />
           ) : null}
 
           {/* Notes footer */}
@@ -170,11 +170,13 @@ async function fetchProjectTitle(projectId: string): Promise<string | null> {
 function InvoiceLineItemsReadOnly({
   lineItems,
   currency,
-  discountPercent = 0,
+  discountValue = 0,
+  discountType = 'percent',
 }: {
   lineItems: LineItemRow[];
   currency: string;
-  discountPercent?: number;
+  discountValue?: number;
+  discountType?: 'percent' | 'flat';
 }) {
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", {
@@ -192,7 +194,9 @@ function InvoiceLineItemsReadOnly({
       sum + Number(li.quantity) * Number(li.unit_price) * (Number(li.tax_rate) / 100),
     0,
   );
-  const discount = subtotal * (discountPercent / 100);
+  const discount = discountType === 'flat'
+    ? Math.min(discountValue, subtotal)
+    : subtotal * (discountValue / 100);
   const discountedSubtotal = subtotal - discount;
   const total = discountedSubtotal + taxTotal;
 
@@ -229,7 +233,7 @@ function InvoiceLineItemsReadOnly({
         </div>
         {discount > 0 ? (
           <div className="flex gap-8 text-red-500">
-            <span>Discount ({discountPercent}%)</span>
+            <span>{discountType === 'percent' ? `Discount (${discountValue}%)` : 'Discount'}</span>
             <span>-{fmt(discount)}</span>
           </div>
         ) : null}

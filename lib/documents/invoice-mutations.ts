@@ -108,7 +108,8 @@ export async function updateInvoiceMeta(
       due_date: parsed.data.due_date ?? null,
       payment_terms: parsed.data.payment_terms ?? null,
       notes_footer: parsed.data.notes_footer ?? null,
-      discount_percent: parsed.data.discount_percent ?? 0,
+      discount_value: parsed.data.discount_value ?? 0,
+      discount_type: parsed.data.discount_type ?? 'percent',
     })
     .eq("id", documentId);
 

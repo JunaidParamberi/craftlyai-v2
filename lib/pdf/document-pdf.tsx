@@ -35,7 +35,8 @@ type DocumentPdfProps = {
     notes_footer: string | null;
     line_items: LineItemRow[];
     currency: string;
-    discount_percent?: number;
+    discount_value?: number;
+    discount_type?: 'percent' | 'flat';
   } | null;
 };
 
@@ -159,7 +160,8 @@ export function DocumentPdf({
             currency={invoiceData.currency}
             styles={styles}
             color={color}
-            discountPercent={invoiceData.discount_percent ?? 0}
+            discountValue={invoiceData.discount_value ?? 0}
+            discountType={invoiceData.discount_type ?? 'percent'}
           />
         ) : null}
 
@@ -196,13 +198,15 @@ function InvoiceLineItemsPdf({
   currency,
   styles,
   color,
-  discountPercent = 0,
+  discountValue = 0,
+  discountType = 'percent',
 }: {
   lineItems: LineItemRow[];
   currency: string;
   styles: ReturnType<typeof makePdfStyles>;
   color: string;
-  discountPercent?: number;
+  discountValue?: number;
+  discountType?: 'percent' | 'flat';
 }) {
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", {
@@ -221,7 +225,9 @@ function InvoiceLineItemsPdf({
       Number(li.quantity) * Number(li.unit_price) * (Number(li.tax_rate) / 100),
     0,
   );
-  const discount = subtotal * (discountPercent / 100);
+  const discount = discountType === 'flat'
+    ? Math.min(discountValue, subtotal)
+    : subtotal * (discountValue / 100);
   const discountedSubtotal = subtotal - discount;
   const total = discountedSubtotal + taxTotal;
 
@@ -267,7 +273,7 @@ function InvoiceLineItemsPdf({
         </View>
         {discount > 0 ? (
           <View style={{ flexDirection: "row", gap: 24 }}>
-            <Text style={{ fontSize: 9, color: "#e53e3e" }}>Discount ({discountPercent}%)</Text>
+            <Text style={{ fontSize: 9, color: "#e53e3e" }}>{discountType === 'percent' ? `Discount (${discountValue}%)` : 'Discount'}</Text>
             <Text style={{ fontSize: 9, color: "#e53e3e" }}>-{fmt(discount)}</Text>
           </View>
         ) : null}

@@ -185,7 +185,8 @@ export const invoiceMetaSchema = z.object({
   due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   payment_terms: z.string().max(200).optional().nullable(),
   notes_footer: z.string().max(1000).optional().nullable(),
-  discount_percent: z.coerce.number().min(0).max(100).default(0).optional(),
+  discount_value: z.coerce.number().min(0).default(0).optional(),
+  discount_type: z.enum(['percent', 'flat']).default('percent').optional(),
 });
 
 export type InvoiceMetaInput = z.infer<typeof invoiceMetaSchema>;
