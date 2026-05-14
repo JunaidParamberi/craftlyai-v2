@@ -4,6 +4,7 @@ import React from "react";
 import { getBrandKit } from "@/lib/brand-kit/actions";
 import { getDocumentById } from "@/lib/documents/document-queries";
 import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
+import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 import { substituteInTiptapDoc } from "@/lib/documents/variables";
 import { buildVariableContext } from "@/lib/documents/variables-server";
@@ -49,9 +50,15 @@ export async function GET(
       ? await getQuoteWithLineItems(id)
       : null;
 
-  // Fetch client currency for invoice or quote.
+  // Fetch proposal data if applicable.
+  const proposalData =
+    document.type === "proposal"
+      ? await getProposalWithLineItems(id)
+      : null;
+
+  // Fetch client currency for invoice, quote, or proposal.
   const clientCurrency =
-    (document.type === "invoice" || document.type === "quote") && document.client_id
+    (document.type === "invoice" || document.type === "quote" || document.type === "proposal") && document.client_id
       ? await fetchClientCurrency(document.client_id, supabase)
       : "USD";
 
@@ -120,6 +127,18 @@ export async function GET(
               }
             : null
         }
+        proposalData={
+          proposalData
+            ? {
+                proposal_number: proposalData.proposal_number,
+                notes_footer: proposalData.notes_footer,
+                line_items: proposalData.line_items,
+                currency: clientCurrency,
+                discount_value: proposalData.discount_value ?? 0,
+                discount_type: proposalData.discount_type ?? 'percent',
+              }
+            : null
+        }
       />,
     );
   } catch (err) {
@@ -135,6 +154,8 @@ export async function GET(
       ? (invoiceData?.invoice_number ?? null)
       : document.type === "quote"
       ? (quoteData?.quote_number ?? null)
+      : document.type === "proposal"
+      ? (proposalData?.proposal_number ?? null)
       : null;
   const safeTitle = (docNumber ?? document.title)
     .replace(/[^a-zA-Z0-9_\-. ]/g, "")
