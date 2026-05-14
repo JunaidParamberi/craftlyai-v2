@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 // Button kept for the confirm/cancel actions inside the dialog
@@ -53,9 +54,11 @@ export function MarkPaidButton({
       if (result.ok) {
         setPaid(true);
         setOpen(false);
+        toast.success("Invoice marked as paid");
         router.refresh();
       } else {
         setError(result.error ?? "Failed to mark as paid.");
+        toast.error(result.error ?? "Failed to mark as paid.");
       }
       setLoading(false);
     });

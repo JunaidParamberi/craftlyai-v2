@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, Clock, FileText } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { convertQuoteToInvoice } from "@/lib/documents/quote-mutations";
 import type { DocumentStatus } from "@/types";
@@ -38,9 +39,11 @@ export function QuoteApprovalStatus({
     startTransition(async () => {
       const result = await convertQuoteToInvoice(documentId);
       if (result.ok && result.invoiceId) {
+        toast.success("Converted to invoice");
         router.push(`/documents/${result.invoiceId}`);
       } else {
         setError(result.error ?? "Failed to convert quote.");
+        toast.error(result.error ?? "Failed to convert quote.");
       }
     });
   };
