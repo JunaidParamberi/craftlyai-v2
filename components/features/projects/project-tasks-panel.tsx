@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import {
   createTask,
@@ -155,8 +156,10 @@ export function ProjectTasksPanel({
       });
       if (!res.ok) {
         setFormError(res.message);
+        toast.error(res.message ?? "Failed to add task.");
         return;
       }
+      toast.success("Task added");
       reset(emptyTaskForm);
       setAddOpen(false);
       refresh();
@@ -168,6 +171,7 @@ export function ProjectTasksPanel({
       const next: TaskStatus = task.status === "done" ? "todo" : "done";
       const res = await updateTask(projectId, task.id, { status: next });
       if (!res.ok) {
+        toast.error(res.message ?? "Failed to update task.");
         return;
       }
       refresh();
@@ -178,8 +182,10 @@ export function ProjectTasksPanel({
     startTransition(async () => {
       const res = await deleteTask(projectId, taskId);
       if (!res.ok) {
+        toast.error(res.message ?? "Failed to delete task.");
         return;
       }
+      toast.success("Task deleted");
       refresh();
     });
   }
