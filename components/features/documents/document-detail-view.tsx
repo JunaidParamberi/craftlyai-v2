@@ -87,7 +87,7 @@ export function DocumentDetailView({
   );
 }
 
-function renderNode(node: TiptapNode, ctx: VariableContext, key?: number) {
+export function renderNode(node: TiptapNode, ctx: VariableContext, key?: number) {
   switch (node.type) {
     case "heading": {
       const level = Number((node.attrs?.level as number) ?? 1);
