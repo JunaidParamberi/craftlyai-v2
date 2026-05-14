@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { createProject, updateProject } from "@/lib/projects/actions";
 import {
@@ -117,6 +118,7 @@ export function ProjectForm(props: ProjectFormProps) {
           }
           return;
         }
+        toast.success("Project created");
         router.push(`/projects/${created.project.id}`);
         router.refresh();
         return;
@@ -141,6 +143,7 @@ export function ProjectForm(props: ProjectFormProps) {
         return;
       }
 
+      toast.success("Project updated");
       router.push(`/projects/${props.projectId}`);
       router.refresh();
     });

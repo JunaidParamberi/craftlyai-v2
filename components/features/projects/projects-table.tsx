@@ -10,6 +10,7 @@ import {
   Search,
 } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { deleteProject } from "@/lib/projects/actions";
 import {
@@ -117,9 +118,11 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
       const result = await deleteProject(pendingDelete.id);
       if (!result.ok) {
         setDeleteError(result.message);
+        toast.error(result.message ?? "Failed to delete project.");
         return;
       }
       setPendingDelete(null);
+      toast.success("Project deleted");
       router.refresh();
     });
   }
