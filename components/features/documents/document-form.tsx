@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -16,6 +17,9 @@ import {
   DOCUMENT_TYPES,
   type DocumentInputForm,
 } from "@/lib/validations/document";
+import { buildClientSideContext } from "@/lib/documents/variables-client";
+import { emptyVariableContext, type VariableContext } from "@/lib/documents/variables";
+import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import type { ClientRow, ProjectListRow, TiptapDoc } from "@/types";
 
@@ -40,6 +44,7 @@ import {
 
 import { TiptapEditor } from "./editor/tiptap-editor";
 import { SaveAsTemplateButton } from "./save-as-template-button";
+import { DocumentPreviewPanel } from "./editor/document-preview-panel";
 
 type CreateProps = {
   mode: "create";
@@ -54,6 +59,7 @@ type EditProps = {
 type DocumentFormProps = (CreateProps | EditProps) & {
   clients: ClientRow[];
   projects: ProjectListRow[];
+  initialVariableContext?: VariableContext;
 };
 
 const NONE_VALUE = "__none";
@@ -72,6 +78,21 @@ export function DocumentForm(props: DocumentFormProps) {
   const watchedClient = watch("client_id");
   const watchedProject = watch("project_id");
   const watchedType = watch("type");
+
+  const [showPreview, setShowPreview] = useState(false);
+  const debouncedContent = useDebounce(watchedContent, 500);
+
+  const liveVariableContext = useMemo(
+    () =>
+      buildClientSideContext({
+        clientId: watchedClient || undefined,
+        projectId: watchedProject || undefined,
+        clients: props.clients,
+        projects: props.projects,
+        initialCtx: props.initialVariableContext ?? emptyVariableContext(),
+      }),
+    [watchedClient, watchedProject, props.clients, props.projects, props.initialVariableContext],
+  );
 
   const filteredProjects = props.projects.filter(
     (p) => !watchedClient || p.client_id === watchedClient,
@@ -124,7 +145,14 @@ export function DocumentForm(props: DocumentFormProps) {
         </Alert>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div
+        className={cn(
+          "grid gap-6",
+          showPreview
+            ? "lg:grid-cols-[1fr_minmax(0,480px)]"
+            : "lg:grid-cols-[1fr_320px]",
+        )}
+      >
         {/* Editor */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
@@ -147,152 +175,176 @@ export function DocumentForm(props: DocumentFormProps) {
           />
         </div>
 
-        {/* Sidebar */}
-        <aside className="flex flex-col gap-4">
-          <Card className="border-border/70">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold tracking-tight">
-                Properties
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <FieldRow label="Type">
-                <Select
-                  value={watchedType}
-                  onValueChange={(v) =>
-                    setValue("type", (v as string) as DocumentInputForm["type"], {
-                      shouldDirty: true,
-                    })
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DOCUMENT_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        <span className="flex items-center gap-2">
-                          <TypeDot type={t} />
-                          {documentTypeLabel(t)}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
-
-              <FieldRow label="Status">
-                <Select
-                  value={watch("status") ?? "draft"}
-                  onValueChange={(v) =>
-                    setValue("status", (v as string) as DocumentInputForm["status"], {
-                      shouldDirty: true,
-                    })
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DOCUMENT_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s[0].toUpperCase() + s.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
-
-              <FieldRow label="Client">
-                <Select
-                  value={watchedClient && watchedClient !== "" ? watchedClient : NONE_VALUE}
-                  onValueChange={(v) => {
-                    const value = (v as string) ?? "";
-                    const next = value === NONE_VALUE ? "" : value;
-                    setValue("client_id", next, { shouldDirty: true });
-                    // Clear project if it no longer matches client
-                    if (next && watchedProject) {
-                      const stillValid = props.projects.some(
-                        (p) => p.id === watchedProject && p.client_id === next,
-                      );
-                      if (!stillValid) setValue("project_id", "");
+        {showPreview ? (
+          <DocumentPreviewPanel
+            title={watch("title")}
+            type={watchedType}
+            content={
+              (debouncedContent as TiptapDoc) ?? props.defaultValues.content_json
+            }
+            variableContext={liveVariableContext}
+          />
+        ) : (
+          <aside className="flex flex-col gap-4">
+            <Card className="border-border/70">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold tracking-tight">
+                  Properties
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <FieldRow label="Type">
+                  <Select
+                    value={watchedType}
+                    onValueChange={(v) =>
+                      setValue("type", (v as string) as DocumentInputForm["type"], {
+                        shouldDirty: true,
+                      })
                     }
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="None">
-                      {selectedClientLabel ?? "None"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE_VALUE}>None</SelectItem>
-                    {props.clients.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DOCUMENT_TYPES.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          <span className="flex items-center gap-2">
+                            <TypeDot type={t} />
+                            {documentTypeLabel(t)}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
 
-              <FieldRow label="Project">
-                <Select
-                  value={watchedProject && watchedProject !== "" ? watchedProject : NONE_VALUE}
-                  onValueChange={(v) => {
-                    const value = (v as string) ?? "";
-                    setValue(
-                      "project_id",
-                      value === NONE_VALUE ? "" : value,
-                      { shouldDirty: true },
-                    );
-                  }}
-                  disabled={filteredProjects.length === 0}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="None">
-                      {selectedProjectLabel ?? "None"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE_VALUE}>None</SelectItem>
-                    {filteredProjects.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-2 border-t border-border/60 pt-4">
-              <SaveAsTemplateButton
-                type={watchedType}
-                content={(watchedContent as TiptapDoc) ?? props.defaultValues.content_json}
-                defaultName={watch("title") || "Untitled template"}
-              />
-            </CardFooter>
-          </Card>
+                <FieldRow label="Status">
+                  <Select
+                    value={watch("status") ?? "draft"}
+                    onValueChange={(v) =>
+                      setValue("status", (v as string) as DocumentInputForm["status"], {
+                        shouldDirty: true,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DOCUMENT_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s[0].toUpperCase() + s.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
 
-          <Card className="border-border/70 bg-muted/40">
-            <CardContent className="pt-5 text-xs leading-relaxed text-muted-foreground">
-              <p className="mb-2 font-medium text-foreground/80">
-                About variables
-              </p>
-              <p>
-                Type{" "}
-                <code className="font-mono text-[0.85em] rounded bg-background px-1 py-0.5">
-                  {"{{client_name}}"}
-                </code>{" "}
-                or use the toolbar menu. The detail view substitutes them
-                against the selected client, project, and your brand kit.
-              </p>
-            </CardContent>
-          </Card>
-        </aside>
+                <FieldRow label="Client">
+                  <Select
+                    value={watchedClient && watchedClient !== "" ? watchedClient : NONE_VALUE}
+                    onValueChange={(v) => {
+                      const value = (v as string) ?? "";
+                      const next = value === NONE_VALUE ? "" : value;
+                      setValue("client_id", next, { shouldDirty: true });
+                      // Clear project if it no longer matches client
+                      if (next && watchedProject) {
+                        const stillValid = props.projects.some(
+                          (p) => p.id === watchedProject && p.client_id === next,
+                        );
+                        if (!stillValid) setValue("project_id", "");
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="None">
+                        {selectedClientLabel ?? "None"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE_VALUE}>None</SelectItem>
+                      {props.clients.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+
+                <FieldRow label="Project">
+                  <Select
+                    value={watchedProject && watchedProject !== "" ? watchedProject : NONE_VALUE}
+                    onValueChange={(v) => {
+                      const value = (v as string) ?? "";
+                      setValue(
+                        "project_id",
+                        value === NONE_VALUE ? "" : value,
+                        { shouldDirty: true },
+                      );
+                    }}
+                    disabled={filteredProjects.length === 0}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="None">
+                        {selectedProjectLabel ?? "None"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE_VALUE}>None</SelectItem>
+                      {filteredProjects.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-2 border-t border-border/60 pt-4">
+                <SaveAsTemplateButton
+                  type={watchedType}
+                  content={(watchedContent as TiptapDoc) ?? props.defaultValues.content_json}
+                  defaultName={watch("title") || "Untitled template"}
+                />
+              </CardFooter>
+            </Card>
+
+            <Card className="border-border/70 bg-muted/40">
+              <CardContent className="pt-5 text-xs leading-relaxed text-muted-foreground">
+                <p className="mb-2 font-medium text-foreground/80">
+                  About variables
+                </p>
+                <p>
+                  Type{" "}
+                  <code className="font-mono text-[0.85em] rounded bg-background px-1 py-0.5">
+                    {"{{client_name}}"}
+                  </code>{" "}
+                  or use the toolbar menu. The detail view substitutes them
+                  against the selected client, project, and your brand kit.
+                </p>
+              </CardContent>
+            </Card>
+          </aside>
+        )}
       </div>
 
       <div className="flex items-center justify-end gap-2 sticky bottom-4 z-10">
         <div className="rounded-full bg-background/95 backdrop-blur border border-border/70 shadow-lg px-2 py-2 flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-9"
+            onClick={() => setShowPreview((v) => !v)}
+            title={showPreview ? "Hide preview" : "Show preview"}
+          >
+            {showPreview ? (
+              <EyeOff className="size-4" />
+            ) : (
+              <Eye className="size-4" />
+            )}
+          </Button>
           <Button
             type="button"
             variant="ghost"
