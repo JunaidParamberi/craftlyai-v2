@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 
 import { listClients } from "@/lib/clients/actions";
+import { getProfile } from "@/lib/profile/actions";
+import { getPlanLimit } from "@/lib/plan-usage/helpers";
 import { paginatedListSkeletonCount } from "@/lib/ui/skeleton-count";
 import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
-
 import { ClientsTable } from "@/components/features/clients/clients-table";
+import { UpgradeGhostRow } from "@/components/features/billing/upgrade-ghost-row";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,23 +16,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import type { PlanTier } from "@/config/plans";
 
 export default async function ClientsPage() {
-  const result = await listClients();
+  const [clientsResult, profileResult] = await Promise.all([
+    listClients(),
+    getProfile(),
+  ]);
 
-  if (!result.ok) {
+  if (!clientsResult.ok) {
     return (
       <div className="flex flex-col gap-2">
         <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
           Clients
         </h1>
-        <p className="text-destructive text-sm">{result.message}</p>
+        <p className="text-destructive text-sm">{clientsResult.message}</p>
       </div>
     );
   }
 
-  const { clients } = result;
+  const { clients } = clientsResult;
+  const planTier = (profileResult.ok && profileResult.profile?.plan_tier
+    ? profileResult.profile.plan_tier
+    : "free") as PlanTier;
+  const clientLimit = getPlanLimit(planTier, "clients");
+  const atLimit = clients.length >= clientLimit;
 
   return (
     <div className="flex flex-col gap-8">
@@ -50,6 +61,8 @@ export default async function ClientsPage() {
         <Button
           nativeButton={false}
           render={<Link href="/clients/new" />}
+          disabled={atLimit}
+          aria-disabled={atLimit}
         >
           <Plus />
           Add client
@@ -76,7 +89,15 @@ export default async function ClientsPage() {
           </CardContent>
         </Card>
       ) : (
-        <ClientsTable clients={clients} />
+        <div className="flex flex-col gap-3">
+          <ClientsTable clients={clients} />
+          {atLimit && (
+            <UpgradeGhostRow
+              title="Add more clients"
+              description="Upgrade to Starter — 15 clients, unlimited documents"
+            />
+          )}
+        </div>
       )}
     </div>
   );
