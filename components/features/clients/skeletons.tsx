@@ -12,8 +12,13 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonRepeat } from "@/components/shared/skeleton-repeat";
 
-export function ClientsPageSkeleton() {
+export type ClientsPageSkeletonProps = {
+  rowCount?: number;
+};
+
+export function ClientsPageSkeleton({ rowCount = 0 }: ClientsPageSkeletonProps) {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -21,12 +26,12 @@ export function ClientsPageSkeleton() {
           <Skeleton className="h-9 w-40 md:h-10 md:w-44" />
           <Skeleton className="h-4 w-full max-w-lg" />
         </div>
-        <Skeleton className="h-9 w-[9.5rem] shrink-0 rounded-4xl" />
+        <Skeleton className="h-9 w-[9.5rem] shrink-0" />
       </div>
       <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm ring-1 ring-border/50">
         <div className="flex flex-col gap-3 border-b border-border/80 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <Skeleton className="h-9 w-full max-w-sm rounded-4xl" />
-          <Skeleton className="h-9 w-full rounded-4xl sm:w-28" />
+          <Skeleton className="h-9 w-full max-w-sm" />
+          <Skeleton className="h-9 w-full sm:w-28" />
         </div>
         <div className="px-4 py-3 sm:px-6">
           <div className="flex gap-4 border-b border-border py-3">
@@ -36,21 +41,24 @@ export function ClientsPageSkeleton() {
             <Skeleton className="h-4 w-14" />
             <Skeleton className="ms-auto h-4 w-8" />
           </div>
-          {Array.from({ length: 6 }, (_, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-4 border-b border-border py-4 last:border-0"
-            >
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <Skeleton className="size-9 shrink-0 rounded-full" />
-                <Skeleton className="h-5 max-w-[200px]" />
+          <SkeletonRepeat
+            count={rowCount}
+            render={(i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 border-b border-border py-4 last:border-0"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <Skeleton className="size-9 shrink-0 rounded-full" />
+                  <Skeleton className="h-5 max-w-[200px]" />
+                </div>
+                <Skeleton className="hidden h-4 w-24 md:block" />
+                <Skeleton className="hidden h-4 w-32 lg:block" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+                <Skeleton className="size-8 shrink-0 rounded-full" />
               </div>
-              <Skeleton className="hidden h-4 w-24 md:block" />
-              <Skeleton className="hidden h-4 w-32 lg:block" />
-              <Skeleton className="h-6 w-16 rounded-full" />
-              <Skeleton className="size-8 shrink-0 rounded-full" />
-            </div>
-          ))}
+            )}
+          />
         </div>
         <div className="flex flex-col gap-3 border-t border-border/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <Skeleton className="h-4 w-48" />
@@ -83,27 +91,27 @@ function ClientFormCardSkeleton() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2 sm:col-span-2">
             <Skeleton className="h-4 w-44" />
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
             <Skeleton className="h-3 w-full max-w-xl" />
           </div>
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
           </div>
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-14" />
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
           </div>
         </div>
         <Separator />
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-48" />
-          <Skeleton className="h-9 w-full rounded-4xl" />
+          <Skeleton className="h-9 w-full" />
           <Skeleton className="h-3 w-full max-w-lg" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-52" />
-          <Skeleton className="h-9 w-full rounded-4xl" />
+          <Skeleton className="h-9 w-full" />
           <Skeleton className="h-3 w-full max-w-md" />
         </div>
         <div className="flex flex-col gap-2">
@@ -113,7 +121,7 @@ function ClientFormCardSkeleton() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-36" />
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
           </div>
         </div>
         <div className="flex flex-col gap-2">
@@ -122,8 +130,8 @@ function ClientFormCardSkeleton() {
         </div>
       </CardContent>
       <CardFooter className={FORM_CARD_FOOTER_END_ACTIONS}>
-        <Skeleton className="h-9 w-20 rounded-4xl" />
-        <Skeleton className="h-9 w-28 rounded-4xl" />
+        <Skeleton className="h-9 w-20" />
+        <Skeleton className="h-9 w-28" />
       </CardFooter>
     </Card>
   );
@@ -167,9 +175,9 @@ export function ClientDetailPageSkeleton() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Skeleton className="h-9 w-28 rounded-4xl" />
-              <Skeleton className="h-9 w-32 rounded-4xl" />
-              <Skeleton className="h-9 w-24 rounded-4xl" />
+              <Skeleton className="h-9 w-28" />
+              <Skeleton className="h-9 w-32" />
+              <Skeleton className="h-9 w-24" />
               <Skeleton className="size-9 rounded-full" />
             </div>
           </div>
@@ -183,12 +191,12 @@ export function ClientDetailPageSkeleton() {
         </div>
         <div className="grid gap-8 lg:grid-cols-[1fr_minmax(260px,320px)]">
           <div className="flex flex-col gap-8">
-            <Skeleton className="min-h-[200px] w-full rounded-4xl" />
-            <Skeleton className="min-h-[120px] w-full rounded-4xl" />
+            <Skeleton className="min-h-[200px] w-full" />
+            <Skeleton className="min-h-[120px] w-full" />
           </div>
           <div className="flex flex-col gap-6">
-            <Skeleton className="min-h-[220px] w-full rounded-4xl" />
-            <Skeleton className="min-h-[200px] w-full rounded-4xl" />
+            <Skeleton className="min-h-[220px] w-full" />
+            <Skeleton className="min-h-[200px] w-full" />
           </div>
         </div>
       </div>
@@ -212,13 +220,13 @@ export function ClientsTestPageSkeleton() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <Skeleton className="h-9 w-full rounded-4xl" />
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
           </div>
           <Skeleton className="min-h-[120px] w-full rounded-2xl" />
           <div className="flex flex-wrap gap-2">
-            <Skeleton className="h-9 w-24 rounded-4xl" />
-            <Skeleton className="h-9 w-28 rounded-4xl" />
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-9 w-28" />
           </div>
         </CardContent>
       </Card>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 
-import { TimePageSkeleton } from "@/components/features/time/skeletons";
+import { TimePageSkeletonLoader } from "@/components/features/time/time-page-skeleton-loader";
 
 export const metadata: Metadata = {
   title: "Time",
@@ -16,7 +16,7 @@ const TimeTracker = dynamic(
       default: m.TimeTracker,
     })),
   {
-    loading: () => <TimePageSkeleton />,
+    loading: () => <TimePageSkeletonLoader />,
   },
 );
 

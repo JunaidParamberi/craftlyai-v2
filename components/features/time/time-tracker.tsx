@@ -64,6 +64,7 @@ import {
 } from "@/components/ui/table";
 import { CalendarDays, Timer } from "lucide-react";
 import { toast } from "sonner";
+import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 
 export type TimeTrackerProps = {
   projects: ProjectListRow[];
@@ -427,6 +428,8 @@ export function TimeTracker({ projects, entries }: TimeTrackerProps) {
 
   return (
     <div className="flex flex-col gap-8">
+      <SkeletonCountRecorder id="time:today" count={todayEntries.length} />
+      <SkeletonCountRecorder id="time:earlier" count={earlierEntries.length} />
       <div className="flex flex-col gap-1">
         <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
           Time tracker

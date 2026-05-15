@@ -18,38 +18,40 @@ export function BrandLockup({
   wordmarkWrapperClassName,
 }: BrandLockupProps) {
   return (
-    <div className={cn("flex shrink-0 items-end gap-2", className)}>
-      <Image
-        src={branding.mark}
-        alt=""
-        width={32}
-        height={32}
-        unoptimized
-        className="size-6 shrink-0 object-contain sm:size-7 group-data-[collapsible=icon]:size-8"
-      />
-      <span
-        className={cn(
-          "flex min-w-0 items-end",
-          wordmarkWrapperClassName,
-        )}
-      >
+    <div className={cn("shrink-0", className)}>
+      <div className="flex items-end gap-2 leading-none">
         <Image
-          src={branding.wordmarkOnLightBg}
+          src={branding.mark}
           alt=""
-          width={160}
-          height={36}
+          width={32}
+          height={32}
           unoptimized
-          className="h-[1.125rem] w-auto max-w-[min(100%,11rem)] object-contain object-left object-bottom dark:hidden sm:h-5"
+          className="block size-6 shrink-0 object-contain object-bottom sm:size-7 group-data-[collapsible=icon]:size-8"
         />
-        <Image
-          src={branding.wordmarkOnDarkBg}
-          alt=""
-          width={160}
-          height={36}
-          unoptimized
-          className="hidden h-[1.125rem] w-auto max-w-[min(100%,11rem)] object-contain object-left object-bottom dark:block sm:h-5"
-        />
-      </span>
+        <span
+          className={cn(
+            "flex min-w-0 items-end leading-none",
+            wordmarkWrapperClassName,
+          )}
+        >
+          <Image
+            src={branding.wordmarkOnLightBg}
+            alt=""
+            width={160}
+            height={36}
+            unoptimized
+            className="block h-[1.125rem] w-auto max-w-[min(100%,11rem)] object-contain object-left-bottom dark:hidden sm:h-5"
+          />
+          <Image
+            src={branding.wordmarkOnDarkBg}
+            alt=""
+            width={160}
+            height={36}
+            unoptimized
+            className="hidden h-[1.125rem] w-auto max-w-[min(100%,11rem)] object-contain object-left-bottom dark:block sm:h-5"
+          />
+        </span>
+      </div>
     </div>
   );
 }

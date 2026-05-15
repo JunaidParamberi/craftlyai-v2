@@ -7,9 +7,18 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonRepeat } from "@/components/shared/skeleton-repeat";
+
+export type DashboardPageSkeletonProps = {
+  statCardCount?: number;
+  activityRowCount?: number;
+};
 
 /** Mirrors dashboard home: hero band, stat row, activity + AI column. */
-export function DashboardPageSkeleton() {
+export function DashboardPageSkeleton({
+  statCardCount = 3,
+  activityRowCount = 2,
+}: DashboardPageSkeletonProps) {
   return (
     <div
       role="status"
@@ -30,17 +39,20 @@ export function DashboardPageSkeleton() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <Card key={i} size="sm">
-            <CardHeader className="pb-2">
-              <Skeleton className="h-4 w-28" />
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3 pt-0">
-              <Skeleton className="h-9 w-24" />
-              <Skeleton className="h-6 w-32 max-w-full rounded-full" />
-            </CardContent>
-          </Card>
-        ))}
+        <SkeletonRepeat
+          count={statCardCount}
+          render={(i) => (
+            <Card key={i} size="sm">
+              <CardHeader className="pb-2">
+                <Skeleton className="h-4 w-28" />
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3 pt-0">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-6 w-32 max-w-full rounded-full" />
+              </CardContent>
+            </Card>
+          )}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -50,21 +62,24 @@ export function DashboardPageSkeleton() {
               <Skeleton className="h-5 w-40" />
               <Skeleton className="h-4 w-64 max-w-full" />
             </div>
-            <Skeleton className="h-8 w-20 shrink-0 rounded-4xl" />
+            <Skeleton className="h-8 w-20 shrink-0" />
           </CardHeader>
           <CardContent className="flex flex-col gap-0 pt-6">
-            {[0, 1].map((row) => (
-              <div key={row}>
-                {row > 0 ? <Separator className="my-0" /> : null}
-                <div className="flex gap-3 py-3">
-                  <Skeleton className="size-9 shrink-0 rounded-2xl" />
-                  <div className="flex min-w-0 flex-1 flex-col gap-2">
-                    <Skeleton className="h-4 w-full max-w-md" />
-                    <Skeleton className="h-3 w-24" />
+            <SkeletonRepeat
+              count={activityRowCount}
+              render={(row) => (
+                <div key={row}>
+                  {row > 0 ? <Separator className="my-0" /> : null}
+                  <div className="flex gap-3 py-3">
+                    <Skeleton className="size-9 shrink-0 rounded-2xl" />
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
+                      <Skeleton className="h-4 w-full max-w-md" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )}
+            />
           </CardContent>
         </Card>
 
@@ -83,7 +98,7 @@ export function DashboardPageSkeleton() {
             </div>
           </CardHeader>
           <CardFooter className="flex-col items-stretch gap-2 pt-0">
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
           </CardFooter>
         </Card>
       </div>

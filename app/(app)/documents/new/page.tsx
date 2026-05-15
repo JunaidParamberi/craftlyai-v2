@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 import { listDocumentTemplates } from "@/lib/documents/document-queries";
+import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 
 import { TemplatePicker } from "@/components/features/documents/template-picker";
 
@@ -13,8 +14,11 @@ export const metadata: Metadata = {
 export default async function NewDocumentPage() {
   const result = await listDocumentTemplates();
 
+  const templateCount = result.ok ? result.templates.length : 0;
+
   return (
     <div className="flex flex-col gap-8">
+      <SkeletonCountRecorder id="documents:templates" count={templateCount} />
       <div className="flex flex-col gap-3">
         <Link
           href="/documents"

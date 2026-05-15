@@ -1,5 +1,5 @@
-import { TimePageSkeleton } from "@/components/features/time/skeletons";
+import { TimePageSkeletonLoader } from "@/components/features/time/time-page-skeleton-loader";
 
 export default function TimeLoading() {
-  return <TimePageSkeleton />;
+  return <TimePageSkeletonLoader />;
 }

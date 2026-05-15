@@ -1,6 +1,6 @@
 # CLAUDE.md — CraftlyAI Project Context
 
-Last updated: 2026-05-18
+Last updated: 2026-05-15
 Current phase: Phase 1 — Foundation complete; Phase 2 — Documents & Finance in-progress
 
 Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
@@ -264,7 +264,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - [x] Invoice flow — create, send (Resend), mark paid
 - [x] Quote flow — create, send, approval tracking, convert to invoice
 - [x] Proposal flow — multi-section, client approval
-- [ ] todo · Client portal — public link, no login, payment embed
+- [x] Client portal — public link, no login, payment embed
 - [ ] todo · Financial dashboard — revenue, outstanding, expenses
 - [ ] todo · Lemon Squeezy — plans, webhooks, plan gating
 
@@ -316,6 +316,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - 2026-05-18: **Quote flow** on `feat/quote-flow` — migration adds `approved`/`declined` to `document_status` enum + `quote_number`, `valid_until`, `approval_token`, `approved_at`, `declined_at`, `approval_message` columns. `QuoteEditForm`, `QuoteMetaFields`, `SendQuoteButton`, `QuoteApprovalStatus` components. `lib/documents/quote-mutations.ts` (generateQuoteNumber, updateQuoteMeta, markQuoteApproved/Declined, convertQuoteToInvoice), `lib/email/send-quote.ts`, `emails/quote.tsx`. Public approval page `/quote/[token]` + `QuoteRespondForm`. `POST /api/quotes/respond`. `InvoiceLineItemsEditor` gets `onDiscountSave` prop. Build passes. Phase 2 progress: 4/8 tasks done.
 - 2026-05-18: **Quote PDF fix** merged to `dev` — quote PDFs were blank (only client name visible) because `DocumentPdf` only rendered line items/meta for `type === "invoice"`; quotes store an empty Tiptap doc and use structured line items. Added `quoteData` prop to `DocumentPdf`, quote metadata band (Quote #, Valid until), line items table, and notes footer for `type === "quote"`. Tiptap body now only renders for proposal/other. PDF download filename now uses `QUO-XXXX` / `INV-XXXX` when number exists instead of raw document title. `feat/quote-flow` merged to `dev`.
 - 2026-05-18: **Proposal flow** complete on `feat/proposal-flow` — custom `PricingTableExtension` Tiptap node (atom block, ReactNodeViewRenderer) lets users insert calculation tables anywhere in the proposal body (Description, Qty, Rate, Total auto-calc, optional tax, add/remove rows). `pricing-table-node.ts` + `pricing-table-view.tsx`. Toolbar Table icon inserts it at cursor. Removed fixed `InvoiceLineItemsEditor` from proposals (proposals are free-form, not invoice-structured). Save redirects to view page. `SendProposalButton` moved from editor footer to view page actions (alongside Download PDF + Edit). `document-detail-view.tsx` renders `pricingTable` nodes statically. Phase 2 progress: 5/8 tasks done. `feat/proposal-flow` → `dev`.
+- 2026-05-15: **Client portal** merged to `dev` — per-client `/portal/[token]` hub (brand kit, document list, CTAs to `/pay`, `/quote`, `/proposal`); `clients.portal_token` migration `20260522120000_client_portal_token.sql`; `PortalShell` on all public doc pages; middleware public paths for `/quote`, `/proposal`, `/portal`; client detail portal link copy/regenerate + Documents tab wired; mock payment unchanged (`MockPaymentForm`). `feat/client-portal` → `dev`. Phase 2 progress: 6/8 tasks done.
 
 ---
 

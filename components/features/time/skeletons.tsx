@@ -6,9 +6,18 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonRepeat } from "@/components/shared/skeleton-repeat";
+
+export type TimePageSkeletonProps = {
+  todayRowCount?: number;
+  earlierRowCount?: number;
+};
 
 /** Mirrors `/time`: hero, live timer card, manual log card, Today table, Earlier table, footer tip. */
-export function TimePageSkeleton() {
+export function TimePageSkeleton({
+  todayRowCount = 0,
+  earlierRowCount = 0,
+}: TimePageSkeletonProps) {
   return (
     <div
       role="status"
@@ -114,19 +123,22 @@ export function TimePageSkeleton() {
               <Skeleton className="hidden h-4 w-14 sm:block" />
               <Skeleton className="hidden h-4 w-14 md:block" />
             </div>
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="flex flex-wrap items-center gap-3 border-b border-border/60 py-3 last:border-0"
-              >
-                <Skeleton className="h-5 min-w-[120px] flex-1" />
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="hidden h-4 w-32 lg:block" />
-                <Skeleton className="h-6 w-14 rounded-full" />
-                <Skeleton className="hidden h-4 w-28 sm:block" />
-                <Skeleton className="hidden h-4 w-28 md:block" />
-              </div>
-            ))}
+            <SkeletonRepeat
+              count={todayRowCount}
+              render={(i) => (
+                <div
+                  key={i}
+                  className="flex flex-wrap items-center gap-3 border-b border-border/60 py-3 last:border-0"
+                >
+                  <Skeleton className="h-5 min-w-[120px] flex-1" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="hidden h-4 w-32 lg:block" />
+                  <Skeleton className="h-6 w-14 rounded-full" />
+                  <Skeleton className="hidden h-4 w-28 sm:block" />
+                  <Skeleton className="hidden h-4 w-28 md:block" />
+                </div>
+              )}
+            />
             <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="ms-auto h-5 w-16 rounded-full" />
@@ -150,19 +162,22 @@ export function TimePageSkeleton() {
               <Skeleton className="hidden h-4 w-14 sm:block" />
               <Skeleton className="hidden h-4 w-14 md:block" />
             </div>
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="flex flex-wrap items-center gap-3 border-b border-border/60 py-3 last:border-0"
-              >
-                <Skeleton className="h-5 min-w-[120px] flex-1" />
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="hidden h-4 w-32 lg:block" />
-                <Skeleton className="h-6 w-14 rounded-full" />
-                <Skeleton className="hidden h-4 w-28 sm:block" />
-                <Skeleton className="hidden h-4 w-28 md:block" />
-              </div>
-            ))}
+            <SkeletonRepeat
+              count={earlierRowCount}
+              render={(i) => (
+                <div
+                  key={i}
+                  className="flex flex-wrap items-center gap-3 border-b border-border/60 py-3 last:border-0"
+                >
+                  <Skeleton className="h-5 min-w-[120px] flex-1" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="hidden h-4 w-32 lg:block" />
+                  <Skeleton className="h-6 w-14 rounded-full" />
+                  <Skeleton className="hidden h-4 w-28 sm:block" />
+                  <Skeleton className="hidden h-4 w-28 md:block" />
+                </div>
+              )}
+            />
           </div>
         </CardContent>
       </Card>

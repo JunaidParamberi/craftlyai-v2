@@ -1,5 +1,5 @@
-import { ProjectsPageSkeleton } from "@/components/features/projects/skeletons";
+import { ProjectsPageSkeletonLoader } from "@/components/features/projects/projects-page-skeleton-loader";
 
 export default function ProjectsLoading() {
-  return <ProjectsPageSkeleton />;
+  return <ProjectsPageSkeletonLoader />;
 }

@@ -1,4 +1,4 @@
-import { DocumentsTableSkeleton } from "@/components/features/documents/skeletons";
+import { DocumentsPageSkeletonLoader } from "@/components/features/documents/documents-page-skeleton-loader";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DocumentsLoading() {
@@ -8,7 +8,7 @@ export default function DocumentsLoading() {
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-4 w-72" />
       </div>
-      <DocumentsTableSkeleton />
+      <DocumentsPageSkeletonLoader />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { listClients } from "@/lib/clients/actions";
+import { paginatedListSkeletonCount } from "@/lib/ui/skeleton-count";
+import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 
 import { ClientsTable } from "@/components/features/clients/clients-table";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,10 @@ export default async function ClientsPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <SkeletonCountRecorder
+        id="clients:list"
+        count={paginatedListSkeletonCount(clients.length)}
+      />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">

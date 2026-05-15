@@ -10,6 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { listProjects } from "@/lib/projects/actions";
+import { paginatedListSkeletonCount } from "@/lib/ui/skeleton-count";
+import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 import { Plus } from "lucide-react";
 
 export default async function ProjectsPage() {
@@ -30,6 +32,10 @@ export default async function ProjectsPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <SkeletonCountRecorder
+        id="projects:list"
+        count={paginatedListSkeletonCount(projects.length)}
+      />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">

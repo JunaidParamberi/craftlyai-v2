@@ -1,5 +1,5 @@
-import { FinancePageSkeleton } from "@/components/features/finance/skeletons";
+import { FinancePageSkeletonLoader } from "@/components/features/finance/finance-page-skeleton-loader";
 
 export default function FinanceLoading() {
-  return <FinancePageSkeleton />;
+  return <FinancePageSkeletonLoader />;
 }

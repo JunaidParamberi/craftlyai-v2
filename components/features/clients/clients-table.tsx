@@ -61,7 +61,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const PAGE_SIZE = 10;
+import { TABLE_PAGE_SIZE as PAGE_SIZE } from "@/lib/ui/skeleton-count";
 
 type HealthFilterValue = "all" | ClientHealthBucket | "unset";
 

@@ -1,4 +1,4 @@
-import { TemplatePickerSkeleton } from "@/components/features/documents/skeletons";
+import { TemplatePickerSkeletonLoader } from "@/components/features/documents/template-picker-skeleton-loader";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function NewDocumentLoading() {
@@ -9,7 +9,7 @@ export default function NewDocumentLoading() {
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-80" />
       </div>
-      <TemplatePickerSkeleton />
+      <TemplatePickerSkeletonLoader />
     </div>
   );
 }

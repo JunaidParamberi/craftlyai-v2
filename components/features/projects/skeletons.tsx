@@ -11,8 +11,17 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonRepeat } from "@/components/shared/skeleton-repeat";
 
-export function ProjectsPageSkeleton() {
+export type ProjectsPageSkeletonProps = {
+  rowCount?: number;
+  statusChipCount?: number;
+};
+
+export function ProjectsPageSkeleton({
+  rowCount = 0,
+  statusChipCount = 4,
+}: ProjectsPageSkeletonProps) {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -20,18 +29,21 @@ export function ProjectsPageSkeleton() {
           <Skeleton className="h-9 w-40 md:h-10 md:w-44" />
           <Skeleton className="h-4 w-full max-w-lg" />
         </div>
-        <Skeleton className="h-9 w-[9.5rem] shrink-0 rounded-4xl" />
+        <Skeleton className="h-9 w-[9.5rem] shrink-0" />
       </div>
       <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm ring-1 ring-border/50">
         <div className="flex flex-col gap-4 border-b border-border/80 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Skeleton className="h-9 w-full max-w-md rounded-4xl" />
-            <Skeleton className="h-9 w-full rounded-4xl sm:w-28" />
+            <Skeleton className="h-9 w-full max-w-md" />
+            <Skeleton className="h-9 w-full sm:w-28" />
           </div>
           <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 4 }, (_, i) => (
-              <Skeleton key={i} className="h-8 w-28 rounded-full" />
-            ))}
+            <SkeletonRepeat
+              count={statusChipCount}
+              render={(i) => (
+                <Skeleton key={i} className="h-8 w-28 rounded-full" />
+              )}
+            />
           </div>
         </div>
         <div className="px-4 py-3 sm:px-6">
@@ -42,18 +54,21 @@ export function ProjectsPageSkeleton() {
             <Skeleton className="hidden h-4 w-20 sm:block" />
             <Skeleton className="ms-auto h-4 w-8" />
           </div>
-          {Array.from({ length: 6 }, (_, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-4 border-b border-border py-4 last:border-0"
-            >
-              <Skeleton className="h-5 min-w-0 flex-1 max-w-[220px]" />
-              <Skeleton className="hidden h-4 w-28 md:block" />
-              <Skeleton className="h-6 w-20 rounded-full" />
-              <Skeleton className="hidden h-4 w-24 sm:block" />
-              <Skeleton className="size-8 shrink-0 rounded-full" />
-            </div>
-          ))}
+          <SkeletonRepeat
+            count={rowCount}
+            render={(i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 border-b border-border py-4 last:border-0"
+              >
+                <Skeleton className="h-5 min-w-0 flex-1 max-w-[220px]" />
+                <Skeleton className="hidden h-4 w-28 md:block" />
+                <Skeleton className="h-6 w-20 rounded-full" />
+                <Skeleton className="hidden h-4 w-24 sm:block" />
+                <Skeleton className="size-8 shrink-0 rounded-full" />
+              </div>
+            )}
+          />
         </div>
         <div className="flex flex-col gap-3 border-t border-border/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <Skeleton className="h-4 w-52" />
@@ -78,38 +93,38 @@ function ProjectFormCardSkeleton() {
       >
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-9 w-full rounded-4xl" />
+          <Skeleton className="h-9 w-full" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-12" />
-          <Skeleton className="h-9 w-full rounded-4xl" />
+          <Skeleton className="h-9 w-full" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-14" />
-          <Skeleton className="h-9 w-full rounded-4xl" />
+          <Skeleton className="h-9 w-full" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
           </div>
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-14" />
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
           </div>
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
           </div>
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-9 w-full rounded-4xl" />
+            <Skeleton className="h-9 w-full" />
           </div>
         </div>
       </CardContent>
       <CardFooter className={FORM_CARD_FOOTER_END_ACTIONS}>
-        <Skeleton className="h-9 w-20 rounded-4xl" />
-        <Skeleton className="h-9 w-32 rounded-4xl" />
+        <Skeleton className="h-9 w-20" />
+        <Skeleton className="h-9 w-32" />
       </CardFooter>
     </Card>
   );
@@ -155,8 +170,8 @@ export function ProjectDetailPageSkeleton() {
                 <Skeleton className="h-4 w-full max-w-2xl" />
               </div>
               <div className="flex gap-2">
-                <Skeleton className="h-9 w-24 rounded-4xl" />
-                <Skeleton className="h-9 w-28 rounded-4xl" />
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-28" />
               </div>
             </div>
           </CardHeader>
@@ -172,8 +187,8 @@ export function ProjectDetailPageSkeleton() {
                 <div className="flex flex-col gap-4">
                   <div className="flex justify-between gap-2">
                     <div className="flex gap-2">
-                      <Skeleton className="h-8 w-20 rounded-4xl" />
-                      <Skeleton className="h-8 w-36 rounded-4xl" />
+                      <Skeleton className="h-8 w-20" />
+                      <Skeleton className="h-8 w-36" />
                     </div>
                     <Skeleton className="h-8 w-24" />
                   </div>
@@ -182,8 +197,8 @@ export function ProjectDetailPageSkeleton() {
                   ))}
                 </div>
                 <div className="flex flex-col gap-6">
-                  <Skeleton className="min-h-[180px] w-full rounded-4xl" />
-                  <Skeleton className="min-h-[160px] w-full rounded-4xl" />
+                  <Skeleton className="min-h-[180px] w-full" />
+                  <Skeleton className="min-h-[160px] w-full" />
                 </div>
               </div>
             </div>

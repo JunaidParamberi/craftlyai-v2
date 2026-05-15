@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FinanceFilterBar } from "@/components/features/finance/finance-filter-bar";
+import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 import { FinanceSummaryCards } from "@/components/features/finance/finance-summary-cards";
 import { RevenueAreaChart } from "@/components/features/finance/revenue-area-chart";
 import { FinanceInvoiceTable } from "@/components/features/finance/finance-invoice-table";
@@ -45,6 +46,7 @@ export default async function FinancePage({
 
   return (
     <>
+      <SkeletonCountRecorder id="finance:invoices" count={invoices.length} />
       <div className="relative shrink-0 rounded-3xl border border-border/60 bg-gradient-to-br from-muted/40 via-background to-background px-4 py-6 md:overflow-hidden md:px-8 md:py-10">
         <div
           aria-hidden

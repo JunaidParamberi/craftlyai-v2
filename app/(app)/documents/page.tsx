@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 
 import { listDocuments } from "@/lib/documents/document-queries";
+import { paginatedListSkeletonCount } from "@/lib/ui/skeleton-count";
+import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 
 import { DocumentsTable } from "@/components/features/documents/documents-table";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,10 @@ export default async function DocumentsPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <SkeletonCountRecorder
+        id="documents:list"
+        count={paginatedListSkeletonCount(documents.length)}
+      />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
