@@ -15,6 +15,7 @@ export type ProfileRow = {
   address_country: string | null;
   default_currency: string;
   brand_kit_id: string | null;
+  plan_tier: "free" | "starter" | "pro" | "agency";
   onboarding_brand_skipped: boolean;
   onboarding_completed_at: string | null;
   created_at: string;
@@ -239,6 +240,19 @@ export type QuoteDocumentRow = DocumentRow & {
 /** DocumentRow extended with embedded line items for proposals. */
 export type ProposalDocumentRow = DocumentRow & {
   line_items: LineItemRow[];
+};
+
+export type SubscriptionStatus = "active" | "cancelled" | "expired" | "past_due";
+
+export type Subscription = {
+  id: string;
+  user_id: string;
+  lemon_squeezy_id: string | null;
+  plan: "free" | "starter" | "pro" | "agency";
+  status: SubscriptionStatus;
+  current_period_end: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 /**
