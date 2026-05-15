@@ -54,7 +54,7 @@ export function KanbanCard({
         }
       }}
       className={cn(
-        "cursor-grab select-none rounded-lg border border-border border-l-4 bg-card p-3 shadow-sm",
+        "cursor-grab select-none touch-none rounded-lg border border-border border-l-4 bg-card p-3 shadow-sm",
         PRIORITY_BORDER[task.priority],
         "transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md",
         isDragging && !isDragOverlay && "opacity-50 shadow-none",

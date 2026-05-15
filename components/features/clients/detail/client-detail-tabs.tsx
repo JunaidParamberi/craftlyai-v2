@@ -47,16 +47,16 @@ export function ClientDetailTabs({
     <Tabs defaultValue="overview" className="gap-6">
       <TabsList
         variant="line"
-        className="h-auto w-full min-w-0 flex-wrap justify-start gap-0 bg-transparent p-0"
+        className="h-auto w-full min-w-0 justify-start gap-0 overflow-x-auto bg-transparent p-0 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        <TabsTrigger value="overview">Overview & projects</TabsTrigger>
-        <TabsTrigger value="documents" className="gap-2">
+        <TabsTrigger value="overview" className="shrink-0">Overview & projects</TabsTrigger>
+        <TabsTrigger value="documents" className="shrink-0 gap-2">
           Documents
           <Badge variant="secondary" className="font-normal">
             {documents.length}
           </Badge>
         </TabsTrigger>
-        <TabsTrigger value="notes">Notes & activity</TabsTrigger>
+        <TabsTrigger value="notes" className="shrink-0">Notes & activity</TabsTrigger>
       </TabsList>
 
       <TabsContent value="overview" className="mt-0">

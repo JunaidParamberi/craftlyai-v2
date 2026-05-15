@@ -3,7 +3,11 @@
 import {
   DndContext,
   DragOverlay,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
+  useSensor,
+  useSensors,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
@@ -66,6 +70,11 @@ export function KanbanBoard({
   projectId,
   onAddTask,
 }: KanbanBoardProps) {
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+  );
+
   const router = useRouter();
   const [tasks, setTasks] = useState(initialTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -192,13 +201,14 @@ export function KanbanBoard({
   return (
     <>
       <DndContext
+        sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
         <div
           ref={boardScrollRef}
-          className="flex min-h-0 min-w-0 w-full touch-pan-x gap-4 overflow-x-auto overscroll-x-contain pb-4 [-webkit-overflow-scrolling:touch]"
+          className="flex min-h-0 min-w-0 w-full gap-4 overflow-x-auto overscroll-x-contain pb-4 [-webkit-overflow-scrolling:touch]"
         >
           {COLUMNS.map((col) => (
             <KanbanColumn

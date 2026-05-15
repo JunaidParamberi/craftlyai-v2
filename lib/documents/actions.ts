@@ -12,6 +12,7 @@ export {
   listDocumentTemplates,
   listDocuments,
   listDocumentsForClient,
+  listDocumentsForProject,
 } from "./document-queries";
 
 export type {

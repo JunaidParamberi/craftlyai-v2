@@ -1,6 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  CheckCircle2,
+  CheckIcon,
+  Circle,
+  RotateCcw,
+  XCircle,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -8,10 +15,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { deleteTask, updateTask } from "@/lib/tasks/actions";
-import {
-  taskPriorityLabel,
-  taskStatusLabel,
-} from "@/lib/tasks/display";
+import { taskPriorityLabel } from "@/lib/tasks/display";
+import { cn } from "@/lib/utils";
 import { TASK_LIMITS, taskCreateSchema } from "@/lib/validations/task";
 import type { TaskPriority, TaskRow, TaskStatus } from "@/types";
 
@@ -33,8 +38,56 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-const STATUSES = ["todo", "in_progress", "done", "cancelled"] as const;
 const PRIORITIES = ["low", "medium", "high"] as const;
+
+type StatusConfig = {
+  status: TaskStatus;
+  label: string;
+  icon: React.ElementType;
+  activeBg: string;
+  activeBorder: string;
+  activeText: string;
+  dot: string;
+};
+
+const STATUS_CONFIG: StatusConfig[] = [
+  {
+    status: "todo",
+    label: "To Do",
+    icon: Circle,
+    activeBg: "bg-slate-100 dark:bg-slate-800",
+    activeBorder: "border-slate-300 dark:border-slate-600",
+    activeText: "text-slate-700 dark:text-slate-200",
+    dot: "bg-slate-400 dark:bg-slate-500",
+  },
+  {
+    status: "in_progress",
+    label: "In Progress",
+    icon: RotateCcw,
+    activeBg: "bg-blue-50 dark:bg-blue-950/60",
+    activeBorder: "border-blue-300 dark:border-blue-700",
+    activeText: "text-blue-700 dark:text-blue-300",
+    dot: "bg-blue-500",
+  },
+  {
+    status: "done",
+    label: "Done",
+    icon: CheckCircle2,
+    activeBg: "bg-emerald-50 dark:bg-emerald-950/60",
+    activeBorder: "border-emerald-300 dark:border-emerald-700",
+    activeText: "text-emerald-700 dark:text-emerald-300",
+    dot: "bg-emerald-500",
+  },
+  {
+    status: "cancelled",
+    label: "Cancelled",
+    icon: XCircle,
+    activeBg: "bg-red-50 dark:bg-red-950/60",
+    activeBorder: "border-red-300 dark:border-red-700",
+    activeText: "text-red-600 dark:text-red-400",
+    dot: "bg-red-500",
+  },
+];
 
 type TaskEditFormValues = z.infer<typeof taskCreateSchema>;
 
@@ -101,101 +154,143 @@ export function TaskEditSheet({
     });
   }
 
+  function handleMoveTo(s: TaskStatus) {
+    if (!task) return;
+    startTransition(async () => {
+      const res = await updateTask(projectId, task.id, { status: s });
+      if (!res.ok) {
+        toast.error(res.message ?? "Failed to update task.");
+        return;
+      }
+      const cfg = STATUS_CONFIG.find((c) => c.status === s);
+      toast.success(`Moved to ${cfg?.label ?? s}`);
+      onSaved(res.task);
+      onClose();
+    });
+  }
+
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent side="right" className="w-[400px] sm:max-w-[400px]">
-        <SheetHeader>
-          <SheetTitle>Edit task</SheetTitle>
+      <SheetContent side="right" className="flex w-full max-w-[360px] flex-col gap-0 p-0 sm:max-w-[360px]">
+        {/* Header */}
+        <SheetHeader className="border-b border-border px-5 py-4">
+          <SheetTitle className="text-base font-semibold leading-tight line-clamp-2">
+            {task?.title ?? "Edit task"}
+          </SheetTitle>
         </SheetHeader>
 
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="mt-6 flex flex-col gap-5 px-1"
-        >
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="kanban-task-title">Title</Label>
-            <Input
-              id="kanban-task-title"
-              maxLength={TASK_LIMITS.title}
-              {...form.register("title")}
-            />
-            {form.formState.errors.title ? (
-              <p className="text-xs text-destructive">
-                {form.formState.errors.title.message}
+        <div className="flex flex-col gap-0 overflow-y-auto flex-1">
+          {/* Move to section */}
+          {task ? (
+            <div className="px-5 py-4 border-b border-border">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+                Move to
               </p>
-            ) : null}
-          </div>
+              <div className="grid grid-cols-2 gap-2">
+                {STATUS_CONFIG.map(({ status: s, label, icon: Icon, activeBg, activeBorder, activeText, dot }) => {
+                  const isCurrent = task.status === s;
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      disabled={isCurrent || isPending}
+                      onClick={() => handleMoveTo(s)}
+                      className={cn(
+                        "group flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-all duration-150",
+                        isCurrent
+                          ? cn("cursor-default", activeBg, activeBorder, activeText)
+                          : "border-border bg-transparent text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-foreground active:scale-[0.98]",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "h-2 w-2 shrink-0 rounded-full",
+                          isCurrent ? dot : "bg-muted-foreground/30 group-hover:bg-muted-foreground/50",
+                        )}
+                      />
+                      <span className="flex-1 truncate">{label}</span>
+                      {isCurrent && (
+                        <CheckIcon className="ml-auto h-3.5 w-3.5 shrink-0 opacity-70" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Status</Label>
-            <Select
-              value={form.watch("status")}
-              onValueChange={(v) =>
-                form.setValue("status", v as TaskStatus)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue>
-                  {taskStatusLabel(form.watch("status"))}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {taskStatusLabel(s)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Edit form */}
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4 px-5 py-4"
+          >
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="kanban-task-title" className="text-xs font-medium text-muted-foreground">
+                Title
+              </Label>
+              <Input
+                id="kanban-task-title"
+                maxLength={TASK_LIMITS.title}
+                className="h-9 text-sm"
+                {...form.register("title")}
+              />
+              {form.formState.errors.title ? (
+                <p className="text-xs text-destructive">
+                  {form.formState.errors.title.message}
+                </p>
+              ) : null}
+            </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Priority</Label>
-            <Select
-              value={form.watch("priority")}
-              onValueChange={(v) =>
-                form.setValue("priority", v as TaskPriority)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue>
-                  {taskPriorityLabel(form.watch("priority"))}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {PRIORITIES.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {taskPriorityLabel(p)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">Priority</Label>
+              <Select
+                value={form.watch("priority")}
+                onValueChange={(v) => form.setValue("priority", v as TaskPriority)}
+              >
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue>
+                    {taskPriorityLabel(form.watch("priority"))}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {PRIORITIES.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {taskPriorityLabel(p)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="kanban-task-due">Due date</Label>
-            <Input
-              id="kanban-task-due"
-              type="date"
-              {...form.register("due_date")}
-            />
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="kanban-task-due" className="text-xs font-medium text-muted-foreground">
+                Due date
+              </Label>
+              <Input
+                id="kanban-task-due"
+                type="date"
+                className="h-9 text-sm"
+                {...form.register("due_date")}
+              />
+            </div>
 
-          <SheetFooter className="flex gap-2 pt-2">
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={onDelete}
-              disabled={isPending}
-              className="mr-auto"
-            >
-              Delete
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving…" : "Save"}
-            </Button>
-          </SheetFooter>
-        </form>
+            <SheetFooter className="mt-2 flex-row gap-2 pt-2 border-t border-border">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onDelete}
+                disabled={isPending}
+                className="mr-auto text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                Delete
+              </Button>
+              <Button type="submit" size="sm" disabled={isPending} className="px-5">
+                {isPending ? "Saving…" : "Save"}
+              </Button>
+            </SheetFooter>
+          </form>
+        </div>
       </SheetContent>
     </Sheet>
   );

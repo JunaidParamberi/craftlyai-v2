@@ -147,6 +147,43 @@ export async function listDocumentsForClient(
   };
 }
 
+export async function listDocumentsForProject(
+  projectId: string,
+): Promise<ListDocumentsResult> {
+  const parsedId = uuidSchema.safeParse(projectId);
+  if (!parsedId.success) {
+    return { ok: false, message: "Invalid project." };
+  }
+
+  const supabase = await createSupabaseClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { ok: false, message: "Not authenticated." };
+  }
+
+  const { data, error } = await supabase
+    .from("documents")
+    .select(
+      "*, clients:client_id(id, name), projects:project_id(id, title)",
+    )
+    .eq("user_id", user.id)
+    .eq("project_id", parsedId.data)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  return {
+    ok: true,
+    documents: (data ?? []).map((row) => normalizeDocumentListRow(row)),
+  };
+}
+
 export async function getDocumentById(
   id: string,
 ): Promise<DocumentRow | null> {

@@ -10,10 +10,11 @@ import {
   projectStatusBadgePresentation,
   projectStatusLabel,
 } from "@/lib/projects/display";
-import type { ExpenseListRow, ProjectListRow, TaskRow } from "@/types";
+import type { DocumentListRow, ExpenseListRow, ProjectListRow, TaskRow } from "@/types";
 
 import { ProjectExpensesPanel } from "@/components/features/expenses/project-expenses-panel";
 import { ProjectTasksPanel } from "@/components/features/projects/project-tasks-panel";
+import { DocumentsTable } from "@/components/features/documents/documents-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,7 @@ type ProjectDetailViewProps = {
   tasks: TaskRow[];
   expenses: ExpenseListRow[];
   projects: ProjectListRow[];
+  documents: DocumentListRow[];
   defaultCurrency: string;
 };
 
@@ -47,6 +49,7 @@ export function ProjectDetailView({
   tasks,
   expenses,
   projects,
+  documents,
   defaultCurrency,
 }: ProjectDetailViewProps) {
   const router = useRouter();
@@ -154,13 +157,13 @@ export function ProjectDetailView({
           >
             <TabsList
               variant="line"
-              className="h-auto w-full min-w-0 flex-wrap justify-start gap-0 bg-transparent p-0"
+              className="h-auto w-full min-w-0 justify-start gap-0 overflow-x-auto bg-transparent p-0 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="tasks">Tasks</TabsTrigger>
-              <TabsTrigger value="expenses">Expenses</TabsTrigger>
-              <TabsTrigger value="time">Time</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
+              <TabsTrigger value="overview" className="shrink-0">Overview</TabsTrigger>
+              <TabsTrigger value="tasks" className="shrink-0">Tasks</TabsTrigger>
+              <TabsTrigger value="expenses" className="shrink-0">Expenses</TabsTrigger>
+              <TabsTrigger value="time" className="shrink-0">Time</TabsTrigger>
+              <TabsTrigger value="documents" className="shrink-0">Documents</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-0">
@@ -231,20 +234,30 @@ export function ProjectDetailView({
             </TabsContent>
 
             <TabsContent value="documents" className="mt-0">
-              <Card className="border-dashed border-border/80 shadow-none">
-                <CardContent className="flex flex-col items-center gap-4 py-14 text-center">
-                  <div className="flex size-14 items-center justify-center rounded-2xl bg-muted">
-                    <FileText className="size-7 text-muted-foreground" />
-                  </div>
-                  <div className="max-w-md space-y-2">
-                    <p className="font-medium text-sm">Documents</p>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      Quotes, proposals, and invoices for this project will appear
-                      here with Document Studio (Phase 2).
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {documents.length === 0
+                      ? "No documents linked to this project yet."
+                      : `${documents.length} document${documents.length === 1 ? "" : "s"}`}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    nativeButton={false}
+                    render={
+                      <Link
+                        href={`/documents/new?projectId=${project.id}`}
+                      />
+                    }
+                  >
+                    <FileText className="size-4" />
+                    New document
+                  </Button>
+                </div>
+                <DocumentsTable documents={documents} />
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
