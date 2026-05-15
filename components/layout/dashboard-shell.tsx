@@ -55,7 +55,7 @@ export function DashboardShell({
         <SidebarInset className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden">
           <div
             ref={scrollRef}
-            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
+            className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
           >
             <AppHeader
               userEmail={userEmail}
@@ -65,7 +65,9 @@ export function DashboardShell({
               unreadCount={unreadCount}
               onOpenSearch={() => setCommandOpen(true)}
             />
-            <div className="flex flex-col gap-6 p-4 md:p-6">{children}</div>
+            <div className="flex min-w-0 flex-col gap-6 p-4 md:p-6">
+              {children}
+            </div>
           </div>
         </SidebarInset>
       </SidebarProvider>

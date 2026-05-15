@@ -49,7 +49,7 @@ export function FormPageShell({
 }: FormPageShellProps) {
   return (
     <div
-      className={cn("mx-auto w-full", maxWidthClasses[maxWidth], className)}
+      className={cn("mx-auto w-full min-w-0", maxWidthClasses[maxWidth], className)}
     >
       {children}
     </div>

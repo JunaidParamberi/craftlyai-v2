@@ -73,7 +73,7 @@ export function ProjectDetailView({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex min-w-0 flex-col gap-8">
       <nav
         aria-label="Breadcrumb"
         className="flex flex-wrap items-center gap-1 text-sm"
@@ -92,7 +92,7 @@ export function ProjectDetailView({
         <span className="truncate font-medium text-foreground">{project.title}</span>
       </nav>
 
-      <Card className="overflow-hidden border-border/80 shadow-sm">
+      <Card className="min-w-0 overflow-hidden border-border/80 shadow-sm">
         <CardHeader className="flex flex-col gap-4 border-b border-border/60 pb-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col gap-3">
@@ -146,8 +146,12 @@ export function ProjectDetailView({
           </div>
         </CardHeader>
 
-        <CardContent className="pt-6">
-          <Tabs value={tab} onValueChange={setTab} className="flex flex-col gap-6">
+        <CardContent className="min-w-0 pt-6">
+          <Tabs
+            value={tab}
+            onValueChange={setTab}
+            className="flex min-w-0 flex-col gap-6"
+          >
             <TabsList
               variant="line"
               className="h-auto w-full min-w-0 flex-wrap justify-start gap-0 bg-transparent p-0"
@@ -196,7 +200,7 @@ export function ProjectDetailView({
               </div>
             </TabsContent>
 
-            <TabsContent value="tasks" className="mt-0">
+            <TabsContent value="tasks" className="mt-0 min-w-0">
               <ProjectTasksPanel projectId={project.id} initialTasks={tasks} />
             </TabsContent>
 

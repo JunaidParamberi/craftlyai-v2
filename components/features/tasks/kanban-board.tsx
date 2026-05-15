@@ -144,7 +144,7 @@ export function KanbanBoard({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4">
+        <div className="flex min-h-0 min-w-0 w-full touch-pan-x gap-4 overflow-x-auto overscroll-x-contain pb-4 [-webkit-overflow-scrolling:touch]">
           {COLUMNS.map((col) => (
             <KanbanColumn
               key={col.status}
