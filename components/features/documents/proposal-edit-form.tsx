@@ -3,12 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import TiptapLink from "@tiptap/extension-link";
-import Typography from "@tiptap/extension-typography";
 import { Button } from "@/components/ui/button";
+import { TiptapEditor } from "./editor/tiptap-editor";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +48,7 @@ export function ProposalEditForm({
   const [clientId, setClientId] = useState(document.client_id ?? "");
   const [projectId, setProjectId] = useState(document.project_id ?? "");
   const [status, setStatus] = useState<string>(document.status);
+  const [contentJson, setContentJson] = useState<import("@/types").TiptapDoc>(document.content_json);
 
   const selectedClient = clients.find((c) => c.id === clientId);
   const filteredProjects = projects.filter(
@@ -59,26 +56,12 @@ export function ProposalEditForm({
   );
   const currency = selectedClient?.currency ?? "USD";
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Placeholder.configure({ placeholder: "Start writing your proposal…" }),
-      TiptapLink.configure({ openOnClick: false }),
-      Typography,
-    ],
-    content: document.content_json,
-    editorProps: {
-      attributes: { class: "doc-prose min-h-[480px] focus:outline-none px-1" },
-    },
-  });
-
   const handleSave = () => {
-    if (!editor) return;
     startTransition(async () => {
       const result = await updateDocument(document.id, {
         title: title.trim() || "Untitled Proposal",
         type: "proposal",
-        content_json: editor.getJSON(),
+        content_json: contentJson,
         client_id: clientId || "",
         project_id: projectId || "",
         status,
@@ -100,7 +83,7 @@ export function ProposalEditForm({
         status: v as "draft",
         client_id: clientId || "",
         project_id: projectId || "",
-        content_json: editor?.getJSON() ?? document.content_json,
+        content_json: contentJson,
       });
     });
   };
@@ -201,9 +184,11 @@ export function ProposalEditForm({
         {/* Main column: editor + meta + pricing */}
         <div className="flex flex-col gap-6">
           {/* Tiptap editor canvas */}
-          <div className="rounded-lg border border-border/60 bg-card p-6">
-            <EditorContent editor={editor} />
-          </div>
+          <TiptapEditor
+            value={contentJson}
+            onChange={setContentJson}
+            placeholder="Start writing your proposal…"
+          />
 
           <ProposalMetaFields
             documentId={document.id}
