@@ -10,8 +10,13 @@ import {
   applyDiscount,
   calcAvgPayDays,
   calcLineItemsTotal,
+  calcTaxTotal,
   calcRevenueChangePct,
 } from "./revenue-calc";
+
+function coerceDiscountType(val: string | null | undefined): "percent" | "flat" {
+  return val === "flat" ? "flat" : "percent";
+}
 import { previousPeriodRange } from "./date-utils";
 
 // ---------------------------------------------------------------------------
@@ -23,7 +28,7 @@ async function fetchPaidInvoicesWithLineItems(
   from: Date,
   to: Date
 ) {
-  const { data: docs } = await supabase
+  const { data: docs, error: docsError } = await supabase
     .from("documents")
     .select("id, paid_at, sent_at, discount_value, discount_type")
     .eq("user_id", userId)
@@ -32,13 +37,20 @@ async function fetchPaidInvoicesWithLineItems(
     .gte("paid_at", from.toISOString())
     .lte("paid_at", to.toISOString());
 
+  if (docsError) {
+    console.error("[finance-queries] docs fetch error:", docsError.message);
+  }
   if (!docs || docs.length === 0) return { docs: [], lineItemsByDoc: new Map() };
 
   const ids = docs.map((d) => d.id);
-  const { data: lineItems } = await supabase
+  const { data: lineItems, error: lineItemsError } = await supabase
     .from("line_items")
-    .select("document_id, quantity, unit_price")
+    .select("document_id, quantity, unit_price, tax_rate")
     .in("document_id", ids);
+
+  if (lineItemsError) {
+    console.error("[finance-queries] line items fetch error:", lineItemsError.message);
+  }
 
   const lineItemsByDoc = new Map<string, typeof lineItems>();
   for (const li of lineItems ?? []) {
@@ -68,14 +80,9 @@ async function computeRangeRevenue(
   return docs.reduce((total, doc) => {
     const items = lineItemsByDoc.get(doc.id) ?? [];
     const subtotal = calcLineItemsTotal(items);
-    return (
-      total +
-      applyDiscount(
-        subtotal,
-        (doc.discount_type ?? "percent") as "percent" | "flat",
-        doc.discount_value ?? 0
-      )
-    );
+    const tax = calcTaxTotal(items);
+    const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
+    return total + net;
   }, 0);
 }
 
@@ -116,22 +123,15 @@ export async function getFinancialSummary(
       .select("id, due_date, discount_value, discount_type")
       .eq("user_id", user.id)
       .eq("type", "invoice")
-      .in("status", ["sent", "viewed"])
-      .gte("created_at", range.from.toISOString())
-      .lte("created_at", range.to.toISOString()),
+      .in("status", ["sent", "viewed"]),
   ]);
 
   const totalRevenue = paidDocs.reduce((sum, doc) => {
     const items = paidLineItems.get(doc.id) ?? [];
     const subtotal = calcLineItemsTotal(items);
-    return (
-      sum +
-      applyDiscount(
-        subtotal,
-        (doc.discount_type ?? "percent") as "percent" | "flat",
-        doc.discount_value ?? 0
-      )
-    );
+    const tax = calcTaxTotal(items);
+    const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
+    return sum + net;
   }, 0);
 
   const outstandingIds = (outstandingDocs.data ?? []).map((d) => d.id);
@@ -139,7 +139,7 @@ export async function getFinancialSummary(
     outstandingIds.length > 0
       ? await supabase
           .from("line_items")
-          .select("document_id, quantity, unit_price")
+          .select("document_id, quantity, unit_price, tax_rate")
           .in("document_id", outstandingIds)
       : { data: [] };
 
@@ -158,11 +158,8 @@ export async function getFinancialSummary(
   for (const doc of outstandingDocs.data ?? []) {
     const items = liByOutstanding.get(doc.id) ?? [];
     const subtotal = calcLineItemsTotal(items);
-    const net = applyDiscount(
-      subtotal,
-      (doc.discount_type ?? "percent") as "percent" | "flat",
-      doc.discount_value ?? 0
-    );
+    const tax = calcTaxTotal(items);
+    const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
     outstanding += net;
     outstandingCount++;
     if (doc.due_date && parseISO(doc.due_date) < now) {
@@ -209,14 +206,12 @@ export async function getMonthlyRevenue(
   const currentMonthKey = format(new Date(), "yyyy-MM");
 
   for (const doc of docs) {
-    const monthKey = format(parseISO(doc.paid_at!), "yyyy-MM");
+    if (!doc.paid_at) continue;
+    const monthKey = format(parseISO(doc.paid_at), "yyyy-MM");
     const items = lineItemsByDoc.get(doc.id) ?? [];
     const subtotal = calcLineItemsTotal(items);
-    const net = applyDiscount(
-      subtotal,
-      (doc.discount_type ?? "percent") as "percent" | "flat",
-      doc.discount_value ?? 0
-    );
+    const tax = calcTaxTotal(items);
+    const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
     byMonth.set(monthKey, (byMonth.get(monthKey) ?? 0) + net);
   }
 
@@ -257,7 +252,7 @@ export async function listFinanceInvoices(
   const ids = docs.map((d) => d.id);
   const { data: lineItems } = await supabase
     .from("line_items")
-    .select("document_id, quantity, unit_price")
+    .select("document_id, quantity, unit_price, tax_rate")
     .in("document_id", ids);
 
   const liByDoc = new Map<string, typeof lineItems>();
@@ -271,11 +266,8 @@ export async function listFinanceInvoices(
     const normalized = normalizeDocumentListRow(row);
     const items = liByDoc.get(row.id) ?? [];
     const subtotal = calcLineItemsTotal(items);
-    const computedTotal = applyDiscount(
-      subtotal,
-      (row.discount_type ?? "percent") as "percent" | "flat",
-      row.discount_value ?? 0
-    );
+    const tax = calcTaxTotal(items);
+    const computedTotal = applyDiscount(subtotal, coerceDiscountType(row.discount_type), row.discount_value ?? 0) + tax;
     return { ...normalized, computedTotal };
   });
 }
