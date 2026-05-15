@@ -15,6 +15,7 @@ import { DocumentDetailView } from "@/components/features/documents/document-det
 import { MarkPaidButton } from "@/components/features/documents/mark-paid-button";
 import { SendInvoiceButton } from "@/components/features/documents/send-invoice-button";
 import { SendQuoteButton } from "@/components/features/documents/send-quote-button";
+import { SendProposalButton } from "@/components/features/documents/send-proposal-button";
 import { QuoteApprovalStatus } from "@/components/features/documents/quote-approval-status";
 import { Button } from "@/components/ui/button";
 import type { LineItemRow } from "@/types";
@@ -96,6 +97,12 @@ export default async function DocumentDetailPage({ params }: PageProps) {
             <SendQuoteButton
               documentId={document.id}
               defaultEmail={client?.email ?? undefined}
+            />
+          ) : null}
+          {document.type === "proposal" ? (
+            <SendProposalButton
+              documentId={document.id}
+              defaultEmail={client?.email ?? ""}
             />
           ) : null}
         </div>

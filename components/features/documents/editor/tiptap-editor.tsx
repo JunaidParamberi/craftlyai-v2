@@ -10,6 +10,7 @@ import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import type { TiptapDoc } from "@/types";
 
+import { PricingTableExtension } from "./pricing-table-node";
 import { EditorToolbar } from "./editor-toolbar";
 
 type TiptapEditorProps = {
@@ -43,6 +44,7 @@ export function TiptapEditor({
         },
       }),
       Typography,
+      PricingTableExtension,
     ],
     content: value as JSONContent,
     editorProps: {

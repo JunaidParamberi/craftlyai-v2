@@ -165,17 +165,6 @@ export default async function EditDocumentPage({ params }: PageProps) {
     const proposal = await getProposalWithLineItems(id);
     if (!proposal) notFound();
 
-    let clientEmail: string | null = null;
-    if (document.client_id) {
-      const supabase = await createSupabaseClient();
-      const { data: clientData } = await supabase
-        .from("clients")
-        .select("email")
-        .eq("id", document.client_id)
-        .single();
-      clientEmail = (clientData as { email?: string } | null)?.email ?? null;
-    }
-
     return (
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
@@ -195,7 +184,6 @@ export default async function EditDocumentPage({ params }: PageProps) {
           document={proposal}
           clients={clients}
           projects={projects}
-          clientEmail={clientEmail}
         />
       </div>
     );

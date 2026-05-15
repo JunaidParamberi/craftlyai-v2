@@ -17,10 +17,8 @@ import {
 } from "@/components/ui/select";
 import { CheckCircle2, XCircle, FileText, ArrowRight } from "lucide-react";
 import { updateDocument } from "@/lib/documents/document-mutations";
-import { updateProposalMeta, convertProposalToInvoice } from "@/lib/documents/proposal-mutations";
+import { convertProposalToInvoice } from "@/lib/documents/proposal-mutations";
 import { ProposalMetaFields } from "./proposal-meta-fields";
-import { SendProposalButton } from "./send-proposal-button";
-import { InvoiceLineItemsEditor } from "./invoice-line-items-editor";
 import type { ProposalDocumentRow, ClientRow, ProjectListRow } from "@/types";
 import { toast } from "sonner";
 
@@ -33,14 +31,12 @@ interface ProposalEditFormProps {
   document: ProposalDocumentRow;
   clients: ClientRow[];
   projects: ProjectListRow[];
-  clientEmail?: string | null;
 }
 
 export function ProposalEditForm({
   document,
   clients,
   projects,
-  clientEmail,
 }: ProposalEditFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -54,7 +50,6 @@ export function ProposalEditForm({
   const filteredProjects = projects.filter(
     (p) => !clientId || p.client_id === clientId,
   );
-  const currency = selectedClient?.currency ?? "USD";
 
   const handleSave = () => {
     startTransition(async () => {
@@ -68,6 +63,7 @@ export function ProposalEditForm({
       });
       if (result.ok) {
         toast.success("Proposal saved");
+        router.push(`/documents/${document.id}`);
       } else {
         toast.error(result.message ?? "Failed to save");
       }
@@ -97,18 +93,6 @@ export function ProposalEditForm({
       } else {
         toast.error(result.error ?? "Failed to convert");
       }
-    });
-  };
-
-  const handleDiscountSave = (value: number, type: "percent" | "flat") => {
-    startTransition(async () => {
-      await updateProposalMeta(document.id, {
-        proposal_number: document.proposal_number,
-        valid_until: document.valid_until,
-        notes_footer: document.notes_footer,
-        discount_value: value,
-        discount_type: type,
-      });
     });
   };
 
@@ -196,24 +180,6 @@ export function ProposalEditForm({
             initialValidUntil={document.valid_until}
             initialNotesFooter={document.notes_footer}
           />
-
-          {/* Optional pricing section */}
-          <div>
-            <p className="text-base font-semibold text-foreground mb-4">
-              Pricing{" "}
-              <span className="font-normal text-muted-foreground text-sm">
-                (optional)
-              </span>
-            </p>
-            <InvoiceLineItemsEditor
-              documentId={document.id}
-              initialItems={document.line_items}
-              discountValue={Number(document.discount_value ?? 0)}
-              discountType={document.discount_type ?? "percent"}
-              currency={currency}
-              onDiscountSave={handleDiscountSave}
-            />
-          </div>
         </div>
 
         {/* Sidebar */}
@@ -328,10 +294,6 @@ export function ProposalEditForm({
           >
             Cancel
           </Button>
-          <SendProposalButton
-            documentId={document.id}
-            defaultEmail={clientEmail ?? ""}
-          />
           <Button type="button" onClick={handleSave} disabled={isPending}>
             {isPending ? "Saving…" : "Save changes"}
           </Button>

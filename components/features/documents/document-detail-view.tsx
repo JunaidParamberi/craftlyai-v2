@@ -1,5 +1,6 @@
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 
+import type { PricingRow, PricingTableAttrs } from "./editor/pricing-table-view";
 import {
   documentStatusLabel,
   documentStatusVariant,
@@ -134,9 +135,80 @@ export function renderNode(node: TiptapNode, ctx: VariableContext, key?: number)
       return <br key={key} />;
     case "text":
       return renderText(node, ctx, key);
+    case "pricingTable":
+      return renderPricingTable(node.attrs as PricingTableAttrs | undefined, key);
     default:
       return null;
   }
+}
+
+function renderPricingTable(attrs: PricingTableAttrs | undefined, key?: number): ReactNode {
+  const rows: PricingRow[] = attrs?.rows ?? [];
+  const currency = attrs?.currency ?? "USD";
+  const showTax = attrs?.showTax ?? false;
+  const taxRate = attrs?.taxRate ?? 0;
+  const subtotal = rows.reduce((s, r) => s + r.qty * r.rate, 0);
+  const tax = showTax ? subtotal * (taxRate / 100) : 0;
+  const total = subtotal + tax;
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+    }).format(n);
+
+  return (
+    <div key={key} className="my-6 rounded-xl border border-border/60 overflow-hidden">
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr className="bg-muted/60 border-b border-border/60">
+            {["Description", "Qty", "Rate", "Total"].map((h, i) => (
+              <th
+                key={h}
+                className={`py-2.5 px-3 text-[0.68rem] font-semibold uppercase tracking-widest text-muted-foreground ${i === 0 ? "text-left pl-4" : "text-right"} ${i === 3 ? "pr-4" : ""}`}
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i} className="border-b border-border/40">
+              <td className="py-2.5 pl-4 pr-3 text-foreground">
+                {row.description || <span className="text-muted-foreground/40 italic">—</span>}
+              </td>
+              <td className="py-2.5 px-3 text-right tabular-nums">{row.qty}</td>
+              <td className="py-2.5 px-3 text-right tabular-nums">{fmt(row.rate)}</td>
+              <td className="py-2.5 pl-3 pr-4 text-right font-medium tabular-nums">{fmt(row.qty * row.rate)}</td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr className="border-t border-border/60">
+            <td colSpan={3} className="py-2.5 pl-4 text-right text-[0.68rem] font-medium uppercase tracking-widest text-muted-foreground">
+              Subtotal
+            </td>
+            <td className="py-2.5 pl-3 pr-4 text-right font-medium tabular-nums">{fmt(subtotal)}</td>
+          </tr>
+          {showTax && (
+            <tr className="border-t border-border/40">
+              <td colSpan={3} className="py-2 pl-4 text-right text-[0.68rem] font-medium uppercase tracking-widest text-muted-foreground">
+                Tax ({taxRate}%)
+              </td>
+              <td className="py-2 pl-3 pr-4 text-right font-medium tabular-nums">{fmt(tax)}</td>
+            </tr>
+          )}
+          <tr className="border-t border-border/60 bg-muted/30">
+            <td colSpan={3} className="py-3 pl-4 text-right text-[0.68rem] font-semibold uppercase tracking-widest text-foreground">
+              Total
+            </td>
+            <td className="py-3 pl-3 pr-4 text-right font-semibold tabular-nums text-foreground text-base">{fmt(total)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  );
 }
 
 function renderInlineChildren(
