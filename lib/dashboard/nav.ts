@@ -3,6 +3,7 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
+  Receipt,
   Timer,
   Users,
   Wallet,
@@ -31,6 +32,7 @@ export const workNav: NavItem[] = [
 
 export const businessNav: NavItem[] = [
   { title: "Documents", href: "/documents", icon: FileText },
+  { title: "Expenses", href: "/expenses", icon: Receipt },
   { title: "Finance", href: "/finance", icon: Wallet },
 ];
 

@@ -132,6 +132,38 @@ export type TimeEntryListRow = TimeEntryRow & {
   task: { id: string; title: string } | null;
 };
 
+/** Matches `expenses_category_check` in `*_expenses.sql`. */
+export type ExpenseCategory =
+  | "housing"
+  | "software"
+  | "travel"
+  | "meals"
+  | "marketing"
+  | "other";
+
+/**
+ * Row shape for `public.expenses` (see supabase/migrations/*_expenses.sql).
+ */
+export type ExpenseRow = {
+  id: string;
+  user_id: string;
+  project_id: string | null;
+  category: ExpenseCategory;
+  amount: number;
+  currency: string;
+  date: string;
+  vendor: string | null;
+  notes: string | null;
+  receipt_url: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** Expense row with optional joined project title from list queries. */
+export type ExpenseListRow = ExpenseRow & {
+  project: { id: string; title: string } | null;
+};
+
 /** Matches `document_type` enum in `*_documents.sql`. */
 export type DocumentType = "proposal" | "quote" | "invoice" | "other";
 

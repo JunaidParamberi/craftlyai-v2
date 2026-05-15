@@ -10,8 +10,9 @@ import {
   projectStatusBadgePresentation,
   projectStatusLabel,
 } from "@/lib/projects/display";
-import type { ProjectListRow, TaskRow } from "@/types";
+import type { ExpenseListRow, ProjectListRow, TaskRow } from "@/types";
 
+import { ProjectExpensesPanel } from "@/components/features/expenses/project-expenses-panel";
 import { ProjectTasksPanel } from "@/components/features/projects/project-tasks-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,9 +37,18 @@ import {
 type ProjectDetailViewProps = {
   project: ProjectListRow;
   tasks: TaskRow[];
+  expenses: ExpenseListRow[];
+  projects: ProjectListRow[];
+  defaultCurrency: string;
 };
 
-export function ProjectDetailView({ project, tasks }: ProjectDetailViewProps) {
+export function ProjectDetailView({
+  project,
+  tasks,
+  expenses,
+  projects,
+  defaultCurrency,
+}: ProjectDetailViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [tab, setTab] = useState("tasks");
@@ -144,6 +154,7 @@ export function ProjectDetailView({ project, tasks }: ProjectDetailViewProps) {
             >
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="tasks">Tasks</TabsTrigger>
+              <TabsTrigger value="expenses">Expenses</TabsTrigger>
               <TabsTrigger value="time">Time</TabsTrigger>
               <TabsTrigger value="documents">Documents</TabsTrigger>
             </TabsList>
@@ -187,6 +198,15 @@ export function ProjectDetailView({ project, tasks }: ProjectDetailViewProps) {
 
             <TabsContent value="tasks" className="mt-0">
               <ProjectTasksPanel projectId={project.id} initialTasks={tasks} />
+            </TabsContent>
+
+            <TabsContent value="expenses" className="mt-0">
+              <ProjectExpensesPanel
+                projectId={project.id}
+                expenses={expenses}
+                projects={projects}
+                defaultCurrency={defaultCurrency}
+              />
             </TabsContent>
 
             <TabsContent value="time" className="mt-0">
