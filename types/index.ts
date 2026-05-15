@@ -51,6 +51,7 @@ export type ClientRow = {
   currency: string | null;
   notes: string | null;
   health_score: number | null;
+  portal_token: string | null;
   created_at: string;
   updated_at: string;
 };

@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
-import { createClient as createSupabaseServerClient } from "@supabase/supabase-js";
 
+import { PortalNotFound } from "@/components/features/portal/portal-not-found";
+import { PortalShell } from "@/components/features/portal/portal-shell";
+import { PortalStatusScreen } from "@/components/features/portal/portal-status-screen";
+import { createPortalAdminClient } from "@/lib/portal/supabase-admin";
+import {
+  getPortalBrandContext,
+  recordDocumentViewed,
+} from "@/lib/portal/public-queries";
 import { QuoteRespondForm } from "./quote-respond-form";
 import type { LineItemRow } from "@/types";
 
@@ -12,10 +19,7 @@ export const metadata: Metadata = {
   title: "Review Quote",
 };
 
-const supabaseAdmin = createSupabaseServerClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+const supabaseAdmin = createPortalAdminClient();
 
 function QuoteLineItemsReadOnly({
   lineItems,
@@ -120,16 +124,10 @@ export default async function ReviewQuotePage({ params }: PageProps) {
 
   if (docError || !doc) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-16">
-        <div className="max-w-md text-center">
-          <p className="font-display text-2xl font-semibold text-foreground">
-            Quote not found
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            This link is invalid or has expired.
-          </p>
-        </div>
-      </div>
+      <PortalNotFound
+        title="Quote not found"
+        message="This link is invalid or has expired."
+      />
     );
   }
 
@@ -142,27 +140,11 @@ export default async function ReviewQuotePage({ params }: PageProps) {
         })
       : null;
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-16">
-        <div className="max-w-md text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-            <svg
-              className="size-7 text-emerald-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
-          </div>
-          <p className="font-display text-2xl font-semibold text-foreground">
-            Already approved
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            This quote was approved{approvedDate ? ` on ${approvedDate}` : ""}.
-          </p>
-        </div>
-      </div>
+      <PortalStatusScreen
+        variant="success"
+        title="Already approved"
+        message={`This quote was approved${approvedDate ? ` on ${approvedDate}` : ""}.`}
+      />
     );
   }
 
@@ -175,20 +157,16 @@ export default async function ReviewQuotePage({ params }: PageProps) {
         })
       : null;
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-16">
-        <div className="max-w-md text-center">
-          <p className="font-display text-2xl font-semibold text-foreground">
-            Already declined
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            This quote was declined{declinedDate ? ` on ${declinedDate}` : ""}.
-          </p>
-        </div>
-      </div>
+      <PortalStatusScreen
+        title="Already declined"
+        message={`This quote was declined${declinedDate ? ` on ${declinedDate}` : ""}.`}
+      />
     );
   }
 
-  const [lineItemsResult, clientResult, profileResult] = await Promise.all([
+  await recordDocumentViewed(doc.id);
+
+  const [lineItemsResult, clientResult, brand] = await Promise.all([
     supabaseAdmin
       .from("line_items")
       .select("*")
@@ -201,18 +179,11 @@ export default async function ReviewQuotePage({ params }: PageProps) {
           .eq("id", doc.client_id)
           .single()
       : Promise.resolve({ data: null }),
-    supabaseAdmin
-      .from("profiles")
-      .select("company_name, full_name")
-      .eq("id", doc.user_id)
-      .single(),
+    getPortalBrandContext(doc.user_id),
   ]);
 
   const lineItems = (lineItemsResult.data ?? []) as LineItemRow[];
   const client = clientResult.data;
-  const profile = profileResult.data;
-  const businessName =
-    profile?.company_name ?? profile?.full_name ?? "Your Business";
   const currency = client?.currency ?? "USD";
 
   const validUntilFormatted = doc.valid_until
@@ -224,18 +195,11 @@ export default async function ReviewQuotePage({ params }: PageProps) {
     : null;
 
   return (
-    <div className="min-h-screen bg-muted/30 px-4 py-16">
-      <div className="mx-auto max-w-2xl">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <span className="font-display text-2xl font-bold tracking-tight text-foreground">
-            CraftlyAI
-          </span>
-          <p className="mt-1 text-sm text-muted-foreground">{businessName}</p>
-        </div>
-
-        {/* Quote card */}
-        <div className="rounded-xl border border-border/60 bg-card p-6 shadow-sm">
+    <PortalShell
+      brand={brand}
+      footer="Your response will be shared with the sender."
+    >
+      <div className="rounded-xl border border-border/60 bg-card p-6 shadow-sm">
           {/* Title + number */}
           <div className="mb-5 border-b border-border/50 pb-5">
             <h1 className="font-display text-xl font-semibold text-foreground">
@@ -292,11 +256,6 @@ export default async function ReviewQuotePage({ params }: PageProps) {
             <QuoteRespondForm approvalToken={token} />
           </div>
         </div>
-
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Sent via CraftlyAI. Your response will be shared with {businessName}.
-        </p>
-      </div>
-    </div>
+    </PortalShell>
   );
 }

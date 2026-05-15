@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ClientDetailView } from "@/components/features/clients/detail/client-detail-view";
 import { FormPageShell } from "@/components/shared/form-page-shell";
 import { getClientById } from "@/lib/clients/actions";
+import { listDocumentsForClient } from "@/lib/documents/document-queries";
 import { listProjects } from "@/lib/projects/actions";
 
 type PageProps = {
@@ -23,12 +24,25 @@ export default async function ClientDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const projectsResult = await listProjects();
+  const [projectsResult, documentsResult] = await Promise.all([
+    listProjects(),
+    listDocumentsForClient(id),
+  ]);
   const projects = projectsResult.ok ? projectsResult.projects : [];
+  const documents = documentsResult.ok ? documentsResult.documents : [];
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const portalUrl = client.portal_token
+    ? `${appUrl}/portal/${client.portal_token}`
+    : null;
 
   return (
     <FormPageShell maxWidth="7xl">
-      <ClientDetailView client={client} projects={projects} />
+      <ClientDetailView
+        client={client}
+        projects={projects}
+        documents={documents}
+        portalUrl={portalUrl}
+      />
     </FormPageShell>
   );
 }

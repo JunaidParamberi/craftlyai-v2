@@ -11,6 +11,7 @@ export {
   getTemplateById,
   listDocumentTemplates,
   listDocuments,
+  listDocumentsForClient,
 } from "./document-queries";
 
 export type {

@@ -12,6 +12,7 @@ type ClientRowRaw = {
   currency: string | null;
   notes: string | null;
   health_score: number | null;
+  portal_token?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -21,5 +22,6 @@ export function normalizeClientRow(row: ClientRowRaw): ClientRow {
     ...row,
     contact_name: row.contact_name ?? null,
     currency: row.currency?.trim().toUpperCase() ?? null,
+    portal_token: row.portal_token ?? null,
   };
 }

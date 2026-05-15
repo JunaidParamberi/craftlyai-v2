@@ -3,7 +3,10 @@
 import Link from "next/link";
 
 import { formatLastUpdated } from "@/lib/clients/display";
-import type { ClientRow, ProjectListRow } from "@/types";
+import type { ClientRow, DocumentListRow, ProjectListRow } from "@/types";
+
+import { ClientDocumentsSection } from "@/components/features/clients/detail/client-documents-section";
+import { ClientPortalLinkCard } from "@/components/features/clients/detail/client-portal-link-card";
 
 import { ClientFinancialSummaryCard } from "@/components/features/clients/detail/client-financial-summary-card";
 import { ClientPinnedNote } from "@/components/features/clients/detail/client-pinned-note";
@@ -19,14 +22,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, History } from "lucide-react";
+import { History } from "lucide-react";
 
 type ClientDetailTabsProps = {
   client: ClientRow;
   projects: ProjectListRow[];
+  documents: DocumentListRow[];
+  portalUrl: string | null;
 };
 
-export function ClientDetailTabs({ client, projects }: ClientDetailTabsProps) {
+export function ClientDetailTabs({
+  client,
+  projects,
+  documents,
+  portalUrl,
+}: ClientDetailTabsProps) {
   const editHref = `/clients/${client.id}/edit`;
   const hasNotes = Boolean(client.notes?.trim());
   const updatedLabel = formatLastUpdated(client.updated_at)
@@ -43,7 +53,7 @@ export function ClientDetailTabs({ client, projects }: ClientDetailTabsProps) {
         <TabsTrigger value="documents" className="gap-2">
           Documents
           <Badge variant="secondary" className="font-normal">
-            0
+            {documents.length}
           </Badge>
         </TabsTrigger>
         <TabsTrigger value="notes">Notes & activity</TabsTrigger>
@@ -81,6 +91,10 @@ export function ClientDetailTabs({ client, projects }: ClientDetailTabsProps) {
             )}
           </div>
           <div className="flex flex-col gap-6">
+            <ClientPortalLinkCard
+              clientId={client.id}
+              initialPortalToken={client.portal_token}
+            />
             <ClientFinancialSummaryCard />
             <ClientPrimaryContactCard client={client} />
           </div>
@@ -88,20 +102,7 @@ export function ClientDetailTabs({ client, projects }: ClientDetailTabsProps) {
       </TabsContent>
 
       <TabsContent value="documents" className="mt-0">
-        <Card className="border-border/80 shadow-sm">
-          <CardContent className="flex flex-col items-center gap-4 py-14 text-center">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-muted">
-              <FileText className="size-7 text-muted-foreground" />
-            </div>
-            <div className="max-w-md space-y-2">
-              <p className="font-medium text-sm">No documents yet</p>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Quotes, proposals, and invoices for this client will live here
-                once Document Studio ships (Phase 2).
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <ClientDocumentsSection documents={documents} portalUrl={portalUrl} />
       </TabsContent>
 
       <TabsContent value="notes" className="mt-0">
