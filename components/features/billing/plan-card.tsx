@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Loader2, Sparkles, ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

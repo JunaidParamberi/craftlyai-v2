@@ -20,6 +20,7 @@ function normalizeProfileRow(row: {
   brand_kit_id?: string | null;
   onboarding_brand_skipped?: boolean;
   onboarding_completed_at?: string | null;
+  plan_tier?: string | null;
   created_at: string;
   updated_at: string;
 }): ProfileRow {
@@ -30,6 +31,7 @@ function normalizeProfileRow(row: {
     onboarding_completed_at: row.onboarding_completed_at ?? null,
     address_country: row.address_country ? row.address_country.trim().toUpperCase() : null,
     default_currency: row.default_currency ?? "USD",
+    plan_tier: (row.plan_tier ?? "free") as "free" | "starter" | "pro" | "agency",
   };
 }
 
