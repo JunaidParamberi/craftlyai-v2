@@ -228,13 +228,19 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 
 ## Build phases
 
-| Phase | Weeks | Goal |
-|---|---|---|
-| 1 — Foundation | 1–3 | Auth, CRM, dashboard shell, basic time tracker |
-| 2 — Documents & Finance | 4–6 | Document Studio, invoices, quotes, proposals, client portal, Lemon Squeezy billing |
-| 3 — AI Layer | 7–10 | Cmd+K palette, Router + 5 agents, Follow-Up Engine, SSE streaming |
-| 4 — Pro AI Agents | 11–14 | Pricing Advisor, Business Strategist, email/calendar integrations, pgvector, mobile (Expo) |
-| 5 — Growth & Scale | Month 4+ | Agency tier, public API, AppSumo, Zapier, accounting export, Tauri desktop |
+| Phase | Goal |
+|---|---|
+| 1 — Foundation | Auth, CRM, dashboard shell, basic time tracker |
+| 2 — Documents & Finance | Document Studio, invoices, quotes, proposals, client portal, Lemon Squeezy billing |
+| 2.5 — Foundation Gaps | Real dashboard, expenses UI, tasks view, kanban, notifications, payment voucher, LPO, receipt |
+| 2.6 — Regional Compliance | Tax engine (VAT/GST), multi-currency, TRN/GSTIN fields, HSN/SAC, UPI, TDS, ZATCA QR |
+| 3 — AI Layer | Cmd+K palette, SSE streaming, Router + 6 agents, Follow-Up Engine |
+| 3.5 — Project Management Depth | Task subtasks, timeline/Gantt, project templates, milestones |
+| 4 — Communication & Automation | Client comms log, workflow automations, email + calendar integrations |
+| 4.5 — Pro AI | Pricing Advisor, Business Strategist, pgvector semantic search |
+| 5 — Growth & Scale | Agency tier, public API, accounting export, mobile (Expo), desktop (Tauri) |
+
+Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 
 ---
 
@@ -268,30 +274,67 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - [x] Financial dashboard — revenue, outstanding, overdue KPI cards, monthly area chart, invoice table, date-range filter bar with presets + custom picker (`feat/financial-dashboard` → `dev`)
 - [x] Lemon Squeezy — mock billing system: plan cards (`/settings/billing`), `mockUpgradePlan`/`mockDowngradePlan` server actions, `subscriptions` table + `plan_tier` on profiles, plan gating middleware, webhook stub. Plan-awareness UX: avatar dropdown usage bars, ghost upgrade rows on clients list, smart dashboard banner (≥80% limit), lock-icon button with toast on click at limit. Real LS swap: replace 3 files when legal entity ready. (`feat/mock-billing` → `dev`). Phase 2 complete.
 
-### Phase 3 — AI Layer (Weeks 7–10)
+### Phase 2.5 — Foundation Gaps
 
-- [ ] todo · Cmd+K command palette
-- [ ] todo · Router Agent (Edge Function)
-- [ ] todo · Document Writer Agent
-- [ ] todo · Communication Drafter Agent
-- [ ] todo · Finance Analyst Agent
-- [ ] todo · Project Intelligence Agent
-- [ ] todo · Follow-Up Engine — triggers, draft, one-click send
-- [ ] todo · Relationship Manager Agent
+- [ ] todo · Real dashboard — live KPIs, pipeline strip, attention list, recent activity (replaces hardcoded data)
+- [ ] todo · Expenses UI — `/expenses` CRUD, categories, receipt upload, project-linked view
+- [ ] todo · Tasks standalone view — `/tasks` all tasks across projects, filters, quick-add, overdue highlight
+- [ ] todo · Project kanban board — board view toggle on `/projects/[id]`, dnd-kit drag between columns
+- [ ] todo · Notifications UI — bell + drawer, unread badge, mark-read server actions
+- [ ] todo · Payment method detail — mark-paid modal with method/cheque/reference fields, payment history tab
+- [ ] todo · Payment Voucher document type — auto-generated on mark-paid, PDF, accessible in portal
+- [ ] todo · LPO document type — record client LPO, linked to project, appears in portal
+- [ ] todo · Receipt document type — auto-generated after payment, Resend to client
 
-### Phase 4 — Pro AI & integrations (Weeks 11–14)
+### Phase 2.6 — Regional Compliance (MENA, India, Asia, US)
 
-- [ ] todo · Pricing Advisor Agent (Pro)
-- [ ] todo · Business Strategist Agent (Pro)
+- [ ] todo · Tax engine — VAT/GST/CGST+SGST/IGST/None, per-invoice override, correct PDF breakdown
+- [ ] todo · Multi-currency — default + per-client + per-invoice currency, manual FX rate, correct symbols
+- [ ] todo · Compliance profile fields — TRN (UAE), GSTIN (India), VAT Reg No (UK) print on invoices
+- [ ] todo · HSN/SAC codes — optional per line item, prints in PDF table (India)
+- [ ] todo · UPI payment display — UPI ID + QR code on `/pay/[token]` (India)
+- [ ] todo · TDS tracking — deduction toggle, amount, certificate upload, net received display (India)
+- [ ] todo · ZATCA QR — base64 TLV QR on KSA invoices, pure local generation (Saudi Arabia)
+
+### Phase 3 — AI Layer
+
+- [ ] todo · Cmd+K palette shell — UI only first, navigation + quick create, no AI yet
+- [ ] todo · SSE streaming infrastructure — `/api/ai/stream` proxy + `useAIStream` hook
+- [ ] todo · Router Agent (Edge Function) — Haiku, intent classification
+- [ ] todo · Document Writer Agent — Sonnet, streams into Document Studio
+- [ ] todo · Finance Analyst Agent — Haiku, revenue Q&A + anomaly detection
+- [ ] todo · Communication Drafter Agent — Haiku, follow-up drafts + reply suggestions
+- [ ] todo · Project Intelligence Agent — Haiku, daily digest + risk scoring
+- [ ] todo · Follow-Up Engine — overdue triggers, draft email, one-click send
+- [ ] todo · Relationship Manager Agent — Haiku, client health scores + churn signals
+
+### Phase 3.5 — Project Management Depth
+
+- [ ] todo · Task subtasks — children under tasks, progress bar on parent
+- [ ] todo · Timeline/Gantt view — horizontal bars per task, drag to reschedule
+- [ ] todo · Project templates — save project as template including tasks
+- [ ] todo · Milestone tracking — milestones on timeline, visible in client portal
+
+### Phase 4 — Communication & Automation
+
+- [ ] todo · Client communication log — per-project notes + email log, internal vs client-visible
+- [ ] todo · Workflow automations — trigger/action rules (overdue → email, approved → task, etc.)
 - [ ] todo · Email integration (Gmail / Outlook OAuth)
 - [ ] todo · Calendar integration (Google Calendar)
-- [ ] todo · pgvector semantic search
-- [ ] todo · Mobile app (Expo)
+
+### Phase 4.5 — Pro AI
+
+- [ ] todo · Pricing Advisor Agent (Pro) — Sonnet, scope analysis + market rates
+- [ ] todo · Business Strategist Agent (Pro) — Opus, monthly briefing, once/month per user
+- [ ] todo · pgvector semantic search — embed notes/docs/briefs, search across everything
 
 ### Phase 5 — Growth & scale (Month 4+)
 
 - [ ] todo · Agency tier — multi-user, roles, shared workspace
-- [ ] todo · Public API
+- [ ] todo · Public API — REST + API key auth, Zapier integration
+- [ ] todo · Accounting export — CSV, Xero-compatible, QuickBooks import
+- [ ] todo · Mobile app (Expo)
+- [ ] todo · Desktop app (Tauri) — if warranted by demand
 
 ---
 
@@ -319,6 +362,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - 2026-05-15: **Client portal** merged to `dev` — per-client `/portal/[token]` hub (brand kit, document list, CTAs to `/pay`, `/quote`, `/proposal`); `clients.portal_token` migration `20260522120000_client_portal_token.sql`; `PortalShell` on all public doc pages; middleware public paths for `/quote`, `/proposal`, `/portal`; client detail portal link copy/regenerate + Documents tab wired; mock payment unchanged (`MockPaymentForm`). `feat/client-portal` → `dev`. Phase 2 progress: 6/8 tasks done.
 - 2026-05-15: **Financial dashboard** merged to `dev` — `/finance` page with URL searchParam date filter (from/to), 4 KPI cards (total revenue, outstanding, overdue, avg pay days) with staggered fade-up animation, monthly revenue area chart (Recharts, gradient fill), invoice table (status badges, overdue highlighting), preset filter pills (This Month / Last 3M / This Year) + custom date range picker. Pure calc functions in `lib/finance/revenue-calc.ts`, date helpers in `lib/finance/date-utils.ts`, server queries in `lib/finance/finance-queries.ts` (batch line-item fetch, tax included in totals, outstanding shows ALL unpaid regardless of date range). Vitest tests for both utility files. Loading skeleton in `app/(app)/finance/loading.tsx`. Fixed hydration error: `PopoverTrigger` nested `<Button>` → applied `buttonVariants` directly to trigger. `feat/financial-dashboard` → `dev`. Phase 2 progress: 7/8 tasks done.
 - 2026-05-15: **Mock billing + plan-awareness** merged to `dev` — `supabase/migrations/20260523120000_billing.sql` adds `plan_tier` to profiles + `subscriptions` table with RLS. `config/plans.ts` defines all 4 tiers with limits + `isPlanAtLeast`. `/settings/billing` page: premium plan cards (amber/gold Pro elevation, staggered animation), `mockUpgradePlan`/`mockDowngradePlan` server actions write directly to DB, mock mode banner. Middleware plan gating (`PRO_ROUTES[]` array, empty until Phase 3 features land). Webhook stub at `/api/webhooks/lemon-squeezy`. Plan-awareness UX: avatar dropdown shows plan badge chip + colour-coded usage bars (emerald/amber/red at 60/80%) + upgrade link; clients page shows `AddClientButton` (lock icon + sonner toast with upgrade action when at limit) + `UpgradeGhostRow` below list; dashboard shows `PlanLimitBanner` (amber strip, dismissible per calendar month via localStorage) only when ≥80% of any limit used. Data fetched in parallel in `app/(app)/layout.tsx`, propagated via `PlanUsageContext`. 163 Vitest tests pass. `feat/mock-billing` → `dev`. Phase 2 complete — 8/8 tasks done.
+- 2026-05-15: **Master roadmap** — full product roadmap spec written to `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`. CLAUDE.md updated with revised phases (2.5 foundation gaps, 2.6 regional compliance, 3.5 project depth, 4.5 pro AI). Next: Phase 2.5 Task 0 — real dashboard.
 - 2026-05-15: **Fix: document monthly limit enforcement** — `/documents` page was not blocking creation when Free tier 5 docs/month quota was hit. Added `AddDocumentButton` client component (lock icon + sonner toast with upgrade CTA at limit, normal Link when under). Page now parallel-fetches doc count this month via `gte("created_at", startOfCurrentMonth())`, computes `atLimit`, renders `AddDocumentButton` + `UpgradeGhostRow` with usage string. `fix/document-limit-enforcement` → `dev`.
 
 ---
