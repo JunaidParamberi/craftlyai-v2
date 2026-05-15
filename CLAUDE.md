@@ -1,7 +1,7 @@
 # CLAUDE.md — CraftlyAI Project Context
 
 Last updated: 2026-05-15
-Current phase: Phase 1 — Foundation complete; Phase 2 — Documents & Finance in-progress
+Current phase: Phase 2 complete; Phase 2.5 — Foundation Gaps in-progress (1/8)
 
 Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
 
@@ -78,10 +78,9 @@ craftlyai.app/
 │       └── webhooks/
 ├── components/
 │   ├── ui/                    ← shadcn/ui base components — DO NOT MODIFY
-│   ├── features/              ← feature-specific components
+│   ├── features/              ← billing, clients, dashboard, documents, finance, …
 │   ├── layout/                ← sidebar, header, shell
 │   ├── auth/
-│   ├── dashboard/
 │   ├── marketing/
 │   └── shared/
 ├── lib/
@@ -90,7 +89,9 @@ craftlyai.app/
 │   ├── validations/           ← Zod schemas
 │   ├── utils/                 ← helpers, formatters
 │   ├── auth/
+│   ├── dashboard/             ← dashboard-queries, activity/attention utils
 │   ├── db/
+│   ├── finance/               ← revenue-calc, finance-queries, date-utils
 │   ├── stripe/
 │   ├── time/                  ← server actions (timer + manual entries)
 │   └── email/
@@ -276,7 +277,7 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 
 ### Phase 2.5 — Foundation Gaps
 
-- [ ] todo · Real dashboard — live KPIs, pipeline strip, attention list, recent activity (replaces hardcoded data)
+- [x] Real dashboard — live KPIs (reuse `getFinancialSummary`), attention banner, activity feed (10 events), active pipeline panel; `lib/dashboard/*`, `components/features/dashboard/*`, spec `docs/superpowers/specs/2026-05-15-real-dashboard-design.md` (`feat/real-dashboard` → `dev`)
 - [ ] todo · Expenses UI — `/expenses` CRUD, categories, receipt upload, project-linked view
 - [ ] todo · Tasks standalone view — `/tasks` all tasks across projects, filters, quick-add, overdue highlight
 - [ ] todo · Project kanban board — board view toggle on `/projects/[id]`, dnd-kit drag between columns
@@ -364,6 +365,7 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 - 2026-05-15: **Mock billing + plan-awareness** merged to `dev` — `supabase/migrations/20260523120000_billing.sql` adds `plan_tier` to profiles + `subscriptions` table with RLS. `config/plans.ts` defines all 4 tiers with limits + `isPlanAtLeast`. `/settings/billing` page: premium plan cards (amber/gold Pro elevation, staggered animation), `mockUpgradePlan`/`mockDowngradePlan` server actions write directly to DB, mock mode banner. Middleware plan gating (`PRO_ROUTES[]` array, empty until Phase 3 features land). Webhook stub at `/api/webhooks/lemon-squeezy`. Plan-awareness UX: avatar dropdown shows plan badge chip + colour-coded usage bars (emerald/amber/red at 60/80%) + upgrade link; clients page shows `AddClientButton` (lock icon + sonner toast with upgrade action when at limit) + `UpgradeGhostRow` below list; dashboard shows `PlanLimitBanner` (amber strip, dismissible per calendar month via localStorage) only when ≥80% of any limit used. Data fetched in parallel in `app/(app)/layout.tsx`, propagated via `PlanUsageContext`. 163 Vitest tests pass. `feat/mock-billing` → `dev`. Phase 2 complete — 8/8 tasks done.
 - 2026-05-15: **Master roadmap** — full product roadmap spec written to `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`. CLAUDE.md updated with revised phases (2.5 foundation gaps, 2.6 regional compliance, 3.5 project depth, 4.5 pro AI). Next: Phase 2.5 Task 0 — real dashboard.
 - 2026-05-15: **Fix: document monthly limit enforcement** — `/documents` page was not blocking creation when Free tier 5 docs/month quota was hit. Added `AddDocumentButton` client component (lock icon + sonner toast with upgrade CTA at limit, normal Link when under). Page now parallel-fetches doc count this month via `gte("created_at", startOfCurrentMonth())`, computes `atLimit`, renders `AddDocumentButton` + `UpgradeGhostRow` with usage string. `fix/document-limit-enforcement` → `dev`.
+- 2026-05-15: **Real dashboard** merged to `dev` — `/dashboard` RSC runs 5 parallel queries (`getFinancialSummary`, `getDashboardCounts`, `getAttentionItems`, `getRecentActivity`, `getActivePipeline`). Layout B: 4 KPI cards, amber attention banner (hidden when empty), 3/5 activity + 2/5 pipeline. Pure utils + Vitest in `lib/dashboard/activity-utils.ts` and `attention-utils.ts`. Shared `formatCurrency` in `lib/utils/format.ts`. Skeleton updated for 4 KPIs + attention row. Project deadline attention uses `planning` + `active` (not task `in_progress`). `feat/real-dashboard` → `dev`. Phase 2.5 progress: 1/8. Next: **Expenses UI**.
 
 ---
 
