@@ -2,7 +2,6 @@ import { FormPageShell } from "@/components/shared/form-page-shell";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -12,12 +11,14 @@ import { SkeletonRepeat } from "@/components/shared/skeleton-repeat";
 export type DashboardPageSkeletonProps = {
   statCardCount?: number;
   activityRowCount?: number;
+  showAttentionBanner?: boolean;
 };
 
-/** Mirrors dashboard home: hero band, stat row, activity + AI column. */
+/** Mirrors dashboard home: hero band, KPI row, attention, activity + pipeline. */
 export function DashboardPageSkeleton({
-  statCardCount = 3,
-  activityRowCount = 2,
+  statCardCount = 4,
+  activityRowCount = 3,
+  showAttentionBanner = true,
 }: DashboardPageSkeletonProps) {
   return (
     <div
@@ -38,7 +39,7 @@ export function DashboardPageSkeleton({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SkeletonRepeat
           count={statCardCount}
           render={(i) => (
@@ -55,8 +56,12 @@ export function DashboardPageSkeleton({
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2" size="sm">
+      {showAttentionBanner ? (
+        <Skeleton className="h-24 w-full rounded-xl" />
+      ) : null}
+
+      <div className="grid gap-4 lg:grid-cols-5">
+        <Card className="lg:col-span-3" size="sm">
           <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
             <div className="flex flex-col gap-2">
               <Skeleton className="h-5 w-40" />
@@ -83,23 +88,22 @@ export function DashboardPageSkeleton({
           </CardContent>
         </Card>
 
-        <Card
-          size="sm"
-          className="border-primary/15 bg-gradient-to-b from-card to-muted/30"
-        >
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Skeleton className="size-9 shrink-0 rounded-2xl" />
-              <Skeleton className="h-5 w-32" />
+        <Card className="lg:col-span-2" size="sm">
+          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-5 w-36" />
+              <Skeleton className="h-4 w-48 max-w-full" />
             </div>
-            <div className="flex flex-col gap-2 pt-1">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full max-w-[220px]" />
-            </div>
+            <Skeleton className="h-8 w-20 shrink-0" />
           </CardHeader>
-          <CardFooter className="flex-col items-stretch gap-2 pt-0">
-            <Skeleton className="h-9 w-full" />
-          </CardFooter>
+          <CardContent className="flex flex-col gap-3 pt-6">
+            <SkeletonRepeat
+              count={3}
+              render={(i) => (
+                <Skeleton key={i} className="h-[4.5rem] w-full rounded-lg" />
+              )}
+            />
+          </CardContent>
         </Card>
       </div>
     </div>
