@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
 import { createClient as createSupabaseServerClient } from "@supabase/supabase-js";
-import { generateHTML } from "@tiptap/html";
-import StarterKit from "@tiptap/starter-kit";
-import Link from "@tiptap/extension-link";
-import Typography from "@tiptap/extension-typography";
 import sanitizeHtml from "sanitize-html";
 
 import { ProposalRespondForm } from "./proposal-respond-form";
@@ -25,6 +21,43 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: sanitizeHtml.defaults.allowedTags.concat(["h1", "h2", "h3"]),
   allowedAttributes: { a: ["href", "target", "rel"] },
 };
+
+// Lightweight Tiptap JSON → HTML — no DOM dependency needed server-side.
+function tiptapToHtml(node: Record<string, unknown>): string {
+  const type = node.type as string | undefined;
+  const children = Array.isArray(node.content)
+    ? (node.content as Record<string, unknown>[]).map(tiptapToHtml).join("")
+    : "";
+
+  if (type === "text") {
+    let text = String(node.text ?? "");
+    const marks = Array.isArray(node.marks) ? node.marks as { type: string; attrs?: Record<string, string> }[] : [];
+    for (const mark of marks) {
+      if (mark.type === "bold") text = `<strong>${text}</strong>`;
+      else if (mark.type === "italic") text = `<em>${text}</em>`;
+      else if (mark.type === "code") text = `<code>${text}</code>`;
+      else if (mark.type === "link") {
+        const href = mark.attrs?.href ?? "#";
+        text = `<a href="${href}" target="_blank" rel="noreferrer noopener">${text}</a>`;
+      }
+    }
+    return text;
+  }
+  if (type === "doc") return children;
+  if (type === "paragraph") return children ? `<p>${children}</p>` : "<p></p>";
+  if (type === "heading") {
+    const level = (node.attrs as { level?: number } | undefined)?.level ?? 2;
+    return `<h${level}>${children}</h${level}>`;
+  }
+  if (type === "bulletList") return `<ul>${children}</ul>`;
+  if (type === "orderedList") return `<ol>${children}</ol>`;
+  if (type === "listItem") return `<li>${children}</li>`;
+  if (type === "blockquote") return `<blockquote>${children}</blockquote>`;
+  if (type === "codeBlock") return `<pre><code>${children}</code></pre>`;
+  if (type === "horizontalRule") return "<hr />";
+  if (type === "hardBreak") return "<br />";
+  return children;
+}
 
 const supabaseAdmin = createSupabaseServerClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -255,11 +288,7 @@ export default async function ReviewProposalPage({ params }: PageProps) {
   let safeContentHtml = "";
   try {
     if (doc.content_json && typeof doc.content_json === "object") {
-      const rawHtml = generateHTML(doc.content_json as TiptapDoc, [
-        StarterKit,
-        Link,
-        Typography,
-      ]);
+      const rawHtml = tiptapToHtml(doc.content_json as Record<string, unknown>);
       safeContentHtml = sanitizeHtml(rawHtml, SANITIZE_OPTIONS);
     }
   } catch {
