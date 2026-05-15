@@ -1,7 +1,7 @@
 # CLAUDE.md — CraftlyAI Project Context
 
 Last updated: 2026-05-15
-Current phase: Phase 2 complete; Phase 2.5 — Foundation Gaps in-progress (4/8)
+Current phase: Phase 2 complete; Phase 2.5 — Foundation Gaps in-progress (5/8)
 
 Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
 
@@ -373,7 +373,7 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 - 2026-05-15: **Expenses UI** merged to `dev` — `expenses` table + `expense-receipts` bucket; `/expenses` with filters, summary card, Sheet form (FieldGroup); multi-attachment via `receipt_urls` jsonb (max 10); project detail **Expenses** tab; `lib/expenses/receipt-utils.ts` + Vitest. `feat/expenses-ui` → `dev`. Phase 2.5 progress: 2/8. Next: **Tasks standalone view**.
 - 2026-05-15: **Tasks standalone view** merged to `dev` — `/tasks` RSC + `listAllTasksForUser` (project/client embed), URL filters, Finance-style `KpiCard` summary, compact **Table** list (shadcn `Checkbox`, badge variants, overdue row highlight), quick-add dialog (`FieldGroup`), Work nav **Tasks** link; `TaskListRow` type; `lib/tasks/task-utils.ts` (9 Vitest); `lib/tasks/display.ts` shared with project Tasks tab; `components/ui/checkbox.tsx` added. 201 Vitest tests pass. `feat/tasks-standalone` → `dev`. Phase 2.5 progress: 3/8. Next: **Project kanban board**.
 - 2026-05-15: **Project kanban board** merged to `dev` — **Tasks** tab on `/projects/[id]`: list/board toggle (per-project `localStorage`), 4-column kanban (`todo` / `in_progress` / `done` / `cancelled`), optimistic dnd-kit status drag, right Sheet edit/delete, column “Add task” pre-fills status via existing project add dialog; `@dnd-kit/core` + `@dnd-kit/utilities`. `feat/kanban-board` → `dev`. Phase 2.5 progress: 4/8. Next: **Notifications UI**.
-- 2026-05-15: **Notifications UI** on `feat/notifications-ui` — `notifications` table + RLS + 30-day document backfill; bell + right Sheet inbox (unread badge, mark read / mark all read); write hooks on mark-paid, quote/proposal approve/decline, send email, public quote respond; `lib/notifications/*` + Vitest. Phase 2.5 progress: 5/8. Next: **Payment method detail**.
+- 2026-05-15: **Notifications UI** merged to `dev` — `notifications` table + RLS (select/insert/update/delete policies) + 30-day backfill; bell icon + right Sheet drawer; unread badge, time-grouped list (Today/Yesterday/Older), colored accent bar per type; mark read on click, mark all read, clear all, per-item delete (hover-reveal trash); browser Notification API with permission prompt in sheet + localStorage dedup (auto-fires on mount for unseen unread); write hooks on invoice paid, quote/proposal sent/approved/declined, public quote respond route; `lib/notifications/*` + Vitest; `hooks/use-browser-notifications.ts`. `feat/notifications-ui` → `dev`. Phase 2.5 progress: 5/8. Next: **Payment method detail**.
 
 ---
 
