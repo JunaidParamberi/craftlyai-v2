@@ -39,6 +39,17 @@ export function calcAvgPayDays(invoices: PaidInvoiceLike[]): number | null {
   return Math.round(totalDays / valid.length);
 }
 
+export function calcTaxTotal(items: LineItemLike[]): number {
+  return items.reduce(
+    (sum, li) =>
+      sum +
+      Number(li.quantity) *
+        Number(li.unit_price) *
+        (Number(li.tax_rate ?? 0) / 100),
+    0
+  );
+}
+
 export function calcRevenueChangePct(
   current: number,
   previous: number

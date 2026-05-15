@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import type { DateRange as DayPickerRange } from "react-day-picker";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -91,15 +91,17 @@ export function FinanceFilterBar() {
 
       {/* Custom date range */}
       <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-        <PopoverTrigger>
-          <Button
-            variant={activePreset === null ? "default" : "outline"}
-            size="sm"
-            className="h-8 gap-1.5 rounded-full text-xs"
-          >
-            <CalendarIcon className="size-3" />
-            {customLabel}
-          </Button>
+        <PopoverTrigger
+          className={cn(
+            buttonVariants({
+              variant: activePreset === null ? "default" : "outline",
+              size: "sm",
+            }),
+            "h-8 gap-1.5 rounded-full text-xs"
+          )}
+        >
+          <CalendarIcon className="size-3" />
+          {customLabel}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
