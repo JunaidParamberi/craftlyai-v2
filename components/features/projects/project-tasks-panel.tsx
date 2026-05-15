@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -56,10 +56,15 @@ import { FormDatePicker } from "@/components/shared/form-date-picker";
 import { formatProjectDate } from "@/lib/projects/display";
 import {
   CircleCheck,
+  LayoutDashboard,
+  LayoutList,
   MoreVertical,
   Plus,
   Sparkles,
 } from "lucide-react";
+
+import { KanbanBoard } from "@/components/features/tasks/kanban-board";
+import { cn } from "@/lib/utils";
 
 type ProjectTasksPanelProps = {
   projectId: string;
@@ -78,6 +83,12 @@ const emptyTaskForm: TaskDialogValues = {
   due_date: "",
 };
 
+type ViewMode = "list" | "board";
+
+function taskViewStorageKey(projectId: string) {
+  return `craftlyai:task-view:${projectId}`;
+}
+
 export function ProjectTasksPanel({
   projectId,
   initialTasks,
@@ -85,8 +96,28 @@ export function ProjectTasksPanel({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [addOpen, setAddOpen] = useState(false);
+  const [addDefaultStatus, setAddDefaultStatus] = useState<TaskStatus>("todo");
   const [formError, setFormError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"due" | "created">("due");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+
+  useEffect(() => {
+    const stored = localStorage.getItem(taskViewStorageKey(projectId));
+    if (stored === "board" || stored === "list") {
+      setViewMode(stored);
+    }
+  }, [projectId]);
+
+  function handleViewChange(mode: ViewMode) {
+    setViewMode(mode);
+    localStorage.setItem(taskViewStorageKey(projectId), mode);
+  }
+
+  function openAddTask(status: TaskStatus = "todo") {
+    setFormError(null);
+    setAddDefaultStatus(status);
+    setAddOpen(true);
+  }
 
   const {
     register,
@@ -133,7 +164,7 @@ export function ProjectTasksPanel({
         title: values.title,
         priority: values.priority,
         due_date: values.due_date,
-        status: "todo",
+        status: addDefaultStatus,
       });
       if (!res.ok) {
         setFormError(res.message);
@@ -175,6 +206,7 @@ export function ProjectTasksPanel({
     <div className="grid gap-8 lg:grid-cols-[1fr_minmax(260px,300px)] lg:items-start">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {viewMode === "list" ? (
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
@@ -204,21 +236,64 @@ export function ProjectTasksPanel({
               </SelectContent>
             </Select>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="gap-1 self-start sm:self-auto"
-            onClick={() => {
-              setFormError(null);
-              setAddOpen(true);
-            }}
-          >
-            <Plus />
-            Add task
-          </Button>
+          ) : (
+            <div />
+          )}
+          <div className="flex flex-wrap items-center gap-2 self-start sm:ms-auto sm:self-auto">
+            <div
+              role="group"
+              aria-label="Task view"
+              className="inline-flex rounded-md border"
+            >
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-label="List view"
+                aria-pressed={viewMode === "list"}
+                className={cn(
+                  "h-8 w-8 p-0",
+                  viewMode === "list" && "bg-muted",
+                )}
+                onClick={() => handleViewChange("list")}
+              >
+                <LayoutList className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-label="Board view"
+                aria-pressed={viewMode === "board"}
+                className={cn(
+                  "h-8 w-8 p-0",
+                  viewMode === "board" && "bg-muted",
+                )}
+                onClick={() => handleViewChange("board")}
+              >
+                <LayoutDashboard className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="gap-1"
+              onClick={() => openAddTask("todo")}
+            >
+              <Plus />
+              Add task
+            </Button>
+          </div>
         </div>
 
+        {viewMode === "board" ? (
+          <KanbanBoard
+            tasks={initialTasks}
+            projectId={projectId}
+            onAddTask={openAddTask}
+          />
+        ) : (
         <div className="flex flex-col gap-3">
           {sortedTasks.length === 0 ? (
             <Card className="border-dashed border-border/80">
@@ -227,7 +302,7 @@ export function ProjectTasksPanel({
                 <p className="max-w-sm text-muted-foreground text-sm">
                   Add tasks to track deliverables and completion for this project.
                 </p>
-                <Button type="button" size="sm" onClick={() => setAddOpen(true)}>
+                <Button type="button" size="sm" onClick={() => openAddTask("todo")}>
                   <Plus />
                   Add task
                 </Button>
@@ -312,6 +387,7 @@ export function ProjectTasksPanel({
             })
           )}
         </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-6">
@@ -359,7 +435,15 @@ export function ProjectTasksPanel({
         </Card>
       </div>
 
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+      <Dialog
+        open={addOpen}
+        onOpenChange={(open) => {
+          setAddOpen(open);
+          if (!open) {
+            setAddDefaultStatus("todo");
+          }
+        }}
+      >
         <DialogContent showCloseButton>
           <DialogHeader>
             <DialogTitle>New task</DialogTitle>
