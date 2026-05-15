@@ -4,6 +4,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { normalizeExpenseRow } from "@/lib/expenses/normalize-expense-row";
+import {
+  appendReceiptUrls,
+  MAX_EXPENSE_RECEIPTS,
+  normalizeReceiptUrls,
+  removeReceiptUrl,
+} from "@/lib/expenses/receipt-utils";
 import { extFromReceiptMime, extractReceiptStoragePath } from "@/lib/expenses/utils";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import {
@@ -46,14 +52,43 @@ function revalidateExpensePaths(projectId: string | null) {
   }
 }
 
-async function removeReceiptFromStorage(
+async function removeReceiptsFromStorage(
   supabase: Awaited<ReturnType<typeof createSupabaseClient>>,
-  receiptUrl: string | null,
+  urls: string[],
 ) {
-  if (!receiptUrl) return;
-  const path = extractReceiptStoragePath(receiptUrl);
-  if (!path) return;
-  await supabase.storage.from(RECEIPT_BUCKET).remove([path]);
+  const paths = urls
+    .map((url) => extractReceiptStoragePath(url))
+    .filter((p): p is string => Boolean(p));
+  if (paths.length === 0) return;
+  await supabase.storage.from(RECEIPT_BUCKET).remove(paths);
+}
+
+function parseReceiptFiles(formData: FormData): File[] {
+  const files: File[] = [];
+  const multi = formData.getAll("receipt");
+  for (const entry of multi) {
+    if (entry instanceof File && entry.size > 0) {
+      files.push(entry);
+    }
+  }
+  const legacy = formData.get("receipt");
+  if (legacy instanceof File && legacy.size > 0 && !files.includes(legacy)) {
+    files.push(legacy);
+  }
+  return files;
+}
+
+function validateReceiptFile(file: File): string | null {
+  if (!EXPENSE_RECEIPT_ALLOWED_MIME.some((m) => m === file.type)) {
+    return `${file.name}: must be PNG, JPEG, WebP, or PDF.`;
+  }
+  if (file.size > EXPENSE_RECEIPT_MAX_BYTES) {
+    return `${file.name}: must be 5 MB or smaller.`;
+  }
+  if (!extFromReceiptMime(file.type)) {
+    return `${file.name}: unsupported file type.`;
+  }
+  return null;
 }
 
 export async function createExpense(
@@ -195,7 +230,7 @@ export async function deleteExpense(id: string): Promise<DeleteExpenseResult> {
 
   const existing = await supabase
     .from("expenses")
-    .select("receipt_url, project_id")
+    .select("receipt_url, receipt_urls, project_id")
     .eq("id", parsedId.data)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -203,6 +238,11 @@ export async function deleteExpense(id: string): Promise<DeleteExpenseResult> {
   if (existing.error || !existing.data) {
     return { ok: false, message: "Expense not found." };
   }
+
+  const urls = normalizeReceiptUrls(
+    existing.data.receipt_urls,
+    existing.data.receipt_url,
+  );
 
   const { count, error } = await supabase
     .from("expenses")
@@ -218,12 +258,13 @@ export async function deleteExpense(id: string): Promise<DeleteExpenseResult> {
     return { ok: false, message: "Expense could not be deleted." };
   }
 
-  await removeReceiptFromStorage(supabase, existing.data.receipt_url);
+  await removeReceiptsFromStorage(supabase, urls);
   revalidateExpensePaths(existing.data.project_id);
 
   return { ok: true };
 }
 
+/** Upload one or more receipt files (FormData keys: `receipt`, repeated). */
 export async function uploadExpenseReceipt(
   expenseId: string,
   formData: FormData,
@@ -233,25 +274,9 @@ export async function uploadExpenseReceipt(
     return { ok: false, message: "Invalid expense." };
   }
 
-  const file = formData.get("receipt");
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "Choose a receipt file to upload." };
-  }
-
-  if (!EXPENSE_RECEIPT_ALLOWED_MIME.some((m) => m === file.type)) {
-    return {
-      ok: false,
-      message: "Receipt must be PNG, JPEG, WebP, or PDF.",
-    };
-  }
-
-  if (file.size > EXPENSE_RECEIPT_MAX_BYTES) {
-    return { ok: false, message: "Receipt must be 5 MB or smaller." };
-  }
-
-  const ext = extFromReceiptMime(file.type);
-  if (!ext) {
-    return { ok: false, message: "Unsupported file type." };
+  const files = parseReceiptFiles(formData);
+  if (files.length === 0) {
+    return { ok: false, message: "Choose at least one file to upload." };
   }
 
   const supabase = await createSupabaseClient();
@@ -275,35 +300,67 @@ export async function uploadExpenseReceipt(
     return { ok: false, message: "Expense not found." };
   }
 
-  const path = `${user.id}/${parsedId.data}.${ext}`;
-  const { error: uploadError } = await supabase.storage
-    .from(RECEIPT_BUCKET)
-    .upload(path, file, {
-      contentType: file.type,
-      upsert: true,
-    });
+  const currentUrls = normalizeReceiptUrls(
+    existing.data.receipt_urls,
+    existing.data.receipt_url,
+  );
 
-  if (uploadError) {
-    return { ok: false, message: uploadError.message };
+  if (currentUrls.length + files.length > MAX_EXPENSE_RECEIPTS) {
+    return {
+      ok: false,
+      message: `You can attach up to ${MAX_EXPENSE_RECEIPTS} files per expense.`,
+    };
   }
 
-  const { data: pub } = supabase.storage.from(RECEIPT_BUCKET).getPublicUrl(path);
-  const newUrl = pub.publicUrl;
+  const newUrls: string[] = [];
 
-  if (existing.data.receipt_url && existing.data.receipt_url !== newUrl) {
-    await removeReceiptFromStorage(supabase, existing.data.receipt_url);
+  for (const file of files) {
+    const validationError = validateReceiptFile(file);
+    if (validationError) {
+      return { ok: false, message: validationError };
+    }
+
+    const ext = extFromReceiptMime(file.type);
+    if (!ext) {
+      return { ok: false, message: `${file.name}: unsupported file type.` };
+    }
+
+    const path = `${user.id}/${parsedId.data}/${crypto.randomUUID()}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from(RECEIPT_BUCKET)
+      .upload(path, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      await removeReceiptsFromStorage(supabase, newUrls);
+      return { ok: false, message: uploadError.message };
+    }
+
+    const { data: pub } = supabase.storage
+      .from(RECEIPT_BUCKET)
+      .getPublicUrl(path);
+    newUrls.push(pub.publicUrl);
   }
+
+  const merged = appendReceiptUrls(currentUrls, newUrls);
+  const primaryUrl = merged[0] ?? null;
 
   const { data, error } = await supabase
     .from("expenses")
-    .update({ receipt_url: newUrl })
+    .update({
+      receipt_urls: merged,
+      receipt_url: primaryUrl,
+    })
     .eq("id", parsedId.data)
     .eq("user_id", user.id)
     .select("*")
     .maybeSingle();
 
   if (error || !data) {
-    return { ok: false, message: error?.message ?? "Could not save receipt." };
+    await removeReceiptsFromStorage(supabase, newUrls);
+    return { ok: false, message: error?.message ?? "Could not save receipts." };
   }
 
   revalidateExpensePaths(data.project_id);
@@ -311,8 +368,10 @@ export async function uploadExpenseReceipt(
   return { ok: true, expense: normalizeExpenseRow(data) };
 }
 
+/** Remove one attachment by URL, or all when receiptUrl is omitted. */
 export async function removeExpenseReceipt(
   expenseId: string,
+  receiptUrl?: string,
 ): Promise<ReceiptMutationResult> {
   const parsedId = uuidSchema.safeParse(expenseId);
   if (!parsedId.success) {
@@ -340,11 +399,33 @@ export async function removeExpenseReceipt(
     return { ok: false, message: "Expense not found." };
   }
 
-  await removeReceiptFromStorage(supabase, existing.data.receipt_url);
+  const currentUrls = normalizeReceiptUrls(
+    existing.data.receipt_urls,
+    existing.data.receipt_url,
+  );
+
+  const toRemove = receiptUrl
+    ? currentUrls.filter((url) => url === receiptUrl)
+    : currentUrls;
+
+  if (toRemove.length === 0) {
+    return { ok: false, message: "Receipt not found." };
+  }
+
+  await removeReceiptsFromStorage(supabase, toRemove);
+
+  const nextUrls = receiptUrl
+    ? removeReceiptUrl(currentUrls, receiptUrl)
+    : [];
+
+  const primaryUrl = nextUrls[0] ?? null;
 
   const { data, error } = await supabase
     .from("expenses")
-    .update({ receipt_url: null })
+    .update({
+      receipt_urls: nextUrls,
+      receipt_url: primaryUrl,
+    })
     .eq("id", parsedId.data)
     .eq("user_id", user.id)
     .select("*")

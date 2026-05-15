@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FileText, Upload } from "lucide-react";
+import { FileText, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,6 +16,10 @@ import {
   updateExpense,
   uploadExpenseReceipt,
 } from "@/lib/expenses/expense-mutations";
+import {
+  MAX_EXPENSE_RECEIPTS,
+  receiptFileLabel,
+} from "@/lib/expenses/receipt-utils";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
@@ -94,8 +98,12 @@ export function ExpenseFormSheet({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptFiles, setReceiptFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const existingReceipts = expense?.receipt_urls ?? [];
+  const totalAttachments = existingReceipts.length + receiptFiles.length;
+  const atReceiptLimit = totalAttachments >= MAX_EXPENSE_RECEIPTS;
 
   const defaults =
     mode === "edit" && expense
@@ -121,7 +129,7 @@ export function ExpenseFormSheet({
         ? expenseRowToFormValues(expense)
         : emptyExpenseFormValues(defaultCurrency, lockProjectId ?? undefined);
     reset(next);
-    setReceiptFile(null);
+    setReceiptFiles([]);
     setServerError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -143,10 +151,12 @@ export function ExpenseFormSheet({
     });
   }
 
-  async function uploadReceiptIfNeeded(expenseId: string) {
-    if (!receiptFile) return true;
+  async function uploadReceiptsIfNeeded(expenseId: string) {
+    if (receiptFiles.length === 0) return true;
     const fd = new FormData();
-    fd.set("receipt", receiptFile);
+    for (const file of receiptFiles) {
+      fd.append("receipt", file);
+    }
     const uploaded = await uploadExpenseReceipt(expenseId, fd);
     if (!uploaded.ok) {
       toast.error(uploaded.message);
@@ -166,9 +176,9 @@ export function ExpenseFormSheet({
           applyFieldErrors(created.fieldErrors);
           return;
         }
-        const receiptOk = await uploadReceiptIfNeeded(created.expense.id);
+        const receiptOk = await uploadReceiptsIfNeeded(created.expense.id);
         toast.success(
-          receiptOk ? "Expense created" : "Expense saved; receipt upload failed.",
+          receiptOk ? "Expense created" : "Expense saved; attachment upload failed.",
         );
         onOpenChange(false);
         onSuccess?.();
@@ -185,9 +195,9 @@ export function ExpenseFormSheet({
         return;
       }
 
-      const receiptOk = await uploadReceiptIfNeeded(updated.expense.id);
+      const receiptOk = await uploadReceiptsIfNeeded(updated.expense.id);
       toast.success(
-        receiptOk ? "Expense updated" : "Expense updated; receipt upload failed.",
+        receiptOk ? "Expense updated" : "Expense updated; attachment upload failed.",
       );
       onOpenChange(false);
       onSuccess?.();
@@ -195,21 +205,34 @@ export function ExpenseFormSheet({
     });
   }
 
-  function handleRemoveReceipt() {
-    if (!expense?.receipt_url) return;
+  function handleRemoveExistingReceipt(url: string) {
+    if (!expense) return;
     startTransition(async () => {
-      const result = await removeExpenseReceipt(expense.id);
+      const result = await removeExpenseReceipt(expense.id, url);
       if (!result.ok) {
         toast.error(result.message);
         return;
       }
-      toast.success("Receipt removed");
+      toast.success("Attachment removed");
       router.refresh();
     });
   }
 
-  function handleReceiptFile(file: File | undefined) {
-    setReceiptFile(file ?? null);
+  function mergeReceiptFiles(incoming: FileList | File[]) {
+    const next = [...receiptFiles];
+    for (const file of Array.from(incoming)) {
+      if (file.size === 0) continue;
+      const duplicate = next.some(
+        (f) => f.name === file.name && f.size === file.size,
+      );
+      if (!duplicate) next.push(file);
+    }
+    const room = MAX_EXPENSE_RECEIPTS - existingReceipts.length;
+    setReceiptFiles(next.slice(0, Math.max(0, room)));
+  }
+
+  function removePendingReceipt(index: number) {
+    setReceiptFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
   const projectLocked = Boolean(lockProjectId);
@@ -407,12 +430,13 @@ export function ExpenseFormSheet({
                 <FieldSeparator>Receipt</FieldSeparator>
 
                 <Field>
-                  <FieldLabel htmlFor="expense-receipt">Attachment</FieldLabel>
+                  <FieldLabel htmlFor="expense-receipt">Attachments</FieldLabel>
+                  {!atReceiptLimit ? (
                   <button
                     type="button"
                     className={cn(
                       "flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/80 bg-muted/25 px-4 py-8 text-center transition-colors hover:border-primary/40 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                      receiptFile && "border-primary/30 bg-primary/5",
+                      receiptFiles.length > 0 && "border-primary/30 bg-primary/5",
                     )}
                     onDragOver={(e) => {
                       e.preventDefault();
@@ -421,72 +445,120 @@ export function ExpenseFormSheet({
                     onDrop={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      const file = e.dataTransfer.files?.[0];
-                      if (file) handleReceiptFile(file);
+                      if (e.dataTransfer.files?.length) {
+                        mergeReceiptFiles(e.dataTransfer.files);
+                      }
                     }}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    {receiptFile ? (
-                      <FileText
-                        className="text-primary"
-                        aria-hidden
-                        data-icon="inline-start"
-                      />
+                    {receiptFiles.length > 0 ? (
+                      <FileText className="text-primary" aria-hidden />
                     ) : (
                       <Upload className="text-muted-foreground" aria-hidden />
                     )}
                     <span className="text-sm font-medium text-foreground">
-                      {receiptFile
-                        ? receiptFile.name
-                        : "Click to upload or drag and drop"}
+                      {receiptFiles.length > 0
+                        ? `${receiptFiles.length} file${receiptFiles.length === 1 ? "" : "s"} ready to upload`
+                        : "Click or drag files here"}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      PNG, JPEG, WebP, or PDF · max 5 MB
+                      PNG, JPEG, WebP, or PDF · max 5 MB each · up to{" "}
+                      {MAX_EXPENSE_RECEIPTS} total
                     </span>
                     <input
                       ref={fileInputRef}
                       id="expense-receipt"
                       type="file"
                       accept={RECEIPT_ACCEPT}
+                      multiple
                       className="sr-only"
                       onChange={(e) => {
-                        handleReceiptFile(e.target.files?.[0]);
+                        if (e.target.files?.length) {
+                          mergeReceiptFiles(e.target.files);
+                        }
+                        e.target.value = "";
                       }}
                     />
                   </button>
-                  {expense?.receipt_url ? (
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        render={
+                  ) : (
+                    <FieldDescription>
+                      Maximum of {MAX_EXPENSE_RECEIPTS} attachments reached.
+                    </FieldDescription>
+                  )}
+                  {existingReceipts.length > 0 ? (
+                    <ul className="flex flex-col gap-2 pt-2">
+                      {existingReceipts.map((url) => (
+                        <li
+                          key={url}
+                          className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2"
+                        >
+                          <FileText
+                            className="shrink-0 text-muted-foreground"
+                            aria-hidden
+                          />
                           <a
-                            href={expense.receipt_url}
+                            href={url}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="min-w-0 flex-1 truncate text-sm text-primary underline-offset-4 hover:underline"
+                          >
+                            {receiptFileLabel(url)}
+                          </a>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="shrink-0 text-muted-foreground hover:text-destructive"
+                            aria-label={`Remove ${receiptFileLabel(url)}`}
+                            onClick={() => handleRemoveExistingReceipt(url)}
+                            disabled={isPending}
+                          >
+                            <X aria-hidden />
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+
+                  {receiptFiles.length > 0 ? (
+                    <ul className="flex flex-col gap-2 pt-2">
+                      {receiptFiles.map((file, index) => (
+                        <li
+                          key={`${file.name}-${file.size}-${index}`}
+                          className="flex items-center gap-2 rounded-lg border border-dashed border-primary/30 bg-primary/5 px-3 py-2"
+                        >
+                          <FileText
+                            className="shrink-0 text-primary"
+                            aria-hidden
                           />
-                        }
-                      >
-                        View current receipt
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={handleRemoveReceipt}
-                        disabled={isPending}
-                      >
-                        Remove
-                      </Button>
-                    </div>
+                          <span className="min-w-0 flex-1 truncate text-sm">
+                            {file.name}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="shrink-0"
+                            aria-label={`Remove ${file.name} from upload queue`}
+                            onClick={() => removePendingReceipt(index)}
+                          >
+                            <X aria-hidden />
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
                   ) : null}
-                  {!expense?.receipt_url && !receiptFile ? (
+
+                  {totalAttachments === 0 ? (
                     <FieldDescription>
-                      Receipts are stored securely and linked to this expense.
+                      Attach invoices, receipts, or PDFs — stored securely on
+                      this expense.
                     </FieldDescription>
-                  ) : null}
+                  ) : (
+                    <FieldDescription>
+                      {totalAttachments} of {MAX_EXPENSE_RECEIPTS} attachments.
+                    </FieldDescription>
+                  )}
                 </Field>
               </FieldGroup>
             </FieldSet>

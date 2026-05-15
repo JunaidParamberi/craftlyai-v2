@@ -1,3 +1,4 @@
+import { normalizeReceiptUrls } from "@/lib/expenses/receipt-utils";
 import type { ExpenseCategory, ExpenseListRow, ExpenseRow } from "@/types";
 
 type ExpenseRowRaw = {
@@ -10,7 +11,8 @@ type ExpenseRowRaw = {
   date: string;
   vendor: string | null;
   notes: string | null;
-  receipt_url: string | null;
+  receipt_url?: string | null;
+  receipt_urls?: unknown;
   created_at: string;
   updated_at: string;
 };
@@ -26,6 +28,12 @@ function parseAmount(amount: number | string): number {
 }
 
 export function normalizeExpenseRow(row: ExpenseRowRaw): ExpenseRow {
+  const receipt_urls = normalizeReceiptUrls(
+    row.receipt_urls,
+    row.receipt_url,
+  );
+  const legacyUrl = receipt_urls[0] ?? row.receipt_url ?? null;
+
   return {
     id: row.id,
     user_id: row.user_id,
@@ -36,7 +44,8 @@ export function normalizeExpenseRow(row: ExpenseRowRaw): ExpenseRow {
     date: row.date,
     vendor: row.vendor,
     notes: row.notes,
-    receipt_url: row.receipt_url,
+    receipt_url: legacyUrl,
+    receipt_urls,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };

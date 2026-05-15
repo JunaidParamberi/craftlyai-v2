@@ -154,7 +154,9 @@ export type ExpenseRow = {
   date: string;
   vendor: string | null;
   notes: string | null;
+  /** @deprecated Use receipt_urls. Kept for legacy rows until column is dropped. */
   receipt_url: string | null;
+  receipt_urls: string[];
   created_at: string;
   updated_at: string;
 };

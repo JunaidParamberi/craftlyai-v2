@@ -216,7 +216,7 @@ Plan gating: Supabase RLS + middleware check plan tier before every AI call.
 | documents | id, user_id, client_id, project_id, type, status, content_json, pdf_url, sent_at, viewed_at, signed_at |
 | line_items | id, document_id, description, quantity, unit_price, tax_rate, amount |
 | payments | id, document_id, amount, currency, method, paid_at |
-| expenses | id, user_id, project_id, category, amount, receipt_url, date |
+| expenses | id, user_id, project_id, category, amount, currency, vendor, notes, receipt_url, receipt_urls (jsonb), date |
 | time_entries | id, user_id, project_id, task_id, started_at, ended_at, duration_seconds, billed |
 | templates | id, user_id, name, type, content_json, is_default |
 | ai_conversations | id, user_id, agent_id, messages_json, context_snapshot, tokens_used |
@@ -278,7 +278,7 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 ### Phase 2.5 — Foundation Gaps
 
 - [x] Real dashboard — live KPIs (reuse `getFinancialSummary`), attention banner, activity feed (10 events), active pipeline panel; `lib/dashboard/*`, `components/features/dashboard/*`, spec `docs/superpowers/specs/2026-05-15-real-dashboard-design.md` (`feat/real-dashboard` → `dev`)
-- [x] Expenses UI — `/expenses` CRUD, categories, receipt upload, project-linked view; migration `20260524120000_expenses.sql`, `lib/expenses/*`, `components/features/expenses/*` (`feat/expenses-ui`)
+- [x] Expenses UI — `/expenses` CRUD, categories, multi-file receipt upload (up to 10), project **Expenses** tab; migrations `20260524120000_expenses.sql` + `20260525120000_expense_receipt_urls.sql`; `lib/expenses/*`, `components/features/expenses/*` (`feat/expenses-ui` → `dev`)
 - [ ] todo · Tasks standalone view — `/tasks` all tasks across projects, filters, quick-add, overdue highlight
 - [ ] todo · Project kanban board — board view toggle on `/projects/[id]`, dnd-kit drag between columns
 - [ ] todo · Notifications UI — bell + drawer, unread badge, mark-read server actions
@@ -366,7 +366,7 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 - 2026-05-15: **Master roadmap** — full product roadmap spec written to `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`. CLAUDE.md updated with revised phases (2.5 foundation gaps, 2.6 regional compliance, 3.5 project depth, 4.5 pro AI). Next: Phase 2.5 Task 0 — real dashboard.
 - 2026-05-15: **Fix: document monthly limit enforcement** — `/documents` page was not blocking creation when Free tier 5 docs/month quota was hit. Added `AddDocumentButton` client component (lock icon + sonner toast with upgrade CTA at limit, normal Link when under). Page now parallel-fetches doc count this month via `gte("created_at", startOfCurrentMonth())`, computes `atLimit`, renders `AddDocumentButton` + `UpgradeGhostRow` with usage string. `fix/document-limit-enforcement` → `dev`.
 - 2026-05-15: **Real dashboard** merged to `dev` — `/dashboard` RSC runs 5 parallel queries (`getFinancialSummary`, `getDashboardCounts`, `getAttentionItems`, `getRecentActivity`, `getActivePipeline`). Layout B: 4 KPI cards, amber attention banner (hidden when empty), 3/5 activity + 2/5 pipeline. Pure utils + Vitest in `lib/dashboard/activity-utils.ts` and `attention-utils.ts`. Shared `formatCurrency` in `lib/utils/format.ts`. Skeleton updated for 4 KPIs + attention row. Project deadline attention uses `planning` + `active` (not task `in_progress`). `feat/real-dashboard` → `dev`. Phase 2.5 progress: 1/8.
-- 2026-05-15: **Expenses UI** on `feat/expenses-ui` — migration `expenses` table + `expense-receipts` storage bucket; `/expenses` with filterable list, summary card, Sheet CRUD + receipt upload; project detail **Expenses** tab; Zod + Vitest. Phase 2.5 progress: 2/8. Next: **Tasks standalone view**.
+- 2026-05-15: **Expenses UI** merged to `dev` — `expenses` table + `expense-receipts` bucket; `/expenses` with filters, summary card, Sheet form (FieldGroup); multi-attachment via `receipt_urls` jsonb (max 10); project detail **Expenses** tab; `lib/expenses/receipt-utils.ts` + Vitest. `feat/expenses-ui` → `dev`. Phase 2.5 progress: 2/8. Next: **Tasks standalone view**.
 
 ---
 
