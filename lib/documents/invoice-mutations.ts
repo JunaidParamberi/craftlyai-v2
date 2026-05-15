@@ -124,12 +124,25 @@ export async function markInvoicePaid(
   documentId: string
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Unauthenticated" };
+
   const { error } = await supabase
     .from("documents")
     .update({ status: "paid", paid_at: new Date().toISOString() })
-    .eq("id", documentId);
+    .eq("id", documentId)
+    .eq("user_id", user.id);
   if (error) return { ok: false, error: error.message };
+
+  const { notifyDocumentEvent } = await import(
+    "@/lib/notifications/document-notification"
+  );
+  await notifyDocumentEvent(supabase, user.id, documentId, "invoice_paid");
+
   revalidatePath(`/documents/${documentId}`);
   revalidatePath("/documents");
+  revalidatePath("/dashboard", "layout");
   return { ok: true };
 }

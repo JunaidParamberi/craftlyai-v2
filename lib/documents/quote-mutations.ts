@@ -50,6 +50,11 @@ export async function markQuoteApproved(
   message?: string
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Unauthenticated" };
+
   const { error } = await supabase
     .from("documents")
     .update({
@@ -57,10 +62,18 @@ export async function markQuoteApproved(
       approved_at: new Date().toISOString(),
       approval_message: message ?? null,
     })
-    .eq("id", documentId);
+    .eq("id", documentId)
+    .eq("user_id", user.id);
   if (error) return { ok: false, error: error.message };
+
+  const { notifyDocumentEvent } = await import(
+    "@/lib/notifications/document-notification"
+  );
+  await notifyDocumentEvent(supabase, user.id, documentId, "quote_approved");
+
   revalidatePath(`/documents/${documentId}`);
   revalidatePath("/documents");
+  revalidatePath("/dashboard", "layout");
   return { ok: true };
 }
 
@@ -69,6 +82,11 @@ export async function markQuoteDeclined(
   message?: string
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Unauthenticated" };
+
   const { error } = await supabase
     .from("documents")
     .update({
@@ -76,10 +94,18 @@ export async function markQuoteDeclined(
       declined_at: new Date().toISOString(),
       approval_message: message ?? null,
     })
-    .eq("id", documentId);
+    .eq("id", documentId)
+    .eq("user_id", user.id);
   if (error) return { ok: false, error: error.message };
+
+  const { notifyDocumentEvent } = await import(
+    "@/lib/notifications/document-notification"
+  );
+  await notifyDocumentEvent(supabase, user.id, documentId, "quote_declined");
+
   revalidatePath(`/documents/${documentId}`);
   revalidatePath("/documents");
+  revalidatePath("/dashboard", "layout");
   return { ok: true };
 }
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CreditCard, LifeBuoy, Search, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { NotificationBell } from "@/components/features/notifications/notification-bell";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { PlanUsageBars } from "@/components/features/billing/plan-usage-bars";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -24,6 +25,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { PLAN_ORDER } from "@/config/plans";
 import type { PlanUsage } from "@/lib/plan-usage/helpers";
+import type { NotificationRow } from "@/types";
 
 const PLAN_LABELS: Record<string, string> = {
   free: "Free",
@@ -36,6 +38,8 @@ type AppHeaderProps = {
   userEmail: string | null;
   userInitials: string;
   planUsage: PlanUsage;
+  notifications: NotificationRow[];
+  unreadCount: number;
   onOpenSearch: () => void;
 };
 
@@ -43,6 +47,8 @@ export function AppHeader({
   userEmail,
   userInitials,
   planUsage,
+  notifications,
+  unreadCount,
   onOpenSearch,
 }: AppHeaderProps) {
   const router = useRouter();
@@ -88,6 +94,10 @@ export function AppHeader({
           <Search />
         </Button>
         <ThemeToggle />
+        <NotificationBell
+          notifications={notifications}
+          unreadCount={unreadCount}
+        />
         <DropdownMenu>
           <DropdownMenuTrigger
             render={

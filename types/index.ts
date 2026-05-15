@@ -313,3 +313,32 @@ export type DocumentTemplateRow = {
   created_at: string;
   updated_at: string;
 };
+
+/** Matches `notifications.type` check constraint. */
+export type NotificationType =
+  | "invoice_paid"
+  | "invoice_overdue"
+  | "quote_approved"
+  | "quote_declined"
+  | "proposal_approved"
+  | "doc_sent"
+  | "task_due"
+  | "task_overdue";
+
+export type NotificationPayload = {
+  href: string;
+  label: string;
+  entity_id: string;
+};
+
+/** Row shape for `public.notifications`. */
+export type NotificationRow = {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  payload: NotificationPayload;
+  read_at: string | null;
+  action_taken_at: string | null;
+  created_at: string;
+  updated_at: string;
+};

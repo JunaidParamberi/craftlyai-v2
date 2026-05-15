@@ -120,6 +120,16 @@ export async function sendQuote(
 
     if (updateError) {
       console.error("[sendQuote] status update failed:", updateError.message);
+    } else {
+      const { notifyDocumentEvent } = await import(
+        "@/lib/notifications/document-notification"
+      );
+      await notifyDocumentEvent(
+        supabase,
+        user.id,
+        input.documentId,
+        "doc_sent"
+      );
     }
 
     return { ok: true };

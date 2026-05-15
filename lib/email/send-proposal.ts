@@ -96,10 +96,22 @@ export async function sendProposal(
 
     if (sendError) return { ok: false, error: formatEmailError(sendError.message) };
 
-    await supabase
+    const { error: updateError } = await supabase
       .from("documents")
       .update({ status: "sent", sent_at: new Date().toISOString() })
       .eq("id", input.documentId);
+
+    if (!updateError) {
+      const { notifyDocumentEvent } = await import(
+        "@/lib/notifications/document-notification"
+      );
+      await notifyDocumentEvent(
+        supabase,
+        user.id,
+        input.documentId,
+        "doc_sent"
+      );
+    }
 
     return { ok: true };
   } catch (err) {
