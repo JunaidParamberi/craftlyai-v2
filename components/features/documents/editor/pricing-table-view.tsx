@@ -2,7 +2,7 @@
 
 import { NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
-import { useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -28,38 +28,61 @@ const fmt = (n: number, currency: string) =>
     minimumFractionDigits: 2,
   }).format(n);
 
-export function PricingTableView({ node, updateAttributes, selected }: NodeViewProps) {
-  const attrs = node.attrs as PricingTableAttrs;
+export function PricingTableView({ node, editor, selected }: NodeViewProps) {
+  const attrs = node.attrs as PricingTableAttrs & { id: string };
+  const tableId = attrs.id as string;
 
   const [rows, setRows] = useState<PricingRow[]>(() => attrs.rows ?? defaultRows());
   const [currency] = useState(attrs.currency || "USD");
   const [taxRate, setTaxRate] = useState(attrs.taxRate ?? 0);
   const [showTax, setShowTax] = useState(attrs.showTax ?? false);
 
-  const sync = useCallback(
-    (nextRows: PricingRow[], nextShowTax: boolean, nextTaxRate: number) => {
-      updateAttributes({ rows: nextRows, currency, showTax: nextShowTax, taxRate: nextTaxRate });
-    },
-    [currency, updateAttributes],
-  );
+  // Write current state to extension storage so TiptapEditor.getJSON() can read it
+  const ext = (editor.storage as unknown as Record<string, { tables: Record<string, PricingTableAttrs> }>);
+
+  const writeToStorage = (
+    nextRows: PricingRow[],
+    nextShowTax: boolean,
+    nextTaxRate: number,
+  ) => {
+    if (!tableId || !ext.pricingTable) return;
+    ext.pricingTable.tables[tableId] = {
+      rows: nextRows,
+      currency,
+      showTax: nextShowTax,
+      taxRate: nextTaxRate,
+    };
+  };
+
+  // Initialize storage on mount so loaded documents are readable
+  useEffect(() => {
+    writeToStorage(rows, showTax, taxRate);
+    // Cleanup on unmount
+    return () => {
+      if (ext.pricingTable?.tables) {
+        delete ext.pricingTable.tables[tableId];
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableId]);
 
   const updateRow = (id: string, field: keyof PricingRow, value: string | number) => {
     const next = rows.map((r) => (r.id === id ? { ...r, [field]: value } : r));
     setRows(next);
-    sync(next, showTax, taxRate);
+    writeToStorage(next, showTax, taxRate);
   };
 
   const addRow = () => {
     const next = [...rows, { id: uid(), description: "", qty: 1, rate: 0 }];
     setRows(next);
-    sync(next, showTax, taxRate);
+    writeToStorage(next, showTax, taxRate);
   };
 
   const removeRow = (id: string) => {
     if (rows.length <= 1) return;
     const next = rows.filter((r) => r.id !== id);
     setRows(next);
-    sync(next, showTax, taxRate);
+    writeToStorage(next, showTax, taxRate);
   };
 
   const subtotal = rows.reduce((s, r) => s + r.qty * r.rate, 0);
@@ -174,7 +197,7 @@ export function PricingTableView({ node, updateAttributes, selected }: NodeViewP
                     onChange={(e) => {
                       const n = parseFloat(e.target.value) || 0;
                       setTaxRate(n);
-                      sync(rows, showTax, n);
+                      writeToStorage(rows, showTax, n);
                     }}
                     min={0}
                     max={100}
@@ -199,7 +222,7 @@ export function PricingTableView({ node, updateAttributes, selected }: NodeViewP
                 onClick={() => {
                   const next = !showTax;
                   setShowTax(next);
-                  sync(rows, next, taxRate);
+                  writeToStorage(rows, next, taxRate);
                 }}
                 className="text-[0.7rem] text-muted-foreground hover:text-foreground transition-colors"
               >

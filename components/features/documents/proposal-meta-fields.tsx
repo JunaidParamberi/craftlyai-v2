@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { updateProposalMeta } from "@/lib/documents/proposal-mutations";
+import { autoGenerateProposalNumber, updateProposalMeta } from "@/lib/documents/proposal-mutations";
 import { FormDatePicker } from "@/components/shared/form-date-picker";
 
 interface ProposalMetaFieldsProps {
@@ -27,6 +27,13 @@ export function ProposalMetaFields({
   const [notesFooter, setNotesFooter] = useState(initialNotesFooter ?? "");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (initialProposalNumber) return;
+    autoGenerateProposalNumber(documentId).then((result) => {
+      if (result?.number) setProposalNumber(result.number);
+    });
+  }, [documentId, initialProposalNumber]);
 
   const handleSave = () => {
     setSaveState("saving");

@@ -2,7 +2,7 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 
 import { PricingTableView } from "./pricing-table-view";
-import type { PricingRow } from "./pricing-table-view";
+import type { PricingRow, PricingTableAttrs } from "./pricing-table-view";
 
 function uid() {
   return Math.random().toString(36).slice(2, 9);
@@ -22,8 +22,15 @@ export const PricingTableExtension = Node.create({
   atom: true,
   draggable: true,
 
+  addStorage() {
+    return {
+      tables: {} as Record<string, PricingTableAttrs>,
+    };
+  },
+
   addAttributes() {
     return {
+      id: { default: "" },
       rows: { default: defaultRows() as PricingRow[] },
       currency: { default: "USD" },
       taxRate: { default: 0 },
