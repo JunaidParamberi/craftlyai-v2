@@ -17,6 +17,34 @@ export async function generateProposalNumber(userId: string): Promise<string> {
   return `PRO-${n.toString().padStart(4, "0")}`;
 }
 
+export async function autoGenerateProposalNumber(
+  documentId: string,
+): Promise<{ number: string } | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("documents")
+    .select("proposal_number")
+    .eq("id", documentId)
+    .maybeSingle();
+
+  if (data?.proposal_number) return { number: data.proposal_number as string };
+
+  const number = await generateProposalNumber(user.id);
+  await supabase
+    .from("documents")
+    .update({ proposal_number: number })
+    .eq("id", documentId);
+
+  revalidatePath(`/documents/${documentId}`);
+  revalidatePath(`/documents/${documentId}/edit`);
+  return { number };
+}
+
 export async function updateProposalMeta(
   documentId: string,
   rawInput: unknown

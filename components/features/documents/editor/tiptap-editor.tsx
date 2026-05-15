@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import type { TiptapDoc } from "@/types";
 
 import { PricingTableExtension } from "./pricing-table-node";
+import type { PricingTableAttrs } from "./pricing-table-view";
 import { EditorToolbar } from "./editor-toolbar";
 
 type TiptapEditorProps = {
@@ -63,7 +64,14 @@ export const TiptapEditor = forwardRef<TiptapEditorHandle, TiptapEditorProps>(
   });
 
   useImperativeHandle(ref, () => ({
-    getJSON: () => (editor?.getJSON() as TiptapDoc) ?? value,
+    getJSON: () => {
+      if (!editor) return value;
+      const json = editor.getJSON() as TiptapDoc;
+      const extStorage = editor.storage as unknown as Record<string, { tables?: Record<string, PricingTableAttrs> }>;
+      const storage = extStorage.pricingTable?.tables;
+      if (!storage) return json;
+      return enrichPricingTables(json, storage);
+    },
   }), [editor, value]);
 
   useEffect(() => {
@@ -94,3 +102,27 @@ export const TiptapEditor = forwardRef<TiptapEditorHandle, TiptapEditorProps>(
   );
   }
 );
+
+function enrichPricingTables(
+  doc: TiptapDoc,
+  storage: Record<string, PricingTableAttrs>,
+): TiptapDoc {
+  const enrichNode = (node: import("@/types").TiptapNode): import("@/types").TiptapNode => {
+    if (node.type === "pricingTable") {
+      const tableId = node.attrs?.id as string | undefined;
+      const stored = tableId ? storage[tableId] : undefined;
+      if (stored) {
+        return { ...node, attrs: { ...node.attrs, ...stored } };
+      }
+    }
+    if (node.content) {
+      return { ...node, content: node.content.map(enrichNode) };
+    }
+    return node;
+  };
+
+  return {
+    ...doc,
+    content: (doc.content ?? []).map(enrichNode),
+  };
+}

@@ -94,6 +94,69 @@ function renderBlock(node: TiptapNode, ctx: RenderCtx): React.ReactNode {
     case "text":
       return <Text style={ctx.styles.p}>{renderTextNode(node, ctx)}</Text>;
 
+    case "pricingTable": {
+      const attrs = node.attrs as {
+        rows?: Array<{ description: string; qty: number; rate: number; id: string }>;
+        currency?: string;
+        showTax?: boolean;
+        taxRate?: number;
+      } | undefined;
+      const rows = attrs?.rows ?? [];
+      const currency = attrs?.currency ?? "USD";
+      const showTax = attrs?.showTax ?? false;
+      const taxRate = attrs?.taxRate ?? 0;
+      const subtotal = rows.reduce((s, r) => s + r.qty * r.rate, 0);
+      const tax = showTax ? subtotal * (taxRate / 100) : 0;
+      const total = subtotal + tax;
+      const fmt = (n: number) =>
+        new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 2 }).format(n);
+
+      const col = { description: { flex: 1 }, qty: { width: 36 }, rate: { width: 60 }, total: { width: 70 } };
+      const headerCell = { fontSize: 7, fontWeight: 700 as const, color: "#71717a", textTransform: "uppercase" as const };
+      const bodyCell = { fontSize: 9 };
+      const border = { borderBottomWidth: 1, borderBottomColor: "#e4e4e7" };
+
+      return (
+        <View style={{ marginVertical: 10, borderWidth: 1, borderColor: "#e4e4e7", borderRadius: 4 }}>
+          {/* Header */}
+          <View style={{ flexDirection: "row", backgroundColor: "#f4f4f5", ...border, padding: 6 }}>
+            <Text style={{ ...col.description, ...headerCell }}>Description</Text>
+            <Text style={{ ...col.qty, ...headerCell, textAlign: "right" }}>Qty</Text>
+            <Text style={{ ...col.rate, ...headerCell, textAlign: "right" }}>Rate</Text>
+            <Text style={{ ...col.total, ...headerCell, textAlign: "right" }}>Total</Text>
+          </View>
+          {/* Rows */}
+          {rows.map((row, i) => (
+            <View key={i} style={{ flexDirection: "row", ...border, padding: 6 }}>
+              <Text style={{ ...col.description, ...bodyCell }}>{row.description || "—"}</Text>
+              <Text style={{ ...col.qty, ...bodyCell, textAlign: "right" }}>{row.qty}</Text>
+              <Text style={{ ...col.rate, ...bodyCell, textAlign: "right" }}>{fmt(row.rate)}</Text>
+              <Text style={{ ...col.total, ...bodyCell, textAlign: "right", fontWeight: 700 }}>{fmt(row.qty * row.rate)}</Text>
+            </View>
+          ))}
+          {/* Subtotal */}
+          <View style={{ flexDirection: "row", borderTopWidth: 1, borderTopColor: "#e4e4e7", padding: 6 }}>
+            <Text style={{ flex: 1 }} />
+            <Text style={{ width: 60, fontSize: 8, color: "#71717a", textAlign: "right", textTransform: "uppercase" }}>Subtotal</Text>
+            <Text style={{ ...col.total, fontSize: 9, textAlign: "right" }}>{fmt(subtotal)}</Text>
+          </View>
+          {showTax && (
+            <View style={{ flexDirection: "row", padding: 6 }}>
+              <Text style={{ flex: 1 }} />
+              <Text style={{ width: 60, fontSize: 8, color: "#71717a", textAlign: "right", textTransform: "uppercase" }}>Tax ({taxRate}%)</Text>
+              <Text style={{ ...col.total, fontSize: 9, textAlign: "right" }}>{fmt(tax)}</Text>
+            </View>
+          )}
+          {/* Total */}
+          <View style={{ flexDirection: "row", borderTopWidth: 1, borderTopColor: "#e4e4e7", backgroundColor: "#fafafa", padding: 6, borderBottomLeftRadius: 4, borderBottomRightRadius: 4 }}>
+            <Text style={{ flex: 1 }} />
+            <Text style={{ width: 60, fontSize: 9, fontWeight: 700, textAlign: "right", textTransform: "uppercase" }}>Total</Text>
+            <Text style={{ ...col.total, fontSize: 10, fontWeight: 700, textAlign: "right" }}>{fmt(total)}</Text>
+          </View>
+        </View>
+      );
+    }
+
     default:
       return null;
   }

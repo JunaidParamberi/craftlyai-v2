@@ -221,7 +221,10 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       <ToolbarBtn
         label="Insert pricing table"
         onClick={() =>
-          editor.chain().focus().insertContent({ type: "pricingTable" }).run()
+          editor.chain().focus().insertContent({
+            type: "pricingTable",
+            attrs: { id: Math.random().toString(36).slice(2, 9) },
+          }).run()
         }
       >
         <Table className="size-4" />
