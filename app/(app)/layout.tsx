@@ -7,6 +7,9 @@ import { getUserInitials } from "@/lib/dashboard/user-display";
 import { getRequiredOnboardingPath } from "@/lib/onboarding/status";
 import { getProfile } from "@/lib/profile/actions";
 import { createClient } from "@/lib/supabase/server";
+import { startOfCurrentMonth } from "@/lib/plan-usage/helpers";
+import type { PlanUsage } from "@/lib/plan-usage/helpers";
+import type { PlanTier } from "@/config/plans";
 
 export default async function AppShellLayout({
   children,
@@ -47,8 +50,30 @@ export default async function AppShellLayout({
   const userEmail = user?.email ?? null;
   const userInitials = getUserInitials(result.profile.full_name, userEmail);
 
+  const [clientCountResult, docCountResult] = await Promise.all([
+    supabase
+      .from("clients")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user?.id ?? ""),
+    supabase
+      .from("documents")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user?.id ?? "")
+      .gte("created_at", startOfCurrentMonth()),
+  ]);
+
+  const planUsage: PlanUsage = {
+    planTier: (result.profile.plan_tier ?? "free") as PlanTier,
+    clientCount: clientCountResult.count ?? 0,
+    docCountThisMonth: docCountResult.count ?? 0,
+  };
+
   return (
-    <DashboardShell userEmail={userEmail} userInitials={userInitials}>
+    <DashboardShell
+      userEmail={userEmail}
+      userInitials={userInitials}
+      planUsage={planUsage}
+    >
       {children}
     </DashboardShell>
   );
