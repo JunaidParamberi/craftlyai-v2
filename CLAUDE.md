@@ -1,7 +1,7 @@
 # CLAUDE.md — CraftlyAI Project Context
 
 Last updated: 2026-05-15
-Current phase: Phase 2 complete; Phase 2.5 — Foundation Gaps in-progress (3/8)
+Current phase: Phase 2 complete; Phase 2.5 — Foundation Gaps in-progress (4/8)
 
 Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
 
@@ -284,7 +284,7 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 - [x] Real dashboard — live KPIs (reuse `getFinancialSummary`), attention banner, activity feed (10 events), active pipeline panel; `lib/dashboard/*`, `components/features/dashboard/*`, spec `docs/superpowers/specs/2026-05-15-real-dashboard-design.md` (`feat/real-dashboard` → `dev`)
 - [x] Expenses UI — `/expenses` CRUD, categories, multi-file receipt upload (up to 10), project **Expenses** tab; migrations `20260524120000_expenses.sql` + `20260525120000_expense_receipt_urls.sql`; `lib/expenses/*`, `components/features/expenses/*` (`feat/expenses-ui` → `dev`)
 - [x] Tasks standalone view — `/tasks` cross-project inbox: `listAllTasksForUser`, URL filters (`project`/`status`/`priority`/`sort`), KPI summary (open/overdue/done), shadcn table + Checkbox, quick-add dialog, sidebar nav; `lib/tasks/task-queries.ts`, `lib/tasks/task-utils.ts` (+ Vitest), `lib/tasks/display.ts`, `components/features/tasks/*`; revalidates `/tasks` on mutations (`feat/tasks-standalone` → `dev`)
-- [ ] todo · Project kanban board — board view toggle on `/projects/[id]`, dnd-kit drag between columns
+- [x] Project kanban board — board view toggle on project **Tasks** tab (`/projects/[id]`), 4 status columns, `@dnd-kit/core` drag-to-update status, edit sheet, per-project list/board in localStorage; `components/features/tasks/kanban-*`, `task-edit-sheet.tsx`, spec `docs/specs/2026-05-15-kanban-board-design.md` (`feat/kanban-board` → `dev`)
 - [ ] todo · Notifications UI — bell + drawer, unread badge, mark-read server actions
 - [ ] todo · Payment method detail — mark-paid modal with method/cheque/reference fields, payment history tab
 - [ ] todo · Payment Voucher document type — auto-generated on mark-paid, PDF, accessible in portal
@@ -372,6 +372,7 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 - 2026-05-15: **Real dashboard** merged to `dev` — `/dashboard` RSC runs 5 parallel queries (`getFinancialSummary`, `getDashboardCounts`, `getAttentionItems`, `getRecentActivity`, `getActivePipeline`). Layout B: 4 KPI cards, amber attention banner (hidden when empty), 3/5 activity + 2/5 pipeline. Pure utils + Vitest in `lib/dashboard/activity-utils.ts` and `attention-utils.ts`. Shared `formatCurrency` in `lib/utils/format.ts`. Skeleton updated for 4 KPIs + attention row. Project deadline attention uses `planning` + `active` (not task `in_progress`). `feat/real-dashboard` → `dev`. Phase 2.5 progress: 1/8.
 - 2026-05-15: **Expenses UI** merged to `dev` — `expenses` table + `expense-receipts` bucket; `/expenses` with filters, summary card, Sheet form (FieldGroup); multi-attachment via `receipt_urls` jsonb (max 10); project detail **Expenses** tab; `lib/expenses/receipt-utils.ts` + Vitest. `feat/expenses-ui` → `dev`. Phase 2.5 progress: 2/8. Next: **Tasks standalone view**.
 - 2026-05-15: **Tasks standalone view** merged to `dev` — `/tasks` RSC + `listAllTasksForUser` (project/client embed), URL filters, Finance-style `KpiCard` summary, compact **Table** list (shadcn `Checkbox`, badge variants, overdue row highlight), quick-add dialog (`FieldGroup`), Work nav **Tasks** link; `TaskListRow` type; `lib/tasks/task-utils.ts` (9 Vitest); `lib/tasks/display.ts` shared with project Tasks tab; `components/ui/checkbox.tsx` added. 201 Vitest tests pass. `feat/tasks-standalone` → `dev`. Phase 2.5 progress: 3/8. Next: **Project kanban board**.
+- 2026-05-15: **Project kanban board** merged to `dev` — **Tasks** tab on `/projects/[id]`: list/board toggle (per-project `localStorage`), 4-column kanban (`todo` / `in_progress` / `done` / `cancelled`), optimistic dnd-kit status drag, right Sheet edit/delete, column “Add task” pre-fills status via existing project add dialog; `@dnd-kit/core` + `@dnd-kit/utilities`. `feat/kanban-board` → `dev`. Phase 2.5 progress: 4/8. Next: **Notifications UI**.
 
 ---
 
