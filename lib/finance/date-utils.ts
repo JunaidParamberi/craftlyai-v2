@@ -1,4 +1,5 @@
 import {
+  startOfDay,
   startOfMonth,
   startOfYear,
   subMonths,
@@ -13,7 +14,7 @@ export function currentMonthRange(): DateRange {
 }
 
 export function lastNMonthsRange(n: number): DateRange {
-  return { from: subMonths(new Date(), n), to: new Date() };
+  return { from: startOfDay(subMonths(new Date(), n)), to: new Date() };
 }
 
 export function yearToDateRange(): DateRange {

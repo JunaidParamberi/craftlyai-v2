@@ -3,6 +3,7 @@ import {
   currentMonthRange,
   lastNMonthsRange,
   yearToDateRange,
+  previousPeriodRange,
   parseDateRangeParams,
   formatDateParam,
 } from "./date-utils";
@@ -51,6 +52,17 @@ describe("parseDateRangeParams", () => {
   it("falls back to currentMonthRange when params are invalid", () => {
     const range = parseDateRangeParams("not-a-date", "also-bad");
     expect(range.from.getDate()).toBe(1);
+  });
+});
+
+describe("previousPeriodRange", () => {
+  it("returns a range of equal duration immediately before the given range", () => {
+    const from = new Date("2026-03-01T00:00:00Z");
+    const to = new Date("2026-03-31T00:00:00Z");
+    const prev = previousPeriodRange({ from, to });
+    const duration = to.getTime() - from.getTime();
+    expect(prev.to.getTime()).toBe(from.getTime());
+    expect(prev.to.getTime() - prev.from.getTime()).toBe(duration);
   });
 });
 
