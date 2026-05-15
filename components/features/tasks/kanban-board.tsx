@@ -14,7 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { updateTask } from "@/lib/tasks/actions";
@@ -72,10 +72,62 @@ export function KanbanBoard({
   const [selectedTask, setSelectedTask] = useState<TaskRow | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [, startTransition] = useTransition();
+  const boardScrollRef = useRef<HTMLDivElement>(null);
+  const lastPointerXRef = useRef<number | null>(null);
 
   useEffect(() => {
     setTasks(initialTasks);
   }, [initialTasks]);
+
+  useEffect(() => {
+    if (!activeId || !boardScrollRef.current) return;
+
+    function applyEdgeScroll(clientX: number) {
+      const scrollEl = boardScrollRef.current;
+      if (!scrollEl) return;
+
+      const rect = scrollEl.getBoundingClientRect();
+      const maxScroll = scrollEl.scrollWidth - scrollEl.clientWidth;
+      if (maxScroll <= 0) return;
+
+      const margin = Math.min(96, Math.max(44, rect.width * 0.22));
+      const leftEdge = rect.left + margin;
+      const rightEdge = rect.right - margin;
+
+      if (clientX < leftEdge) {
+        const depth = Math.min(1, (leftEdge - clientX) / margin);
+        scrollEl.scrollLeft = Math.max(
+          0,
+          scrollEl.scrollLeft - (8 + depth * 28),
+        );
+      } else if (clientX > rightEdge) {
+        const depth = Math.min(1, (clientX - rightEdge) / margin);
+        scrollEl.scrollLeft = Math.min(
+          maxScroll,
+          scrollEl.scrollLeft + (8 + depth * 28),
+        );
+      }
+    }
+
+    function onPointerMove(e: PointerEvent) {
+      lastPointerXRef.current = e.clientX;
+      applyEdgeScroll(e.clientX);
+    }
+
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+
+    const tick = () => {
+      const x = lastPointerXRef.current;
+      if (x != null) applyEdgeScroll(x);
+    };
+    const intervalId = window.setInterval(tick, 45);
+
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.clearInterval(intervalId);
+      lastPointerXRef.current = null;
+    };
+  }, [activeId]);
 
   const activeTask = activeId
     ? (tasks.find((t) => t.id === activeId) ?? null)
@@ -144,7 +196,10 @@ export function KanbanBoard({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex min-h-0 min-w-0 w-full touch-pan-x gap-4 overflow-x-auto overscroll-x-contain pb-4 [-webkit-overflow-scrolling:touch]">
+        <div
+          ref={boardScrollRef}
+          className="flex min-h-0 min-w-0 w-full touch-pan-x gap-4 overflow-x-auto overscroll-x-contain pb-4 [-webkit-overflow-scrolling:touch]"
+        >
           {COLUMNS.map((col) => (
             <KanbanColumn
               key={col.status}
