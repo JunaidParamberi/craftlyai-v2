@@ -30,6 +30,7 @@ type DocumentRowRaw = {
   discount_value?: number;
   discount_type?: string;
   quote_number?: string | null;
+  proposal_number?: string | null;
   valid_until?: string | null;
   approval_token?: string | null;
   approved_at?: string | null;
@@ -69,6 +70,7 @@ export function normalizeDocumentRow(row: DocumentRowRaw): DocumentRow {
     discount_value: row.discount_value ?? 0,
     discount_type: (row.discount_type ?? 'percent') as 'percent' | 'flat',
     quote_number: row.quote_number ?? null,
+    proposal_number: row.proposal_number ?? null,
     valid_until: row.valid_until ?? null,
     approval_token: row.approval_token ?? null,
     approved_at: row.approved_at ?? null,

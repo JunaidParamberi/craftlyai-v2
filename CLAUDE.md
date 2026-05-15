@@ -263,7 +263,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - [x] PDF generation
 - [x] Invoice flow — create, send (Resend), mark paid
 - [x] Quote flow — create, send, approval tracking, convert to invoice
-- [ ] todo · Proposal flow — multi-section, client approval
+- [x] Proposal flow — multi-section, client approval
 - [ ] todo · Client portal — public link, no login, payment embed
 - [ ] todo · Financial dashboard — revenue, outstanding, expenses
 - [ ] todo · Lemon Squeezy — plans, webhooks, plan gating
@@ -315,6 +315,7 @@ All tables: `created_at`, `updated_at`, and RLS enabled. Users only read/write t
 - 2026-05-18: **Invoice flow** complete on `dev` — dedicated `invoice-edit-form`, line items editor (add/edit/delete/reorder), invoice meta fields (number, due date, terms, notes), discount toggle (percent/flat), PDF renderer with line items table, Resend email (`lib/email/send-invoice.ts`, `emails/invoice.tsx`), public pay page (`/pay/[token]`) with `MockPaymentForm`, mark-paid button, `pay_token` on documents. Mutations in `lib/documents/invoice-mutations.ts`, queries in `lib/documents/invoice-queries.ts`. Phase 2 progress: 3/8 tasks done.
 - 2026-05-18: **Quote flow** on `feat/quote-flow` — migration adds `approved`/`declined` to `document_status` enum + `quote_number`, `valid_until`, `approval_token`, `approved_at`, `declined_at`, `approval_message` columns. `QuoteEditForm`, `QuoteMetaFields`, `SendQuoteButton`, `QuoteApprovalStatus` components. `lib/documents/quote-mutations.ts` (generateQuoteNumber, updateQuoteMeta, markQuoteApproved/Declined, convertQuoteToInvoice), `lib/email/send-quote.ts`, `emails/quote.tsx`. Public approval page `/quote/[token]` + `QuoteRespondForm`. `POST /api/quotes/respond`. `InvoiceLineItemsEditor` gets `onDiscountSave` prop. Build passes. Phase 2 progress: 4/8 tasks done.
 - 2026-05-18: **Quote PDF fix** merged to `dev` — quote PDFs were blank (only client name visible) because `DocumentPdf` only rendered line items/meta for `type === "invoice"`; quotes store an empty Tiptap doc and use structured line items. Added `quoteData` prop to `DocumentPdf`, quote metadata band (Quote #, Valid until), line items table, and notes footer for `type === "quote"`. Tiptap body now only renders for proposal/other. PDF download filename now uses `QUO-XXXX` / `INV-XXXX` when number exists instead of raw document title. `feat/quote-flow` merged to `dev`.
+- 2026-05-18: **Proposal flow** complete on `feat/proposal-flow` — custom `PricingTableExtension` Tiptap node (atom block, ReactNodeViewRenderer) lets users insert calculation tables anywhere in the proposal body (Description, Qty, Rate, Total auto-calc, optional tax, add/remove rows). `pricing-table-node.ts` + `pricing-table-view.tsx`. Toolbar Table icon inserts it at cursor. Removed fixed `InvoiceLineItemsEditor` from proposals (proposals are free-form, not invoice-structured). Save redirects to view page. `SendProposalButton` moved from editor footer to view page actions (alongside Download PDF + Edit). `document-detail-view.tsx` renders `pricingTable` nodes statically. Phase 2 progress: 5/8 tasks done. `feat/proposal-flow` → `dev`.
 
 ---
 

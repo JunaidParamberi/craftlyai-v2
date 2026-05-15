@@ -188,6 +188,7 @@ export type DocumentRow = {
   discount_value: number;
   discount_type: 'percent' | 'flat';
   quote_number: string | null;
+  proposal_number: string | null;
   valid_until: string | null;
   approval_token: string | null;
   approved_at: string | null;
@@ -231,6 +232,11 @@ export type InvoiceDocumentRow = DocumentRow & {
 
 /** DocumentRow extended with embedded line items for quotes. */
 export type QuoteDocumentRow = DocumentRow & {
+  line_items: LineItemRow[];
+};
+
+/** DocumentRow extended with embedded line items for proposals. */
+export type ProposalDocumentRow = DocumentRow & {
   line_items: LineItemRow[];
 };
 

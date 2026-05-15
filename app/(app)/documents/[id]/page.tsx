@@ -7,6 +7,7 @@ import { getClientById } from "@/lib/clients/client-queries";
 import { getDocumentById } from "@/lib/documents/document-queries";
 import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
+import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
 import { buildVariableContext } from "@/lib/documents/variables-server";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 
@@ -14,6 +15,7 @@ import { DocumentDetailView } from "@/components/features/documents/document-det
 import { MarkPaidButton } from "@/components/features/documents/mark-paid-button";
 import { SendInvoiceButton } from "@/components/features/documents/send-invoice-button";
 import { SendQuoteButton } from "@/components/features/documents/send-quote-button";
+import { SendProposalButton } from "@/components/features/documents/send-proposal-button";
 import { QuoteApprovalStatus } from "@/components/features/documents/quote-approval-status";
 import { Button } from "@/components/ui/button";
 import type { LineItemRow } from "@/types";
@@ -35,7 +37,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const [client, projectTitle, variableContext, invoiceData, quoteData] = await Promise.all([
+  const [client, projectTitle, variableContext, invoiceData, quoteData, proposalData] = await Promise.all([
     document.client_id ? getClientById(document.client_id) : Promise.resolve(null),
     document.project_id ? fetchProjectTitle(document.project_id) : Promise.resolve(null),
     buildVariableContext({
@@ -44,6 +46,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     }),
     document.type === "invoice" ? getInvoiceWithLineItems(id) : Promise.resolve(null),
     document.type === "quote" ? getQuoteWithLineItems(id) : Promise.resolve(null),
+    document.type === "proposal" ? getProposalWithLineItems(id) : Promise.resolve(null),
   ]);
 
   return (
@@ -94,6 +97,12 @@ export default async function DocumentDetailPage({ params }: PageProps) {
             <SendQuoteButton
               documentId={document.id}
               defaultEmail={client?.email ?? undefined}
+            />
+          ) : null}
+          {document.type === "proposal" ? (
+            <SendProposalButton
+              documentId={document.id}
+              defaultEmail={client?.email ?? ""}
             />
           ) : null}
         </div>
@@ -195,6 +204,57 @@ export default async function DocumentDetailPage({ params }: PageProps) {
               approvalToken={quoteData.approval_token}
             />
           </div>
+        </div>
+      ) : null}
+
+      {document.type === "proposal" && proposalData ? (
+        <div className="rounded-xl border border-border/60 bg-card p-5 flex flex-col gap-4">
+          {/* Metadata row */}
+          <div className="flex flex-wrap gap-6 text-sm">
+            {proposalData.proposal_number ? (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Proposal #</span>
+                <span className="font-mono font-medium">{proposalData.proposal_number}</span>
+              </div>
+            ) : null}
+            {proposalData.valid_until ? (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Valid until</span>
+                <span>{new Date(proposalData.valid_until + "T12:00:00").toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Line items table */}
+          {proposalData.line_items.length > 0 ? (
+            <InvoiceLineItemsReadOnly
+              lineItems={proposalData.line_items}
+              currency={client?.currency ?? "USD"}
+              discountValue={Number(proposalData.discount_value ?? 0)}
+              discountType={(proposalData.discount_type ?? "percent") as "percent" | "flat"}
+            />
+          ) : null}
+
+          {/* Notes footer */}
+          {proposalData.notes_footer ? (
+            <p className="text-sm text-muted-foreground border-t border-border/50 pt-3 whitespace-pre-line">
+              {proposalData.notes_footer}
+            </p>
+          ) : null}
+
+          {/* Approval status */}
+          {(document.status === "approved" || document.status === "declined") ? (
+            <div className="border-t border-border/50 pt-3">
+              <QuoteApprovalStatus
+                documentId={document.id}
+                status={document.status}
+                approvedAt={proposalData.approved_at}
+                declinedAt={proposalData.declined_at}
+                approvalMessage={proposalData.approval_message}
+                approvalToken={proposalData.approval_token}
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
 

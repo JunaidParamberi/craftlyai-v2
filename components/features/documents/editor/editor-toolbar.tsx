@@ -13,6 +13,7 @@ import {
   Quote,
   Redo2,
   Strikethrough,
+  Table,
   Undo2,
 } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -216,6 +217,15 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           </div>
         </PopoverContent>
       </Popover>
+      <ToolbarSep />
+      <ToolbarBtn
+        label="Insert pricing table"
+        onClick={() =>
+          editor.chain().focus().insertContent({ type: "pricingTable" }).run()
+        }
+      >
+        <Table className="size-4" />
+      </ToolbarBtn>
       <ToolbarSep />
       <VariableMenu onInsert={insertVariable} />
     </div>

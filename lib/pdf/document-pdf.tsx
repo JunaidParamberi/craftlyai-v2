@@ -59,6 +59,14 @@ type DocumentPdfProps = {
     discount_value?: number;
     discount_type?: 'percent' | 'flat';
   } | null;
+  proposalData?: {
+    proposal_number: string | null;
+    notes_footer: string | null;
+    line_items: LineItemRow[];
+    currency: string;
+    discount_value?: number;
+    discount_type?: 'percent' | 'flat';
+  } | null;
 };
 
 export function DocumentPdf({
@@ -71,6 +79,7 @@ export function DocumentPdf({
   businessName,
   invoiceData,
   quoteData,
+  proposalData,
 }: DocumentPdfProps) {
   const color = primaryColor || "#6366f1";
   const fontFamily = resolvePdfFont(brandFont);
@@ -235,9 +244,41 @@ export function DocumentPdf({
           </View>
         ) : null}
 
+        {/* Proposal metadata band */}
+        {document.type === "proposal" && proposalData ? (
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12, padding: "8 0" }}>
+            {proposalData.proposal_number ? (
+              <View>
+                <Text style={styles.metaLabel}>Proposal #</Text>
+                <Text style={{ ...styles.metaValue, fontFamily, fontSize: 11 }}>{proposalData.proposal_number}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
         {/* Body content (Tiptap) — proposal, other */}
         {document.type !== "invoice" && document.type !== "quote" ? (
           renderTiptapContent(content.content, { styles, primaryColor: color })
+        ) : null}
+
+        {/* Line items table — proposal */}
+        {document.type === "proposal" && proposalData && proposalData.line_items.length > 0 ? (
+          <InvoiceLineItemsPdf
+            lineItems={proposalData.line_items}
+            currency={proposalData.currency}
+            styles={styles}
+            color={color}
+            discountValue={proposalData.discount_value ?? 0}
+            discountType={proposalData.discount_type ?? 'percent'}
+          />
+        ) : null}
+
+        {/* Notes footer — proposal */}
+        {document.type === "proposal" && proposalData?.notes_footer ? (
+          <View style={{ marginTop: 12, padding: "8 0", borderTop: "1 solid #e5e7eb" }}>
+            <Text style={{ ...styles.metaLabel, marginBottom: 4 }}>Notes</Text>
+            <Text style={{ fontSize: 9, color: "#666", lineHeight: 1.5 }}>{proposalData.notes_footer}</Text>
+          </View>
         ) : null}
 
         {/* Footer */}
