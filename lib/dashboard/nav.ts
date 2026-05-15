@@ -3,6 +3,7 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
+  ListChecks,
   Receipt,
   Timer,
   Users,
@@ -26,6 +27,7 @@ export const workNav: NavItem[] = [
     href: "/projects",
     icon: FolderKanban,
   },
+  { title: "Tasks", href: "/tasks", icon: ListChecks },
   { title: "Clients", href: "/clients", icon: Users },
   { title: "Time", href: "/time", icon: Timer },
 ];

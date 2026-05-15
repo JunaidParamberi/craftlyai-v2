@@ -1,7 +1,7 @@
 # CLAUDE.md — CraftlyAI Project Context
 
 Last updated: 2026-05-15
-Current phase: Phase 2 complete; Phase 2.5 — Foundation Gaps in-progress (1/8)
+Current phase: Phase 2 complete; Phase 2.5 — Foundation Gaps in-progress (3/8)
 
 Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
 
@@ -279,7 +279,7 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 
 - [x] Real dashboard — live KPIs (reuse `getFinancialSummary`), attention banner, activity feed (10 events), active pipeline panel; `lib/dashboard/*`, `components/features/dashboard/*`, spec `docs/superpowers/specs/2026-05-15-real-dashboard-design.md` (`feat/real-dashboard` → `dev`)
 - [x] Expenses UI — `/expenses` CRUD, categories, multi-file receipt upload (up to 10), project **Expenses** tab; migrations `20260524120000_expenses.sql` + `20260525120000_expense_receipt_urls.sql`; `lib/expenses/*`, `components/features/expenses/*` (`feat/expenses-ui` → `dev`)
-- [ ] todo · Tasks standalone view — `/tasks` all tasks across projects, filters, quick-add, overdue highlight
+- [x] Tasks standalone view — `/tasks` all tasks across projects, filters, quick-add, overdue highlight; `lib/tasks/task-queries.ts`, `lib/tasks/task-utils.ts`, `components/features/tasks/*` (`feat/tasks-standalone`)
 - [ ] todo · Project kanban board — board view toggle on `/projects/[id]`, dnd-kit drag between columns
 - [ ] todo · Notifications UI — bell + drawer, unread badge, mark-read server actions
 - [ ] todo · Payment method detail — mark-paid modal with method/cheque/reference fields, payment history tab
@@ -367,6 +367,7 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 - 2026-05-15: **Fix: document monthly limit enforcement** — `/documents` page was not blocking creation when Free tier 5 docs/month quota was hit. Added `AddDocumentButton` client component (lock icon + sonner toast with upgrade CTA at limit, normal Link when under). Page now parallel-fetches doc count this month via `gte("created_at", startOfCurrentMonth())`, computes `atLimit`, renders `AddDocumentButton` + `UpgradeGhostRow` with usage string. `fix/document-limit-enforcement` → `dev`.
 - 2026-05-15: **Real dashboard** merged to `dev` — `/dashboard` RSC runs 5 parallel queries (`getFinancialSummary`, `getDashboardCounts`, `getAttentionItems`, `getRecentActivity`, `getActivePipeline`). Layout B: 4 KPI cards, amber attention banner (hidden when empty), 3/5 activity + 2/5 pipeline. Pure utils + Vitest in `lib/dashboard/activity-utils.ts` and `attention-utils.ts`. Shared `formatCurrency` in `lib/utils/format.ts`. Skeleton updated for 4 KPIs + attention row. Project deadline attention uses `planning` + `active` (not task `in_progress`). `feat/real-dashboard` → `dev`. Phase 2.5 progress: 1/8.
 - 2026-05-15: **Expenses UI** merged to `dev` — `expenses` table + `expense-receipts` bucket; `/expenses` with filters, summary card, Sheet form (FieldGroup); multi-attachment via `receipt_urls` jsonb (max 10); project detail **Expenses** tab; `lib/expenses/receipt-utils.ts` + Vitest. `feat/expenses-ui` → `dev`. Phase 2.5 progress: 2/8. Next: **Tasks standalone view**.
+- 2026-05-15: **Tasks standalone view** on `feat/tasks-standalone` — `/tasks` RSC + `listAllTasksForUser` (project/client embed), URL filters (`project`, `status`, `priority`, `sort`), summary strip (open/overdue/done), card list with overdue highlight, quick-add dialog, sidebar nav; `lib/tasks/task-utils.ts` + Vitest; shared `lib/tasks/display.ts` with project panel. Phase 2.5 progress: 3/8. Next: **Project kanban board**.
 
 ---
 

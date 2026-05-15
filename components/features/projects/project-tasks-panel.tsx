@@ -10,6 +10,10 @@ import {
   deleteTask,
   updateTask,
 } from "@/lib/tasks/actions";
+import {
+  taskPriorityBadgeVariant,
+  taskPriorityLabel,
+} from "@/lib/tasks/display";
 import { TASK_LIMITS } from "@/lib/validations/task";
 import type { TaskPriority, TaskRow, TaskStatus } from "@/types";
 
@@ -73,29 +77,6 @@ const emptyTaskForm: TaskDialogValues = {
   priority: "medium",
   due_date: "",
 };
-
-function priorityLabel(p: TaskPriority): string {
-  switch (p) {
-    case "high":
-      return "High";
-    case "medium":
-      return "Medium";
-    case "low":
-      return "Low";
-    default:
-      return p;
-  }
-}
-
-function priorityBadgeClass(p: TaskPriority): string {
-  if (p === "high") {
-    return "font-normal border-destructive/30 bg-destructive/10 text-destructive";
-  }
-  if (p === "medium") {
-    return "font-normal";
-  }
-  return "font-normal text-muted-foreground";
-}
 
 export function ProjectTasksPanel({
   projectId,
@@ -309,11 +290,8 @@ export function ProjectTasksPanel({
                         </DropdownMenu>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <Badge
-                          variant="outline"
-                          className={priorityBadgeClass(task.priority)}
-                        >
-                          {priorityLabel(task.priority)}
+                        <Badge variant={taskPriorityBadgeVariant(task.priority)}>
+                          {taskPriorityLabel(task.priority)}
                         </Badge>
                         {task.due_date ? (
                           <Badge variant="secondary" className="font-normal">

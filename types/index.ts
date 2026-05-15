@@ -107,6 +107,15 @@ export type TaskRow = {
   updated_at: string;
 };
 
+/** Task with embedded project (and client) for `/tasks` list. */
+export type TaskListRow = TaskRow & {
+  project: {
+    id: string;
+    title: string;
+    client: { id: string; name: string } | null;
+  };
+};
+
 /**
  * Row shape for `public.time_entries` (see supabase/migrations/*_time_entries.sql).
  */

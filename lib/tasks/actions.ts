@@ -48,7 +48,8 @@ async function projectBelongsToUser(
   return !error && !!data;
 }
 
-function revalidateProjectPaths(projectId: string) {
+function revalidateTaskPaths(projectId: string) {
+  revalidatePath("/tasks");
   revalidatePath("/projects");
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/edit`);
@@ -166,7 +167,7 @@ export async function createTask(
     return { ok: false, message: "Task could not be created." };
   }
 
-  revalidateProjectPaths(parsedProjectId.data);
+  revalidateTaskPaths(parsedProjectId.data);
 
   return { ok: true, task: normalizeTaskRow(data as TaskRowRaw) };
 }
@@ -246,7 +247,7 @@ export async function updateTask(
     return { ok: false, message: "Task not found or could not be updated." };
   }
 
-  revalidateProjectPaths(parsedProjectId.data);
+  revalidateTaskPaths(parsedProjectId.data);
 
   return { ok: true, task: normalizeTaskRow(data as TaskRowRaw) };
 }
@@ -298,7 +299,7 @@ export async function deleteTask(
     return { ok: false, message: "Task not found." };
   }
 
-  revalidateProjectPaths(parsedProjectId.data);
+  revalidateTaskPaths(parsedProjectId.data);
 
   return { ok: true };
 }
