@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
   const { data: doc, error } = await supabaseAdmin
     .from("documents")
-    .select("id, type, status")
+    .select("id, type, status, user_id")
     .eq("approval_token", approvalToken)
     .single();
 
@@ -63,6 +63,16 @@ export async function POST(req: Request) {
         : { status: "declined", declined_at: now, approval_message: message },
     )
     .eq("id", doc.id);
+
+  const { notifyDocumentEvent } = await import(
+    "@/lib/notifications/document-notification"
+  );
+  await notifyDocumentEvent(
+    supabaseAdmin,
+    doc.user_id as string,
+    doc.id,
+    action === "approve" ? "quote_approved" : "quote_declined",
+  );
 
   return NextResponse.json({ ok: true });
 }

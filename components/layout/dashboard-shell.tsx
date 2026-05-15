@@ -9,12 +9,15 @@ import { CommandPalette } from "@/components/layout/command-palette";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { PlanUsageProvider } from "@/lib/plan-usage/context";
 import type { PlanUsage } from "@/lib/plan-usage/helpers";
+import type { NotificationRow } from "@/types";
 
 type DashboardShellProps = {
   children: React.ReactNode;
   userEmail: string | null;
   userInitials: string;
   planUsage: PlanUsage;
+  notifications: NotificationRow[];
+  unreadCount: number;
 };
 
 export function DashboardShell({
@@ -22,6 +25,8 @@ export function DashboardShell({
   userEmail,
   userInitials,
   planUsage,
+  notifications,
+  unreadCount,
 }: DashboardShellProps) {
   const [commandOpen, setCommandOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -56,6 +61,8 @@ export function DashboardShell({
               userEmail={userEmail}
               userInitials={userInitials}
               planUsage={planUsage}
+              notifications={notifications}
+              unreadCount={unreadCount}
               onOpenSearch={() => setCommandOpen(true)}
             />
             <div className="flex flex-col gap-6 p-4 md:p-6">{children}</div>
