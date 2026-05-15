@@ -7,6 +7,7 @@ import { getPlanLimit } from "@/lib/plan-usage/helpers";
 import { paginatedListSkeletonCount } from "@/lib/ui/skeleton-count";
 import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 import { ClientsTable } from "@/components/features/clients/clients-table";
+import { AddClientButton } from "@/components/features/clients/add-client-button";
 import { UpgradeGhostRow } from "@/components/features/billing/upgrade-ghost-row";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,15 +59,11 @@ export default async function ClientsPage() {
             back anytime.
           </p>
         </div>
-        <Button
-          nativeButton={false}
-          render={<Link href="/clients/new" />}
-          disabled={atLimit}
-          aria-disabled={atLimit}
-        >
-          <Plus />
-          Add client
-        </Button>
+        <AddClientButton
+          atLimit={atLimit}
+          planTier={planTier}
+          clientLimit={clientLimit}
+        />
       </div>
 
       {clients.length === 0 ? (
