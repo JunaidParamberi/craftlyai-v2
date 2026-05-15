@@ -1,9 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { CreditCard, LifeBuoy, Search, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { PlanUsageBars } from "@/components/features/billing/plan-usage-bars";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,21 +22,31 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { SHELL_HEADER_CLASS } from "@/lib/dashboard/shell";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { LifeBuoy, Search, Settings } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { PLAN_ORDER } from "@/config/plans";
+import type { PlanUsage } from "@/lib/plan-usage/helpers";
+
+const PLAN_LABELS: Record<string, string> = {
+  free: "Free",
+  starter: "Starter",
+  pro: "Pro",
+  agency: "Agency",
+};
 
 type AppHeaderProps = {
   userEmail: string | null;
   userInitials: string;
+  planUsage: PlanUsage;
   onOpenSearch: () => void;
 };
 
 export function AppHeader({
   userEmail,
   userInitials,
+  planUsage,
   onOpenSearch,
 }: AppHeaderProps) {
   const router = useRouter();
+  const showUsageBars = PLAN_ORDER.indexOf(planUsage.planTier) < PLAN_ORDER.indexOf("pro");
 
   const signOut = async () => {
     const supabase = createClient();
@@ -92,21 +106,38 @@ export function AppHeader({
           <DropdownMenuContent align="end" className="min-w-56">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">Account</span>
-                  {userEmail ? (
-                    <span className="truncate text-xs text-muted-foreground">
-                      {userEmail}
-                    </span>
-                  ) : null}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-sm font-medium">Account</span>
+                    {userEmail ? (
+                      <span className="truncate text-xs text-muted-foreground">
+                        {userEmail}
+                      </span>
+                    ) : null}
+                  </div>
+                  <Badge variant="outline" className="shrink-0 text-xs capitalize font-medium">
+                    {PLAN_LABELS[planUsage.planTier] ?? planUsage.planTier}
+                  </Badge>
                 </div>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
+
+            {showUsageBars && (
+              <>
+                <DropdownMenuSeparator />
+                <PlanUsageBars usage={planUsage} />
+              </>
+            )}
+
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem render={<Link href="/settings" />}>
                 <Settings />
                 Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem render={<Link href="/settings/billing" />}>
+                <CreditCard />
+                Billing &amp; Plans
               </DropdownMenuItem>
               <DropdownMenuItem render={<Link href="/support" />}>
                 <LifeBuoy />
