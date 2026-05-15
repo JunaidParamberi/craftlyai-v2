@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRightIcon, PaletteIcon } from "lucide-react";
+import { ChevronRightIcon, CreditCardIcon, PaletteIcon } from "lucide-react";
 
 import {
   Card,
@@ -14,6 +14,12 @@ const SETTINGS_SECTIONS = [
     icon: PaletteIcon,
     title: "Brand kit",
     description: "Logo, colors, and font applied to invoices and client portals.",
+  },
+  {
+    href: "/settings/billing",
+    icon: CreditCardIcon,
+    title: "Billing & Plans",
+    description: "Manage your subscription, upgrade or change your plan.",
   },
 ] as const;
 
