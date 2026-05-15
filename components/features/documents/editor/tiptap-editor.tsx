@@ -5,7 +5,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Typography from "@tiptap/extension-typography";
 import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 import type { TiptapDoc } from "@/types";
@@ -20,12 +20,15 @@ type TiptapEditorProps = {
   className?: string;
 };
 
-export function TiptapEditor({
-  value,
-  onChange,
-  placeholder = "Start writing…",
-  className,
-}: TiptapEditorProps) {
+export interface TiptapEditorHandle {
+  getJSON: () => TiptapDoc;
+}
+
+export const TiptapEditor = forwardRef<TiptapEditorHandle, TiptapEditorProps>(
+  function TiptapEditorInner(
+    { value, onChange, placeholder = "Start writing…", className },
+    ref,
+  ) {
   const skipExternalSyncRef = useRef(false);
 
   const editor = useEditor({
@@ -59,6 +62,10 @@ export function TiptapEditor({
     },
   });
 
+  useImperativeHandle(ref, () => ({
+    getJSON: () => (editor?.getJSON() as TiptapDoc) ?? value,
+  }), [editor, value]);
+
   useEffect(() => {
     if (!editor) return;
     if (skipExternalSyncRef.current) {
@@ -85,4 +92,5 @@ export function TiptapEditor({
       </div>
     </div>
   );
-}
+  }
+);

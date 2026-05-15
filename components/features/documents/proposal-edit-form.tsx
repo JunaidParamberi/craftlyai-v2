@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { TiptapEditor } from "./editor/tiptap-editor";
+import { TiptapEditor, type TiptapEditorHandle } from "./editor/tiptap-editor";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +45,7 @@ export function ProposalEditForm({
   const [projectId, setProjectId] = useState(document.project_id ?? "");
   const [status, setStatus] = useState<string>(document.status);
   const [contentJson, setContentJson] = useState<import("@/types").TiptapDoc>(document.content_json);
+  const editorRef = useRef<TiptapEditorHandle>(null);
 
   const selectedClient = clients.find((c) => c.id === clientId);
   const filteredProjects = projects.filter(
@@ -52,11 +53,12 @@ export function ProposalEditForm({
   );
 
   const handleSave = () => {
+    const freshJson = editorRef.current?.getJSON() ?? contentJson;
     startTransition(async () => {
       const result = await updateDocument(document.id, {
         title: title.trim() || "Untitled Proposal",
         type: "proposal",
-        content_json: contentJson,
+        content_json: freshJson,
         client_id: clientId || "",
         project_id: projectId || "",
         status,
@@ -169,6 +171,7 @@ export function ProposalEditForm({
         <div className="flex flex-col gap-6">
           {/* Tiptap editor canvas */}
           <TiptapEditor
+            ref={editorRef}
             value={contentJson}
             onChange={setContentJson}
             placeholder="Start writing your proposal…"

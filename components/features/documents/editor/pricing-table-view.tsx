@@ -2,7 +2,7 @@
 
 import { NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -36,14 +36,9 @@ export function PricingTableView({ node, updateAttributes, selected }: NodeViewP
   const [taxRate, setTaxRate] = useState(attrs.taxRate ?? 0);
   const [showTax, setShowTax] = useState(attrs.showTax ?? false);
 
-  const syncTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
   const sync = useCallback(
     (nextRows: PricingRow[], nextShowTax: boolean, nextTaxRate: number) => {
-      clearTimeout(syncTimer.current);
-      syncTimer.current = setTimeout(() => {
-        updateAttributes({ rows: nextRows, currency, showTax: nextShowTax, taxRate: nextTaxRate });
-      }, 300);
+      updateAttributes({ rows: nextRows, currency, showTax: nextShowTax, taxRate: nextTaxRate });
     },
     [currency, updateAttributes],
   );
