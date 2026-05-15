@@ -3,10 +3,15 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 
 import { listDocuments } from "@/lib/documents/document-queries";
+import { getProfile } from "@/lib/profile/actions";
+import { createClient } from "@/lib/supabase/server";
+import { getPlanLimit, startOfCurrentMonth } from "@/lib/plan-usage/helpers";
 import { paginatedListSkeletonCount } from "@/lib/ui/skeleton-count";
 import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 
 import { DocumentsTable } from "@/components/features/documents/documents-table";
+import { AddDocumentButton } from "@/components/features/documents/add-document-button";
+import { UpgradeGhostRow } from "@/components/features/billing/upgrade-ghost-row";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,26 +20,44 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { PlanTier } from "@/config/plans";
 
 export const metadata: Metadata = {
   title: "Documents",
 };
 
 export default async function DocumentsPage() {
-  const result = await listDocuments();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!result.ok) {
+  const [documentsResult, profileResult, docCountResult] = await Promise.all([
+    listDocuments(),
+    getProfile(),
+    supabase
+      .from("documents")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user?.id ?? "")
+      .gte("created_at", startOfCurrentMonth()),
+  ]);
+
+  if (!documentsResult.ok) {
     return (
       <div className="flex flex-col gap-2">
         <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
           Documents
         </h1>
-        <p className="text-destructive text-sm">{result.message}</p>
+        <p className="text-destructive text-sm">{documentsResult.message}</p>
       </div>
     );
   }
 
-  const { documents } = result;
+  const { documents } = documentsResult;
+  const planTier = (profileResult.ok && profileResult.profile?.plan_tier
+    ? profileResult.profile.plan_tier
+    : "free") as PlanTier;
+  const docLimit = getPlanLimit(planTier, "docsPerMonth");
+  const docCountThisMonth = docCountResult.count ?? 0;
+  const atLimit = docLimit !== Infinity && docCountThisMonth >= docLimit;
 
   return (
     <div className="flex flex-col gap-8">
@@ -52,10 +75,11 @@ export default async function DocumentsPage() {
             written here, sent from here.
           </p>
         </div>
-        <Button nativeButton={false} render={<Link href="/documents/new" />}>
-          <Plus />
-          New document
-        </Button>
+        <AddDocumentButton
+          atLimit={atLimit}
+          planTier={planTier}
+          docLimit={docLimit}
+        />
       </div>
 
       {documents.length === 0 ? (
@@ -75,7 +99,15 @@ export default async function DocumentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <DocumentsTable documents={documents} />
+        <div className="flex flex-col gap-3">
+          <DocumentsTable documents={documents} />
+          {atLimit && (
+            <UpgradeGhostRow
+              title="Create more documents"
+              description={`Free plan: ${docCountThisMonth}/${docLimit} documents used this month — upgrade for unlimited`}
+            />
+          )}
+        </div>
       )}
     </div>
   );
