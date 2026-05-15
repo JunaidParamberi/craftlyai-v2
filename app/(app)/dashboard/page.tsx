@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getProfile } from "@/lib/profile/actions";
+import { PlanLimitBanner } from "@/components/features/billing/plan-limit-banner";
 import {
   ArrowUpRight,
   CheckCircle2,
@@ -36,6 +37,7 @@ export default async function DashboardPage() {
 
   return (
     <>
+      <PlanLimitBanner />
       <div className="relative shrink-0 rounded-3xl border border-border/60 bg-gradient-to-br from-muted/40 via-background to-background px-4 py-6 md:overflow-hidden md:px-8 md:py-10">
         <div
           aria-hidden
