@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { InvoiceDocumentRow } from "@/types";
+import type { InvoiceDocumentRow, PaymentRow } from "@/types";
 
 export async function getInvoiceWithLineItems(
   id: string
@@ -26,4 +26,16 @@ export async function getInvoiceWithLineItems(
     ...doc,
     line_items: lineItems ?? [],
   } as InvoiceDocumentRow;
+}
+
+export async function getPaymentsForDocument(
+  documentId: string
+): Promise<PaymentRow[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("document_id", documentId)
+    .order("paid_at", { ascending: false });
+  return (data ?? []) as PaymentRow[];
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { parseLineItemInput } from "@/lib/validations/line-item";
 import { invoiceMetaSchema } from "@/lib/validations/document";
+import { markPaidInputSchema } from "@/lib/validations/payment";
 import type { LineItemRow } from "@/types";
 
 // Generate next invoice number for user: INV-0001, INV-0002, etc.
@@ -119,22 +120,82 @@ export async function updateInvoiceMeta(
   return { ok: true };
 }
 
-// Mark invoice as paid
+// Mark invoice as paid, recording payment method and optional reference
 export async function markInvoicePaid(
-  documentId: string
+  documentId: string,
+  rawInput: unknown
 ): Promise<{ ok: boolean; error?: string }> {
+  const parsed = markPaidInputSchema.safeParse(rawInput);
+  if (!parsed.success) return { ok: false, error: "Invalid payment details" };
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Unauthenticated" };
 
-  const { error } = await supabase
+  // Fetch document + client currency for payment record
+  const { data: doc, error: docError } = await supabase
     .from("documents")
-    .update({ status: "paid", paid_at: new Date().toISOString() })
+    .select("id, user_id, client_id, clients(currency)")
+    .eq("id", documentId)
+    .eq("user_id", user.id)
+    .single();
+  if (docError || !doc) return { ok: false, error: "Document not found" };
+
+  // Compute invoice total server-side
+  const { data: lineItems } = await supabase
+    .from("line_items")
+    .select("quantity, unit_price, tax_rate")
+    .eq("document_id", documentId);
+
+  const { data: discountRow } = await supabase
+    .from("documents")
+    .select("discount_value, discount_type")
+    .eq("id", documentId)
+    .single();
+
+  const subtotal = (lineItems ?? []).reduce(
+    (sum, li) => sum + Number(li.quantity) * Number(li.unit_price),
+    0
+  );
+  const taxTotal = (lineItems ?? []).reduce(
+    (sum, li) =>
+      sum + Number(li.quantity) * Number(li.unit_price) * (Number(li.tax_rate) / 100),
+    0
+  );
+  const discountValue = Number(discountRow?.discount_value ?? 0);
+  const discountType = discountRow?.discount_type ?? "percent";
+  const discount =
+    discountType === "flat"
+      ? Math.min(discountValue, subtotal)
+      : subtotal * (discountValue / 100);
+  const total = subtotal - discount + taxTotal;
+
+  const clientRecord = (doc.clients as unknown) as { currency: string | null } | null;
+  const currency = clientRecord?.currency ?? "USD";
+  const paidAt = new Date().toISOString();
+
+  // Mark document paid
+  const { error: updateError } = await supabase
+    .from("documents")
+    .update({ status: "paid", paid_at: paidAt })
     .eq("id", documentId)
     .eq("user_id", user.id);
-  if (error) return { ok: false, error: error.message };
+  if (updateError) return { ok: false, error: updateError.message };
+
+  // Insert payment record
+  const { error: paymentError } = await supabase.from("payments").insert({
+    document_id: documentId,
+    user_id: user.id,
+    amount: total,
+    currency,
+    method: parsed.data.method,
+    reference: parsed.data.reference ?? null,
+    notes: parsed.data.notes ?? null,
+    paid_at: paidAt,
+  });
+  if (paymentError) return { ok: false, error: paymentError.message };
 
   const { notifyDocumentEvent } = await import(
     "@/lib/notifications/document-notification"

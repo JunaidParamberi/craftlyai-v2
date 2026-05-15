@@ -6,7 +6,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-// Button kept for the confirm/cancel actions inside the dialog
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +25,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { markInvoicePaid } from "@/lib/documents/invoice-mutations";
+import type { PaymentMethod } from "@/types";
+
+const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  bank_transfer: "Bank transfer",
+  cash: "Cash",
+  cheque: "Cheque",
+  card: "Card",
+  other: "Other",
+};
 
 interface MarkPaidButtonProps {
   documentId: string;
@@ -32,6 +49,9 @@ export function MarkPaidButton({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [method, setMethod] = useState<PaymentMethod>("bank_transfer");
+  const [reference, setReference] = useState("");
+  const [notes, setNotes] = useState("");
   const [, startTransition] = useTransition();
 
   if (paid) {
@@ -50,7 +70,11 @@ export function MarkPaidButton({
     setLoading(true);
     setError("");
     startTransition(async () => {
-      const result = await markInvoicePaid(documentId);
+      const result = await markInvoicePaid(documentId, {
+        method,
+        reference: reference.trim() || undefined,
+        notes: notes.trim() || undefined,
+      });
       if (result.ok) {
         setPaid(true);
         setOpen(false);
@@ -72,16 +96,73 @@ export function MarkPaidButton({
           Mark as Paid
         </DialogTrigger>
 
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Mark invoice as paid?</DialogTitle>
+            <DialogTitle>Record payment</DialogTitle>
             <DialogDescription>
-              This will update the invoice status to Paid and record the payment
-              date as today. This action cannot be undone.
+              This will mark the invoice as paid and record the payment details.
             </DialogDescription>
           </DialogHeader>
 
-          {error && <p className="text-xs text-destructive">{error}</p>}
+          <div className="flex flex-col gap-4 py-1">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="payment-method">Payment method</Label>
+              <Select
+                value={method}
+                onValueChange={(v) => setMethod(v as PaymentMethod)}
+              >
+                <SelectTrigger id="payment-method">
+                  <SelectValue>{PAYMENT_METHOD_LABELS[method]}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {(
+                    Object.entries(PAYMENT_METHOD_LABELS) as [
+                      PaymentMethod,
+                      string,
+                    ][]
+                  ).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="payment-reference">
+                Reference{" "}
+                <span className="text-muted-foreground font-normal">
+                  (cheque no., transfer ID, etc.)
+                </span>
+              </Label>
+              <Input
+                id="payment-reference"
+                placeholder="Optional"
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                maxLength={200}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="payment-notes">
+                Notes{" "}
+                <span className="text-muted-foreground font-normal">
+                  (optional)
+                </span>
+              </Label>
+              <Input
+                id="payment-notes"
+                placeholder="Optional"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                maxLength={500}
+              />
+            </div>
+
+            {error && <p className="text-xs text-destructive">{error}</p>}
+          </div>
 
           <DialogFooter>
             <Button
@@ -101,10 +182,10 @@ export function MarkPaidButton({
               {loading ? (
                 <>
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Updating…
+                  Saving…
                 </>
               ) : (
-                "Confirm"
+                "Confirm payment"
               )}
             </Button>
           </DialogFooter>

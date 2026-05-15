@@ -5,7 +5,7 @@ import { ChevronLeft, Download, Pencil } from "lucide-react";
 
 import { getClientById } from "@/lib/clients/client-queries";
 import { getDocumentById } from "@/lib/documents/document-queries";
-import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
+import { getInvoiceWithLineItems, getPaymentsForDocument } from "@/lib/documents/invoice-queries";
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
 import { buildVariableContext } from "@/lib/documents/variables-server";
@@ -17,6 +17,7 @@ import { SendInvoiceButton } from "@/components/features/documents/send-invoice-
 import { SendQuoteButton } from "@/components/features/documents/send-quote-button";
 import { SendProposalButton } from "@/components/features/documents/send-proposal-button";
 import { QuoteApprovalStatus } from "@/components/features/documents/quote-approval-status";
+import { PaymentHistory } from "@/components/features/documents/payment-history";
 import { Button } from "@/components/ui/button";
 import type { LineItemRow } from "@/types";
 
@@ -37,7 +38,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const [client, projectTitle, variableContext, invoiceData, quoteData, proposalData] = await Promise.all([
+  const [client, projectTitle, variableContext, invoiceData, quoteData, proposalData, payments] = await Promise.all([
     document.client_id ? getClientById(document.client_id) : Promise.resolve(null),
     document.project_id ? fetchProjectTitle(document.project_id) : Promise.resolve(null),
     buildVariableContext({
@@ -47,6 +48,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     document.type === "invoice" ? getInvoiceWithLineItems(id) : Promise.resolve(null),
     document.type === "quote" ? getQuoteWithLineItems(id) : Promise.resolve(null),
     document.type === "proposal" ? getProposalWithLineItems(id) : Promise.resolve(null),
+    document.type === "invoice" ? getPaymentsForDocument(id) : Promise.resolve([]),
   ]);
 
   return (
@@ -158,6 +160,10 @@ export default async function DocumentDetailPage({ params }: PageProps) {
             <p className="text-sm text-muted-foreground border-t border-border/50 pt-3 whitespace-pre-line">{invoiceData.notes_footer}</p>
           ) : null}
         </div>
+      ) : null}
+
+      {document.type === "invoice" ? (
+        <PaymentHistory payments={payments} currency={client?.currency ?? "USD"} />
       ) : null}
 
       {document.type === "quote" && quoteData ? (
