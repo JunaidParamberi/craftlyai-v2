@@ -124,6 +124,7 @@ export async function updateInvoiceMeta(
       notes_footer: parsed.data.notes_footer ?? null,
       discount_value: parsed.data.discount_value ?? 0,
       discount_type: parsed.data.discount_type ?? 'percent',
+      lpo_reference_number: parsed.data.lpo_reference_number ?? null,
     })
     .eq("id", documentId);
 

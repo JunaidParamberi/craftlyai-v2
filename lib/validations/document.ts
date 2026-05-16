@@ -203,6 +203,7 @@ export const invoiceMetaSchema = z.object({
   notes_footer: z.string().max(1000).optional().nullable(),
   discount_value: z.coerce.number().min(0).default(0).optional(),
   discount_type: z.enum(['percent', 'flat']).default('percent').optional(),
+  lpo_reference_number: z.string().trim().max(100).nullable().optional(),
 });
 
 export type InvoiceMetaInput = z.infer<typeof invoiceMetaSchema>;

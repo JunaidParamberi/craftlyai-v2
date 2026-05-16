@@ -22,6 +22,7 @@ import {
 
 import { InvoiceMetaFields } from "./invoice-meta-fields";
 import { InvoiceLineItemsEditor } from "./invoice-line-items-editor";
+import type { LPOSummary } from "@/lib/documents/lpo-queries";
 
 const NONE_VALUE = "__none";
 
@@ -38,11 +39,13 @@ interface InvoiceEditFormProps {
     due_date: string | null;
     payment_terms: string | null;
     notes_footer: string | null;
+    lpo_reference_number: string | null;
     line_items: LineItemRow[];
     currency: string;
     discount_value?: number;
     discount_type?: 'percent' | 'flat';
   };
+  lpos?: LPOSummary[];
 }
 
 export function InvoiceEditForm({
@@ -54,6 +57,7 @@ export function InvoiceEditForm({
   clients,
   projects,
   invoiceData,
+  lpos,
 }: InvoiceEditFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -114,7 +118,9 @@ export function InvoiceEditForm({
               due_date: invoiceData.due_date,
               payment_terms: invoiceData.payment_terms,
               notes_footer: invoiceData.notes_footer,
+              lpo_reference_number: invoiceData.lpo_reference_number,
             }}
+            lpos={lpos}
           />
 
           <InvoiceLineItemsEditor

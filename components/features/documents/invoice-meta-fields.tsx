@@ -4,8 +4,16 @@ import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { updateInvoiceMeta } from "@/lib/documents/invoice-mutations";
 import { FormDatePicker } from "@/components/shared/form-date-picker";
+import type { LPOSummary } from "@/lib/documents/lpo-queries";
 
 interface InvoiceMetaFieldsProps {
   documentId: string;
@@ -14,7 +22,9 @@ interface InvoiceMetaFieldsProps {
     due_date: string | null;
     payment_terms: string | null;
     notes_footer: string | null;
+    lpo_reference_number?: string | null;
   };
+  lpos?: LPOSummary[];
 }
 
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -22,6 +32,7 @@ type SaveState = "idle" | "saving" | "saved" | "error";
 export function InvoiceMetaFields({
   documentId,
   initialValues,
+  lpos,
 }: InvoiceMetaFieldsProps) {
   const [invoiceNumber, setInvoiceNumber] = useState(
     initialValues.invoice_number ?? ""
@@ -32,6 +43,9 @@ export function InvoiceMetaFields({
   );
   const [notesFooter, setNotesFooter] = useState(
     initialValues.notes_footer ?? ""
+  );
+  const [lpoReferenceNumber, setLpoReferenceNumber] = useState(
+    initialValues.lpo_reference_number ?? null
   );
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [, startTransition] = useTransition();
@@ -44,6 +58,7 @@ export function InvoiceMetaFields({
         due_date: dueDate || null,
         payment_terms: paymentTerms || null,
         notes_footer: notesFooter || null,
+        lpo_reference_number: lpoReferenceNumber || null,
       });
       if (result.ok) {
         setSaveState("saved");
@@ -94,7 +109,6 @@ export function InvoiceMetaFields({
             value={dueDate}
             onChange={(val: string) => {
               setDueDate(val);
-              // Trigger save on date change since there's no blur on a picker
               setSaveState("saving");
               startTransition(async () => {
                 const result = await updateInvoiceMeta(documentId, {
@@ -102,6 +116,7 @@ export function InvoiceMetaFields({
                   due_date: val || null,
                   payment_terms: paymentTerms || null,
                   notes_footer: notesFooter || null,
+                  lpo_reference_number: lpoReferenceNumber || null,
                 });
                 if (result.ok) {
                   setSaveState("saved");
@@ -139,6 +154,50 @@ export function InvoiceMetaFields({
           rows={3}
         />
       </div>
+
+      {(lpos?.length ?? 0) > 0 ? (
+        <div className="space-y-1.5">
+          <Label>LPO Reference (optional)</Label>
+          <Select
+            value={lpoReferenceNumber ?? ""}
+            onValueChange={(val) => {
+              const next = val || null;
+              setLpoReferenceNumber(next);
+              setSaveState("saving");
+              startTransition(async () => {
+                const result = await updateInvoiceMeta(documentId, {
+                  invoice_number: invoiceNumber || null,
+                  due_date: dueDate || null,
+                  payment_terms: paymentTerms || null,
+                  notes_footer: notesFooter || null,
+                  lpo_reference_number: next,
+                });
+                if (result.ok) {
+                  setSaveState("saved");
+                  setTimeout(() => setSaveState("idle"), 2000);
+                } else {
+                  setSaveState("error");
+                  setTimeout(() => setSaveState("idle"), 3000);
+                }
+              });
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select LPO…" />
+            </SelectTrigger>
+            <SelectContent>
+              {lpos!.map((lpo) => (
+                <SelectItem key={lpo.id} value={lpo.lpo_number}>
+                  {lpo.lpo_number} — {lpo.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            LPO number prints on the invoice.
+          </p>
+        </div>
+      ) : null}
     </section>
   );
 }

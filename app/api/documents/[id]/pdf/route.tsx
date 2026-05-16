@@ -114,6 +114,7 @@ export async function GET(
                 due_date: invoiceData.due_date,
                 payment_terms: invoiceData.payment_terms,
                 notes_footer: invoiceData.notes_footer,
+                lpo_reference_number: invoiceData.lpo_reference_number ?? null,
                 line_items: invoiceData.line_items,
                 currency: clientCurrency,
                 discount_value: invoiceData.discount_value ?? 0,
