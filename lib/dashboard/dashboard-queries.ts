@@ -14,7 +14,6 @@ import {
   calcLineItemsTotal,
   calcTaxTotal,
 } from "@/lib/finance/revenue-calc";
-import { type createClient } from "@/lib/supabase/server";
 import { getServerContext } from "@/lib/supabase/get-server-context";
 import { formatCurrency } from "@/lib/utils/format";
 import { projectStatusLabel } from "@/lib/projects/display";
@@ -68,25 +67,6 @@ function computeDocTotal(
   );
 }
 
-async function fetchLineItemsByDocIds(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  docIds: string[]
-) {
-  if (docIds.length === 0) return new Map<string, { quantity: number; unit_price: number; tax_rate: number | null }[]>();
-
-  const { data } = await supabase
-    .from("line_items")
-    .select("document_id, quantity, unit_price, tax_rate")
-    .in("document_id", docIds);
-
-  const map = new Map<string, { quantity: number; unit_price: number; tax_rate: number | null }[]>();
-  for (const li of data ?? []) {
-    const existing = map.get(li.document_id) ?? [];
-    existing.push(li);
-    map.set(li.document_id, existing);
-  }
-  return map;
-}
 
 function clientNameFromJoin(
   client: { name: string } | { name: string }[] | null | undefined
@@ -152,7 +132,7 @@ const _cachedGetAttentionItems = unstable_cache(
       supabase
         .from("documents")
         .select(
-          "id, invoice_number, due_date, discount_value, discount_type, clients:client_id(name)"
+          "id, invoice_number, due_date, discount_value, discount_type, clients:client_id(name), line_items(quantity, unit_price, tax_rate)"
         )
         .eq("user_id", userId)
         .eq("type", "invoice")
@@ -162,7 +142,7 @@ const _cachedGetAttentionItems = unstable_cache(
       supabase
         .from("documents")
         .select(
-          "id, quote_number, valid_until, sent_at, discount_value, discount_type, clients:client_id(name)"
+          "id, quote_number, valid_until, sent_at, discount_value, discount_type, clients:client_id(name), line_items(quantity, unit_price, tax_rate)"
         )
         .eq("user_id", userId)
         .eq("type", "quote")
@@ -177,19 +157,12 @@ const _cachedGetAttentionItems = unstable_cache(
         .lte("deadline", inSevenDays),
     ]);
 
-    const invoiceIds = (invoicesRes.data ?? []).map((d) => d.id);
-    const quoteIds = (quotesRes.data ?? []).map((d) => d.id);
-    const lineItemsByDoc = await fetchLineItemsByDocIds(supabase, [
-      ...invoiceIds,
-      ...quoteIds,
-    ]);
-
     const items: AttentionItem[] = [];
 
     for (const doc of invoicesRes.data ?? []) {
       const due = parseISO(`${doc.due_date}T12:00:00.000Z`);
       const daysOverdue = differenceInCalendarDays(today, startOfDay(due));
-      const itemsLi = lineItemsByDoc.get(doc.id) ?? [];
+      const itemsLi = (doc.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
       const amount = computeDocTotal(
         itemsLi,
         doc.discount_type,
@@ -285,7 +258,7 @@ const _cachedGetRecentActivity = unstable_cache(
       supabase
         .from("documents")
         .select(
-          "id, type, status, sent_at, paid_at, approved_at, declined_at, invoice_number, quote_number, title, updated_at, discount_value, discount_type, clients:client_id(name)"
+          "id, type, status, sent_at, paid_at, approved_at, declined_at, invoice_number, quote_number, title, updated_at, discount_value, discount_type, clients:client_id(name), line_items(quantity, unit_price, tax_rate)"
         )
         .eq("user_id", userId)
         .gte("updated_at", since)
@@ -300,11 +273,8 @@ const _cachedGetRecentActivity = unstable_cache(
         .limit(20),
     ]);
 
-    const docIds = (docsRes.data ?? []).map((d) => d.id);
-    const lineItemsByDoc = await fetchLineItemsByDocIds(supabase, docIds);
-
     const docEvents = (docsRes.data ?? []).flatMap((row) => {
-      const items = lineItemsByDoc.get(row.id) ?? [];
+      const items = (row.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
       const amount = computeDocTotal(
         items,
         row.discount_type,

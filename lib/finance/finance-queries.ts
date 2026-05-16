@@ -30,38 +30,19 @@ async function fetchPaidInvoicesWithLineItems(
   from: Date,
   to: Date
 ) {
-  const { data: docs, error: docsError } = await supabase
+  const { data: docs, error } = await supabase
     .from("documents")
-    .select("id, paid_at, sent_at, discount_value, discount_type")
+    .select(
+      "id, paid_at, sent_at, discount_value, discount_type, line_items(quantity, unit_price, tax_rate)"
+    )
     .eq("user_id", userId)
     .eq("type", "invoice")
     .eq("status", "paid")
     .gte("paid_at", from.toISOString())
     .lte("paid_at", to.toISOString());
 
-  if (docsError) {
-    console.error("[finance-queries] docs fetch error:", docsError.message);
-  }
-  if (!docs || docs.length === 0) return { docs: [], lineItemsByDoc: new Map() };
-
-  const ids = docs.map((d) => d.id);
-  const { data: lineItems, error: lineItemsError } = await supabase
-    .from("line_items")
-    .select("document_id, quantity, unit_price, tax_rate")
-    .in("document_id", ids);
-
-  if (lineItemsError) {
-    console.error("[finance-queries] line items fetch error:", lineItemsError.message);
-  }
-
-  const lineItemsByDoc = new Map<string, typeof lineItems>();
-  for (const li of lineItems ?? []) {
-    const existing = lineItemsByDoc.get(li.document_id) ?? [];
-    existing.push(li);
-    lineItemsByDoc.set(li.document_id, existing);
-  }
-
-  return { docs, lineItemsByDoc };
+  if (error) console.error("[finance-queries] fetch error:", error.message);
+  return docs ?? [];
 }
 
 // ---------------------------------------------------------------------------
@@ -73,14 +54,9 @@ async function computeRangeRevenue(
   from: Date,
   to: Date
 ): Promise<number> {
-  const { docs, lineItemsByDoc } = await fetchPaidInvoicesWithLineItems(
-    supabase,
-    userId,
-    from,
-    to
-  );
+  const docs = await fetchPaidInvoicesWithLineItems(supabase, userId, from, to);
   return docs.reduce((total, doc) => {
-    const items = lineItemsByDoc.get(doc.id) ?? [];
+    const items = (doc.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
     const subtotal = calcLineItemsTotal(items);
     const tax = calcTaxTotal(items);
     const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
@@ -101,7 +77,7 @@ const _cachedGetFinancialSummary = unstable_cache(
     const now = new Date();
 
     const [
-      { docs: paidDocs, lineItemsByDoc: paidLineItems },
+      paidDocs,
       prevRevenue,
       outstandingDocs,
     ] = await Promise.all([
@@ -109,35 +85,19 @@ const _cachedGetFinancialSummary = unstable_cache(
       computeRangeRevenue(supabase, userId, prev.from, prev.to),
       supabase
         .from("documents")
-        .select("id, due_date, discount_value, discount_type")
+        .select("id, due_date, discount_value, discount_type, line_items(quantity, unit_price, tax_rate)")
         .eq("user_id", userId)
         .eq("type", "invoice")
         .in("status", ["sent", "viewed"]),
     ]);
 
     const totalRevenue = paidDocs.reduce((sum, doc) => {
-      const items = paidLineItems.get(doc.id) ?? [];
+      const items = (doc.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
       const subtotal = calcLineItemsTotal(items);
       const tax = calcTaxTotal(items);
       const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
       return sum + net;
     }, 0);
-
-    const outstandingIds = (outstandingDocs.data ?? []).map((d) => d.id);
-    const { data: outstandingLineItems } =
-      outstandingIds.length > 0
-        ? await supabase
-            .from("line_items")
-            .select("document_id, quantity, unit_price, tax_rate")
-            .in("document_id", outstandingIds)
-        : { data: [] };
-
-    const liByOutstanding = new Map<string, typeof outstandingLineItems>();
-    for (const li of outstandingLineItems ?? []) {
-      const existing = liByOutstanding.get(li.document_id) ?? [];
-      existing.push(li);
-      liByOutstanding.set(li.document_id, existing);
-    }
 
     let outstanding = 0;
     let outstandingCount = 0;
@@ -145,7 +105,7 @@ const _cachedGetFinancialSummary = unstable_cache(
     let overdueCount = 0;
 
     for (const doc of outstandingDocs.data ?? []) {
-      const items = liByOutstanding.get(doc.id) ?? [];
+      const items = (doc.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
       const subtotal = calcLineItemsTotal(items);
       const tax = calcTaxTotal(items);
       const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
@@ -202,12 +162,7 @@ const _cachedGetMonthlyRevenue = unstable_cache(
     const from = new Date(fromIso);
     const to = new Date(toIso);
 
-    const { docs, lineItemsByDoc } = await fetchPaidInvoicesWithLineItems(
-      supabase,
-      userId,
-      from,
-      to
-    );
+    const docs = await fetchPaidInvoicesWithLineItems(supabase, userId, from, to);
 
     const byMonth = new Map<string, number>();
     const currentMonthKey = format(new Date(), "yyyy-MM");
@@ -215,7 +170,7 @@ const _cachedGetMonthlyRevenue = unstable_cache(
     for (const doc of docs) {
       if (!doc.paid_at) continue;
       const monthKey = format(parseISO(doc.paid_at), "yyyy-MM");
-      const items = lineItemsByDoc.get(doc.id) ?? [];
+      const items = (doc.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
       const subtotal = calcLineItemsTotal(items);
       const tax = calcTaxTotal(items);
       const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
@@ -254,7 +209,7 @@ const _cachedListFinanceInvoices = unstable_cache(
 
     const { data: docs } = await supabase
       .from("documents")
-      .select("*, clients:client_id(id, name), projects:project_id(id, title)")
+      .select("*, clients:client_id(id, name), projects:project_id(id, title), line_items(quantity, unit_price, tax_rate)")
       .eq("user_id", userId)
       .eq("type", "invoice")
       .gte("created_at", from.toISOString())
@@ -264,22 +219,9 @@ const _cachedListFinanceInvoices = unstable_cache(
 
     if (!docs || docs.length === 0) return [];
 
-    const ids = docs.map((d) => d.id);
-    const { data: lineItems } = await supabase
-      .from("line_items")
-      .select("document_id, quantity, unit_price, tax_rate")
-      .in("document_id", ids);
-
-    const liByDoc = new Map<string, typeof lineItems>();
-    for (const li of lineItems ?? []) {
-      const existing = liByDoc.get(li.document_id) ?? [];
-      existing.push(li);
-      liByDoc.set(li.document_id, existing);
-    }
-
     return docs.map((row) => {
       const normalized = normalizeDocumentListRow(row);
-      const items = liByDoc.get(row.id) ?? [];
+      const items = (row.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
       const subtotal = calcLineItemsTotal(items);
       const tax = calcTaxTotal(items);
       const computedTotal = applyDiscount(subtotal, coerceDiscountType(row.discount_type), row.discount_value ?? 0) + tax;
