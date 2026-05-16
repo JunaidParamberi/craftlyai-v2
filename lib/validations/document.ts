@@ -18,6 +18,7 @@ export const DOCUMENT_TYPES = [
   "quote",
   "invoice",
   "payment_voucher",
+  "local_purchase_order",
   "other",
 ] as const satisfies readonly DocumentType[];
 
@@ -219,3 +220,11 @@ export const proposalMetaSchema = z.object({
 });
 
 export type ProposalMetaInput = z.infer<typeof proposalMetaSchema>;
+
+export const lpoMetaSchema = z.object({
+  lpo_number: z.string().trim().min(1, "LPO number is required.").max(100),
+  lpo_validity_date: z.string().nullable().optional(),
+  lpo_amount: z.coerce.number().positive("Amount must be positive.").nullable().optional(),
+});
+
+export type LPOMetaInput = z.infer<typeof lpoMetaSchema>;

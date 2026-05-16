@@ -176,7 +176,7 @@ export type ExpenseListRow = ExpenseRow & {
 };
 
 /** Matches `document_type` enum in `*_documents.sql`. */
-export type DocumentType = "proposal" | "quote" | "invoice" | "payment_voucher" | "other";
+export type DocumentType = "proposal" | "quote" | "invoice" | "payment_voucher" | "local_purchase_order" | "other";
 
 /** Matches `document_status` enum in `*_documents.sql`. */
 export type DocumentStatus =
@@ -244,6 +244,11 @@ export type DocumentRow = {
   voucher_number: string | null;
   source_document_id: string | null;
   payment_id: string | null;
+  lpo_number: string | null;
+  lpo_validity_date: string | null;
+  lpo_amount: number | null;
+  lpo_pdf_url: string | null;
+  lpo_reference_number: string | null;
   created_at: string;
   updated_at: string;
 };
