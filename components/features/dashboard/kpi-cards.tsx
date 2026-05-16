@@ -50,7 +50,7 @@ export function DashboardKpiCards({ summary, counts }: Props) {
         </CardHeader>
         <CardContent className="flex flex-col gap-3 pt-0">
           <p className="font-heading text-[26px] font-bold tabular-nums tracking-[-0.025em] text-foreground leading-none mt-1">
-            <CountUp value={totalRevenue} format={formatCurrency} />
+            <CountUp value={totalRevenue} format="currency" />
           </p>
           {changeLabel !== null ? (
             <Badge
@@ -111,7 +111,7 @@ export function DashboardKpiCards({ summary, counts }: Props) {
         </CardHeader>
         <CardContent className="flex flex-col gap-2 pt-0">
           <p className="font-heading text-[26px] font-bold tabular-nums tracking-[-0.025em] text-foreground leading-none mt-1">
-            <CountUp value={outstanding} format={formatCurrency} />
+            <CountUp value={outstanding} format="currency" />
           </p>
           <p className="text-muted-foreground text-xs">
             {outstandingCount} unpaid invoice

@@ -2,20 +2,29 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { formatCurrency } from "@/lib/utils/format";
+
+type FormatType = "number" | "currency";
+
 type Props = {
   value: number;
-  format?: (n: number) => string;
+  format?: FormatType;
   duration?: number;
   className?: string;
 };
 
+function applyFormat(n: number, fmt: FormatType): string {
+  if (fmt === "currency") return formatCurrency(n);
+  return String(Math.round(n));
+}
+
 export function CountUp({
   value,
-  format = (n) => String(Math.round(n)),
+  format = "number",
   duration = 700,
   className,
 }: Props) {
-  const [displayed, setDisplayed] = useState(format(0));
+  const [displayed, setDisplayed] = useState(applyFormat(0, format));
   const frameRef = useRef<number | null>(null);
   const mounted = useRef(false);
 
@@ -24,7 +33,7 @@ export function CountUp({
     mounted.current = true;
 
     if (typeof window === "undefined") {
-      setDisplayed(format(value));
+      setDisplayed(applyFormat(value, format));
       return;
     }
 
@@ -37,7 +46,7 @@ export function CountUp({
       // easeOutCubic
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = startValue + (value - startValue) * eased;
-      setDisplayed(format(current));
+      setDisplayed(applyFormat(current, format));
       if (progress < 1) {
         frameRef.current = requestAnimationFrame(tick);
       }
