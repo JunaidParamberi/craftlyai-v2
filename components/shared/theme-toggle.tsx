@@ -14,20 +14,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return (
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        disabled
-        aria-label="Toggle color theme"
-        className={className}
-      >
-        <Moon />
-      </Button>
-    );
-  }
+  if (!mounted) return null;
 
   const isDark = resolvedTheme === "dark";
 
