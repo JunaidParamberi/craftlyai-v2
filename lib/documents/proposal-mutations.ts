@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { proposalMetaSchema, emptyTiptapDoc } from "@/lib/validations/document";
 import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
@@ -42,6 +42,7 @@ export async function autoGenerateProposalNumber(
 
   revalidatePath(`/documents/${documentId}`);
   revalidatePath(`/documents/${documentId}/edit`);
+  revalidateTag("dashboard");
   return { number };
 }
 
@@ -69,6 +70,7 @@ export async function updateProposalMeta(
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/documents/${documentId}`);
   revalidatePath(`/documents/${documentId}/edit`);
+  revalidateTag("dashboard");
   return { ok: true };
 }
 
@@ -101,6 +103,7 @@ export async function markProposalApproved(
   revalidatePath(`/documents/${documentId}`);
   revalidatePath("/documents");
   revalidatePath("/dashboard", "layout");
+  revalidateTag("dashboard");
   return { ok: true };
 }
 
@@ -120,6 +123,7 @@ export async function markProposalDeclined(
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/documents/${documentId}`);
   revalidatePath("/documents");
+  revalidateTag("dashboard");
   return { ok: true };
 }
 
@@ -177,5 +181,6 @@ export async function convertProposalToInvoice(
   }
 
   revalidatePath("/documents");
+  revalidateTag("dashboard");
   return { ok: true, invoiceId: newDoc.id };
 }

@@ -1,4 +1,4 @@
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 import { getServerContext } from "@/lib/supabase/get-server-context";
@@ -12,49 +12,63 @@ export type ListClientsResult =
   | { ok: true; clients: ClientRow[] }
   | { ok: false; message: string };
 
-export const getClientById = cache(async (id: string): Promise<ClientRow | null> => {
-  const parsedId = uuidSchema.safeParse(id);
-  if (!parsedId.success) {
-    return null;
-  }
+const _cachedGetClientById = unstable_cache(
+  async (userId: string, id: string): Promise<ClientRow | null> => {
+    const parsedId = uuidSchema.safeParse(id);
+    if (!parsedId.success) return null;
 
-  const { supabase, user } = await getServerContext();
-  if (!user) {
-    return null;
-  }
+    const { supabase } = await getServerContext();
 
-  const { data, error } = await supabase
-    .from("clients")
-    .select("*")
-    .eq("id", parsedId.data)
-    .eq("user_id", user.id)
-    .maybeSingle();
+    const { data, error } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("id", parsedId.data)
+      .eq("user_id", userId)
+      .maybeSingle();
 
-  if (error || !data) {
-    return null;
-  }
+    if (error || !data) {
+      return null;
+    }
 
-  return normalizeClientRow(data);
-});
+    return normalizeClientRow(data);
+  },
+  ["client-by-id"],
+  { revalidate: 60, tags: ["clients"] }
+);
+
+export async function getClientById(id: string): Promise<ClientRow | null> {
+  const { user } = await getServerContext();
+  if (!user) return null;
+  return _cachedGetClientById(user.id, id);
+}
+
+const _cachedListClients = unstable_cache(
+  async (userId: string): Promise<ListClientsResult> => {
+    const { supabase } = await getServerContext();
+
+    const { data, error } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+
+    return {
+      ok: true,
+      clients: (data ?? []).map((row) => normalizeClientRow(row)),
+    };
+  },
+  ["clients-list"],
+  { revalidate: 60, tags: ["clients"] }
+);
 
 export async function listClients(): Promise<ListClientsResult> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) {
     return { ok: false, message: "Not authenticated." };
   }
-
-  const { data, error } = await supabase
-    .from("clients")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    return { ok: false, message: error.message };
-  }
-
-  return {
-    ok: true,
-    clients: (data ?? []).map((row) => normalizeClientRow(row)),
-  };
+  return _cachedListClients(user.id);
 }

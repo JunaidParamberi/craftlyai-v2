@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { upgradePlanSchema } from "@/lib/validations/billing";
 import type { PlanTier } from "@/config/plans";
@@ -41,6 +41,7 @@ export async function mockUpgradePlan(
   if (profileError) return { ok: false, error: profileError.message };
 
   revalidatePath("/settings/billing");
+  revalidateTag("profile");
   return { ok: true };
 }
 
@@ -72,5 +73,6 @@ export async function mockDowngradePlan(): Promise<{ ok: boolean; error?: string
   if (profileError) return { ok: false, error: profileError.message };
 
   revalidatePath("/settings/billing");
+  revalidateTag("profile");
   return { ok: true };
 }

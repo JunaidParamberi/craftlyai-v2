@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { quoteMetaSchema } from "@/lib/validations/document";
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
@@ -42,6 +42,8 @@ export async function updateQuoteMeta(
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/documents/${documentId}`);
   revalidatePath(`/documents/${documentId}/edit`);
+  revalidateTag("dashboard");
+  revalidateTag("finance");
   return { ok: true };
 }
 
@@ -74,6 +76,8 @@ export async function markQuoteApproved(
   revalidatePath(`/documents/${documentId}`);
   revalidatePath("/documents");
   revalidatePath("/dashboard", "layout");
+  revalidateTag("dashboard");
+  revalidateTag("finance");
   return { ok: true };
 }
 
@@ -106,6 +110,8 @@ export async function markQuoteDeclined(
   revalidatePath(`/documents/${documentId}`);
   revalidatePath("/documents");
   revalidatePath("/dashboard", "layout");
+  revalidateTag("dashboard");
+  revalidateTag("finance");
   return { ok: true };
 }
 
@@ -165,5 +171,7 @@ export async function convertQuoteToInvoice(
   }
 
   revalidatePath("/documents");
+  revalidateTag("dashboard");
+  revalidateTag("finance");
   return { ok: true, invoiceId: newDoc.id };
 }

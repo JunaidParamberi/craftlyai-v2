@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_cache } from "next/cache";
 import { getServerContext } from "@/lib/supabase/get-server-context";
 import { mergeAndValidateProfile } from "@/lib/validations/profile";
 import type { ProfileRow } from "@/types";
@@ -40,30 +41,39 @@ export type GetProfileResult =
   | { ok: true; profile: null; reason: "no_session" | "no_row" }
   | { ok: false; message: string };
 
+const _cachedGetProfile = unstable_cache(
+  async (userId: string): Promise<GetProfileResult> => {
+    const { supabase } = await getServerContext();
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+
+    if (!data) {
+      return { ok: true, profile: null, reason: "no_row" };
+    }
+
+    return { ok: true, profile: normalizeProfileRow(data) };
+  },
+  ["profile"],
+  { revalidate: 300, tags: ["profile"] }
+);
+
 /**
  * Loads the authenticated user's profile row (server components & server actions).
  */
 export async function getProfile(): Promise<GetProfileResult> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) {
     return { ok: true, profile: null, reason: "no_session" };
   }
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    return { ok: false, message: error.message };
-  }
-
-  if (!data) {
-    return { ok: true, profile: null, reason: "no_row" };
-  }
-
-  return { ok: true, profile: normalizeProfileRow(data) };
+  return _cachedGetProfile(user.id);
 }
 
 export type UpdateProfileResult =

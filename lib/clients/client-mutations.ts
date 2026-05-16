@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
 import { normalizeClientRow } from "@/lib/clients/normalize-client-row";
@@ -77,6 +77,8 @@ export async function createClient(input: unknown): Promise<CreateClientResult> 
   }
 
   revalidatePath("/clients");
+  revalidateTag("clients");
+  revalidateTag("dashboard");
 
   return { ok: true, client: normalizeClientRow(data) };
 }
@@ -148,6 +150,8 @@ export async function updateClient(
   revalidatePath("/clients");
   revalidatePath(`/clients/${parsedId.data}`);
   revalidatePath(`/clients/${parsedId.data}/edit`);
+  revalidateTag("clients");
+  revalidateTag("dashboard");
 
   return { ok: true, client: normalizeClientRow(data) };
 }
@@ -189,6 +193,8 @@ export async function deleteClient(id: string): Promise<DeleteClientResult> {
   revalidatePath("/clients");
   revalidatePath(`/clients/${parsedId.data}`);
   revalidatePath(`/clients/${parsedId.data}/edit`);
+  revalidateTag("clients");
+  revalidateTag("dashboard");
 
   return { ok: true };
 }

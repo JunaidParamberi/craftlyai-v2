@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_cache } from "next/cache";
 import { getServerContext } from "@/lib/supabase/get-server-context";
 import type { NotificationRow, NotificationType } from "@/types";
 
@@ -40,47 +41,65 @@ function mapRow(row: {
   };
 }
 
+const _cachedListNotificationsForUser = unstable_cache(
+  async (userId: string, limit: number): Promise<NotificationRow[]> => {
+    const { supabase } = await getServerContext();
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .select(
+        "id, user_id, type, payload, read_at, action_taken_at, created_at, updated_at"
+      )
+      .eq("user_id", userId)
+      .in("type", NOTIFICATION_TYPES)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("[listNotificationsForUser]", error.message);
+      return [];
+    }
+
+    return (data ?? [])
+      .map(mapRow)
+      .filter((r): r is NotificationRow => r !== null);
+  },
+  ["notifications-list"],
+  { revalidate: 30, tags: ["notifications"] }
+);
+
 export async function listNotificationsForUser(
   limit = 50
 ): Promise<NotificationRow[]> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) return [];
-
-  const { data, error } = await supabase
-    .from("notifications")
-    .select(
-      "id, user_id, type, payload, read_at, action_taken_at, created_at, updated_at"
-    )
-    .eq("user_id", user.id)
-    .in("type", NOTIFICATION_TYPES)
-    .order("created_at", { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error("[listNotificationsForUser]", error.message);
-    return [];
-  }
-
-  return (data ?? [])
-    .map(mapRow)
-    .filter((r): r is NotificationRow => r !== null);
+  return _cachedListNotificationsForUser(user.id, limit);
 }
 
+const _cachedGetUnreadNotificationCount = unstable_cache(
+  async (userId: string): Promise<number> => {
+    const { supabase } = await getServerContext();
+
+    const { count, error } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .is("read_at", null)
+      .in("type", NOTIFICATION_TYPES);
+
+    if (error) {
+      console.error("[getUnreadNotificationCount]", error.message);
+      return 0;
+    }
+
+    return count ?? 0;
+  },
+  ["notifications-count"],
+  { revalidate: 30, tags: ["notifications"] }
+);
+
 export async function getUnreadNotificationCount(): Promise<number> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) return 0;
-
-  const { count, error } = await supabase
-    .from("notifications")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .is("read_at", null)
-    .in("type", NOTIFICATION_TYPES);
-
-  if (error) {
-    console.error("[getUnreadNotificationCount]", error.message);
-    return 0;
-  }
-
-  return count ?? 0;
+  return _cachedGetUnreadNotificationCount(user.id);
 }

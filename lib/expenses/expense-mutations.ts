@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
 import { normalizeExpenseRow } from "@/lib/expenses/normalize-expense-row";
@@ -50,6 +50,7 @@ function revalidateExpensePaths(projectId: string | null) {
   if (projectId) {
     revalidatePath(`/projects/${projectId}`);
   }
+  revalidateTag("expenses");
 }
 
 async function removeReceiptsFromStorage(

@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_cache } from "next/cache";
 import { format, parseISO } from "date-fns";
 
 import { type createClient } from "@/lib/supabase/server";
@@ -90,10 +91,94 @@ async function computeRangeRevenue(
 // ---------------------------------------------------------------------------
 // getFinancialSummary
 // ---------------------------------------------------------------------------
+const _cachedGetFinancialSummary = unstable_cache(
+  async (userId: string, fromIso: string, toIso: string): Promise<FinancialSummary> => {
+    const { supabase } = await getServerContext();
+    const from = new Date(fromIso);
+    const to = new Date(toIso);
+    const range = { from, to };
+    const prev = previousPeriodRange(range);
+    const now = new Date();
+
+    const [
+      { docs: paidDocs, lineItemsByDoc: paidLineItems },
+      prevRevenue,
+      outstandingDocs,
+    ] = await Promise.all([
+      fetchPaidInvoicesWithLineItems(supabase, userId, from, to),
+      computeRangeRevenue(supabase, userId, prev.from, prev.to),
+      supabase
+        .from("documents")
+        .select("id, due_date, discount_value, discount_type")
+        .eq("user_id", userId)
+        .eq("type", "invoice")
+        .in("status", ["sent", "viewed"]),
+    ]);
+
+    const totalRevenue = paidDocs.reduce((sum, doc) => {
+      const items = paidLineItems.get(doc.id) ?? [];
+      const subtotal = calcLineItemsTotal(items);
+      const tax = calcTaxTotal(items);
+      const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
+      return sum + net;
+    }, 0);
+
+    const outstandingIds = (outstandingDocs.data ?? []).map((d) => d.id);
+    const { data: outstandingLineItems } =
+      outstandingIds.length > 0
+        ? await supabase
+            .from("line_items")
+            .select("document_id, quantity, unit_price, tax_rate")
+            .in("document_id", outstandingIds)
+        : { data: [] };
+
+    const liByOutstanding = new Map<string, typeof outstandingLineItems>();
+    for (const li of outstandingLineItems ?? []) {
+      const existing = liByOutstanding.get(li.document_id) ?? [];
+      existing.push(li);
+      liByOutstanding.set(li.document_id, existing);
+    }
+
+    let outstanding = 0;
+    let outstandingCount = 0;
+    let overdue = 0;
+    let overdueCount = 0;
+
+    for (const doc of outstandingDocs.data ?? []) {
+      const items = liByOutstanding.get(doc.id) ?? [];
+      const subtotal = calcLineItemsTotal(items);
+      const tax = calcTaxTotal(items);
+      const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
+      outstanding += net;
+      outstandingCount++;
+      if (doc.due_date && parseISO(doc.due_date) < now) {
+        overdue += net;
+        overdueCount++;
+      }
+    }
+
+    const avgPayDays = calcAvgPayDays(
+      paidDocs.map((d) => ({ sent_at: d.sent_at, paid_at: d.paid_at }))
+    );
+
+    return {
+      totalRevenue,
+      outstanding,
+      overdue,
+      avgPayDays,
+      revenueChangePct: calcRevenueChangePct(totalRevenue, prevRevenue),
+      overdueCount,
+      outstandingCount,
+    };
+  },
+  ["finance-summary"],
+  { revalidate: 60, tags: ["finance", "dashboard"] }
+);
+
 export async function getFinancialSummary(
   range: DateRange
 ): Promise<FinancialSummary> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) {
     return {
       totalRevenue: 0,
@@ -105,161 +190,110 @@ export async function getFinancialSummary(
       outstandingCount: 0,
     };
   }
-
-  const prev = previousPeriodRange(range);
-  const now = new Date();
-
-  const [
-    { docs: paidDocs, lineItemsByDoc: paidLineItems },
-    prevRevenue,
-    outstandingDocs,
-  ] = await Promise.all([
-    fetchPaidInvoicesWithLineItems(supabase, user.id, range.from, range.to),
-    computeRangeRevenue(supabase, user.id, prev.from, prev.to),
-    supabase
-      .from("documents")
-      .select("id, due_date, discount_value, discount_type")
-      .eq("user_id", user.id)
-      .eq("type", "invoice")
-      .in("status", ["sent", "viewed"]),
-  ]);
-
-  const totalRevenue = paidDocs.reduce((sum, doc) => {
-    const items = paidLineItems.get(doc.id) ?? [];
-    const subtotal = calcLineItemsTotal(items);
-    const tax = calcTaxTotal(items);
-    const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
-    return sum + net;
-  }, 0);
-
-  const outstandingIds = (outstandingDocs.data ?? []).map((d) => d.id);
-  const { data: outstandingLineItems } =
-    outstandingIds.length > 0
-      ? await supabase
-          .from("line_items")
-          .select("document_id, quantity, unit_price, tax_rate")
-          .in("document_id", outstandingIds)
-      : { data: [] };
-
-  const liByOutstanding = new Map<string, typeof outstandingLineItems>();
-  for (const li of outstandingLineItems ?? []) {
-    const existing = liByOutstanding.get(li.document_id) ?? [];
-    existing.push(li);
-    liByOutstanding.set(li.document_id, existing);
-  }
-
-  let outstanding = 0;
-  let outstandingCount = 0;
-  let overdue = 0;
-  let overdueCount = 0;
-
-  for (const doc of outstandingDocs.data ?? []) {
-    const items = liByOutstanding.get(doc.id) ?? [];
-    const subtotal = calcLineItemsTotal(items);
-    const tax = calcTaxTotal(items);
-    const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
-    outstanding += net;
-    outstandingCount++;
-    if (doc.due_date && parseISO(doc.due_date) < now) {
-      overdue += net;
-      overdueCount++;
-    }
-  }
-
-  const avgPayDays = calcAvgPayDays(
-    paidDocs.map((d) => ({ sent_at: d.sent_at, paid_at: d.paid_at }))
-  );
-
-  return {
-    totalRevenue,
-    outstanding,
-    overdue,
-    avgPayDays,
-    revenueChangePct: calcRevenueChangePct(totalRevenue, prevRevenue),
-    overdueCount,
-    outstandingCount,
-  };
+  return _cachedGetFinancialSummary(user.id, range.from.toISOString(), range.to.toISOString());
 }
 
 // ---------------------------------------------------------------------------
 // getMonthlyRevenue
 // ---------------------------------------------------------------------------
+const _cachedGetMonthlyRevenue = unstable_cache(
+  async (userId: string, fromIso: string, toIso: string): Promise<MonthlyRevenuePoint[]> => {
+    const { supabase } = await getServerContext();
+    const from = new Date(fromIso);
+    const to = new Date(toIso);
+
+    const { docs, lineItemsByDoc } = await fetchPaidInvoicesWithLineItems(
+      supabase,
+      userId,
+      from,
+      to
+    );
+
+    const byMonth = new Map<string, number>();
+    const currentMonthKey = format(new Date(), "yyyy-MM");
+
+    for (const doc of docs) {
+      if (!doc.paid_at) continue;
+      const monthKey = format(parseISO(doc.paid_at), "yyyy-MM");
+      const items = lineItemsByDoc.get(doc.id) ?? [];
+      const subtotal = calcLineItemsTotal(items);
+      const tax = calcTaxTotal(items);
+      const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
+      byMonth.set(monthKey, (byMonth.get(monthKey) ?? 0) + net);
+    }
+
+    return Array.from(byMonth.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([monthKey, revenue]) => ({
+        monthKey,
+        month: format(parseISO(`${monthKey}-01`), "MMM yyyy"),
+        revenue,
+        isCurrent: monthKey === currentMonthKey,
+      }));
+  },
+  ["finance-monthly"],
+  { revalidate: 60, tags: ["finance"] }
+);
+
 export async function getMonthlyRevenue(
   range: DateRange
 ): Promise<MonthlyRevenuePoint[]> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) return [];
-
-  const { docs, lineItemsByDoc } = await fetchPaidInvoicesWithLineItems(
-    supabase,
-    user.id,
-    range.from,
-    range.to
-  );
-
-  const byMonth = new Map<string, number>();
-  const currentMonthKey = format(new Date(), "yyyy-MM");
-
-  for (const doc of docs) {
-    if (!doc.paid_at) continue;
-    const monthKey = format(parseISO(doc.paid_at), "yyyy-MM");
-    const items = lineItemsByDoc.get(doc.id) ?? [];
-    const subtotal = calcLineItemsTotal(items);
-    const tax = calcTaxTotal(items);
-    const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
-    byMonth.set(monthKey, (byMonth.get(monthKey) ?? 0) + net);
-  }
-
-  return Array.from(byMonth.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([monthKey, revenue]) => ({
-      monthKey,
-      month: format(parseISO(`${monthKey}-01`), "MMM yyyy"),
-      revenue,
-      isCurrent: monthKey === currentMonthKey,
-    }));
+  return _cachedGetMonthlyRevenue(user.id, range.from.toISOString(), range.to.toISOString());
 }
 
 // ---------------------------------------------------------------------------
 // listFinanceInvoices — returns invoices with pre-computed totals (avoids N+1)
 // ---------------------------------------------------------------------------
+const _cachedListFinanceInvoices = unstable_cache(
+  async (userId: string, fromIso: string, toIso: string): Promise<(DocumentListRow & { computedTotal: number })[]> => {
+    const { supabase } = await getServerContext();
+    const from = new Date(fromIso);
+    const to = new Date(toIso);
+
+    const { data: docs } = await supabase
+      .from("documents")
+      .select("*, clients:client_id(id, name), projects:project_id(id, title)")
+      .eq("user_id", userId)
+      .eq("type", "invoice")
+      .gte("created_at", from.toISOString())
+      .lte("created_at", to.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (!docs || docs.length === 0) return [];
+
+    const ids = docs.map((d) => d.id);
+    const { data: lineItems } = await supabase
+      .from("line_items")
+      .select("document_id, quantity, unit_price, tax_rate")
+      .in("document_id", ids);
+
+    const liByDoc = new Map<string, typeof lineItems>();
+    for (const li of lineItems ?? []) {
+      const existing = liByDoc.get(li.document_id) ?? [];
+      existing.push(li);
+      liByDoc.set(li.document_id, existing);
+    }
+
+    return docs.map((row) => {
+      const normalized = normalizeDocumentListRow(row);
+      const items = liByDoc.get(row.id) ?? [];
+      const subtotal = calcLineItemsTotal(items);
+      const tax = calcTaxTotal(items);
+      const computedTotal = applyDiscount(subtotal, coerceDiscountType(row.discount_type), row.discount_value ?? 0) + tax;
+      return { ...normalized, computedTotal };
+    });
+  },
+  ["finance-invoices"],
+  { revalidate: 60, tags: ["finance"] }
+);
+
 export async function listFinanceInvoices(
   range: DateRange
 ): Promise<(DocumentListRow & { computedTotal: number })[]> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) return [];
-
-  const { data: docs } = await supabase
-    .from("documents")
-    .select("*, clients:client_id(id, name), projects:project_id(id, title)")
-    .eq("user_id", user.id)
-    .eq("type", "invoice")
-    .gte("created_at", range.from.toISOString())
-    .lte("created_at", range.to.toISOString())
-    .order("created_at", { ascending: false })
-    .limit(20);
-
-  if (!docs || docs.length === 0) return [];
-
-  const ids = docs.map((d) => d.id);
-  const { data: lineItems } = await supabase
-    .from("line_items")
-    .select("document_id, quantity, unit_price, tax_rate")
-    .in("document_id", ids);
-
-  const liByDoc = new Map<string, typeof lineItems>();
-  for (const li of lineItems ?? []) {
-    const existing = liByDoc.get(li.document_id) ?? [];
-    existing.push(li);
-    liByDoc.set(li.document_id, existing);
-  }
-
-  return docs.map((row) => {
-    const normalized = normalizeDocumentListRow(row);
-    const items = liByDoc.get(row.id) ?? [];
-    const subtotal = calcLineItemsTotal(items);
-    const tax = calcTaxTotal(items);
-    const computedTotal = applyDiscount(subtotal, coerceDiscountType(row.discount_type), row.discount_value ?? 0) + tax;
-    return { ...normalized, computedTotal };
-  });
+  return _cachedListFinanceInvoices(user.id, range.from.toISOString(), range.to.toISOString());
 }

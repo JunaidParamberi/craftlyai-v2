@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { getServerContext } from "@/lib/supabase/get-server-context";
 import { pickEmbed } from "@/lib/supabase/pick-embed";
 import type { TaskListRow, TaskPriority, TaskRow, TaskStatus } from "@/types";
@@ -68,29 +69,38 @@ export type ListAllTasksResult =
   | { ok: true; tasks: TaskListRow[] }
   | { ok: false; message: string };
 
+const _cachedListAllTasksForUser = unstable_cache(
+  async (userId: string): Promise<ListAllTasksResult> => {
+    const { supabase } = await getServerContext();
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .select(TASK_LIST_SELECT)
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+
+    const tasks: TaskListRow[] = [];
+    for (const row of data ?? []) {
+      const normalized = normalizeTaskListRow(row as TaskListRowRaw);
+      if (normalized) {
+        tasks.push(normalized);
+      }
+    }
+
+    return { ok: true, tasks };
+  },
+  ["tasks-list"],
+  { revalidate: 60, tags: ["tasks"] }
+);
+
 export async function listAllTasksForUser(): Promise<ListAllTasksResult> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) {
     return { ok: false, message: "Not authenticated." };
   }
-
-  const { data, error } = await supabase
-    .from("tasks")
-    .select(TASK_LIST_SELECT)
-    .order("due_date", { ascending: true, nullsFirst: false })
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    return { ok: false, message: error.message };
-  }
-
-  const tasks: TaskListRow[] = [];
-  for (const row of data ?? []) {
-    const normalized = normalizeTaskListRow(row as TaskListRowRaw);
-    if (normalized) {
-      tasks.push(normalized);
-    }
-  }
-
-  return { ok: true, tasks };
+  return _cachedListAllTasksForUser(user.id);
 }

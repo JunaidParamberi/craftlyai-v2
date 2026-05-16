@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { parseLineItemInput } from "@/lib/validations/line-item";
 import { invoiceMetaSchema } from "@/lib/validations/document";
@@ -42,6 +42,8 @@ export async function upsertLineItem(
       .single();
     if (error) return { ok: false, error: error.message };
     revalidatePath(`/documents/${documentId}`);
+    revalidateTag("dashboard");
+    revalidateTag("finance");
     return { ok: true, lineItem: data as LineItemRow };
   }
 
@@ -59,6 +61,8 @@ export async function upsertLineItem(
     .single();
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/documents/${documentId}`);
+  revalidateTag("dashboard");
+  revalidateTag("finance");
   return { ok: true, lineItem: data as LineItemRow };
 }
 
@@ -71,6 +75,8 @@ export async function deleteLineItem(
   const { error } = await supabase.from("line_items").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/documents/${documentId}`);
+  revalidateTag("dashboard");
+  revalidateTag("finance");
   return { ok: true };
 }
 
@@ -88,6 +94,8 @@ export async function reorderLineItems(
   );
   await Promise.all(updates);
   revalidatePath(`/documents/${documentId}`);
+  revalidateTag("dashboard");
+  revalidateTag("finance");
   return { ok: true };
 }
 
@@ -117,6 +125,8 @@ export async function updateInvoiceMeta(
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/documents/${documentId}`);
   revalidatePath(`/documents/${documentId}/edit`);
+  revalidateTag("dashboard");
+  revalidateTag("finance");
   return { ok: true };
 }
 
@@ -205,5 +215,7 @@ export async function markInvoicePaid(
   revalidatePath(`/documents/${documentId}`);
   revalidatePath("/documents");
   revalidatePath("/dashboard", "layout");
+  revalidateTag("dashboard");
+  revalidateTag("finance");
   return { ok: true };
 }

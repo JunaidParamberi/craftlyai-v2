@@ -1,4 +1,4 @@
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 import {
@@ -23,23 +23,20 @@ export type ListExpensesResult =
 const EXPENSE_LIST_SELECT =
   "*, project:projects(id, title)" as const;
 
-export const getExpenseById = cache(
-  async (id: string): Promise<ExpenseRow | null> => {
+const _cachedGetExpenseById = unstable_cache(
+  async (userId: string, id: string): Promise<ExpenseRow | null> => {
     const parsedId = uuidSchema.safeParse(id);
     if (!parsedId.success) {
       return null;
     }
 
-    const { supabase, user } = await getServerContext();
-    if (!user) {
-      return null;
-    }
+    const { supabase } = await getServerContext();
 
     const { data, error } = await supabase
       .from("expenses")
       .select("*")
       .eq("id", parsedId.data)
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (error || !data) {
@@ -48,47 +45,65 @@ export const getExpenseById = cache(
 
     return normalizeExpenseRow(data);
   },
+  ["expense-by-id"],
+  { revalidate: 60, tags: ["expenses"] }
+);
+
+export async function getExpenseById(id: string): Promise<ExpenseRow | null> {
+  const { user } = await getServerContext();
+  if (!user) return null;
+  return _cachedGetExpenseById(user.id, id);
+}
+
+const _cachedListExpenses = unstable_cache(
+  async (userId: string, optionsJson: string): Promise<ListExpensesResult> => {
+    const { supabase } = await getServerContext();
+    const options: ListExpensesOptions = JSON.parse(optionsJson);
+
+    let query = supabase
+      .from("expenses")
+      .select(EXPENSE_LIST_SELECT)
+      .eq("user_id", userId)
+      .order("date", { ascending: false })
+      .order("created_at", { ascending: false });
+
+    if (options.projectId) {
+      const projectId = uuidSchema.safeParse(options.projectId);
+      if (!projectId.success) {
+        return { ok: false, message: "Invalid project." };
+      }
+      query = query.eq("project_id", projectId.data);
+    }
+
+    if (options.from) {
+      query = query.gte("date", options.from);
+    }
+
+    if (options.to) {
+      query = query.lte("date", options.to);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+
+    return {
+      ok: true,
+      expenses: (data ?? []).map((row) => normalizeExpenseListRow(row)),
+    };
+  },
+  ["expenses-list"],
+  { revalidate: 60, tags: ["expenses"] }
 );
 
 export async function listExpenses(
   options: ListExpensesOptions = {},
 ): Promise<ListExpensesResult> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) {
     return { ok: false, message: "Not authenticated." };
   }
-
-  let query = supabase
-    .from("expenses")
-    .select(EXPENSE_LIST_SELECT)
-    .eq("user_id", user.id)
-    .order("date", { ascending: false })
-    .order("created_at", { ascending: false });
-
-  if (options.projectId) {
-    const projectId = uuidSchema.safeParse(options.projectId);
-    if (!projectId.success) {
-      return { ok: false, message: "Invalid project." };
-    }
-    query = query.eq("project_id", projectId.data);
-  }
-
-  if (options.from) {
-    query = query.gte("date", options.from);
-  }
-
-  if (options.to) {
-    query = query.lte("date", options.to);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    return { ok: false, message: error.message };
-  }
-
-  return {
-    ok: true,
-    expenses: (data ?? []).map((row) => normalizeExpenseListRow(row)),
-  };
+  return _cachedListExpenses(user.id, JSON.stringify(options));
 }

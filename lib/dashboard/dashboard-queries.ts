@@ -1,5 +1,6 @@
 "use server";
 
+import { unstable_cache } from "next/cache";
 import {
   addDays,
   differenceInCalendarDays,
@@ -98,266 +99,302 @@ function clientNameFromJoin(
 // ---------------------------------------------------------------------------
 // getDashboardCounts
 // ---------------------------------------------------------------------------
+const _cachedGetDashboardCounts = unstable_cache(
+  async (userId: string): Promise<DashboardCounts> => {
+    const { supabase } = await getServerContext();
+
+    const now = new Date();
+    const inSevenDays = addDays(now, 7).toISOString().slice(0, 10);
+
+    const { data: projects } = await supabase
+      .from("projects")
+      .select("id, deadline, status")
+      .eq("user_id", userId)
+      .in("status", ACTIVE_PROJECT_STATUSES);
+
+    const rows = projects ?? [];
+    const nearingDeadlineCount = rows.filter((p) => {
+      if (!p.deadline) return false;
+      const d = parseISO(`${p.deadline}T12:00:00.000Z`);
+      return d >= startOfDay(now) && p.deadline <= inSevenDays;
+    }).length;
+
+    return {
+      activeProjectsCount: rows.length,
+      nearingDeadlineCount,
+    };
+  },
+  ["dashboard-counts"],
+  { revalidate: 60, tags: ["dashboard"] }
+);
+
 export async function getDashboardCounts(): Promise<DashboardCounts> {
-  const { supabase, user } = await getServerContext();
+  const { user } = await getServerContext();
   if (!user) return { activeProjectsCount: 0, nearingDeadlineCount: 0 };
-
-  const now = new Date();
-  const inSevenDays = addDays(now, 7).toISOString().slice(0, 10);
-
-  const { data: projects } = await supabase
-    .from("projects")
-    .select("id, deadline, status")
-    .eq("user_id", user.id)
-    .in("status", ACTIVE_PROJECT_STATUSES);
-
-  const rows = projects ?? [];
-  const nearingDeadlineCount = rows.filter((p) => {
-    if (!p.deadline) return false;
-    const d = parseISO(`${p.deadline}T12:00:00.000Z`);
-    return d >= startOfDay(now) && p.deadline <= inSevenDays;
-  }).length;
-
-  return {
-    activeProjectsCount: rows.length,
-    nearingDeadlineCount,
-  };
+  return _cachedGetDashboardCounts(user.id);
 }
 
 // ---------------------------------------------------------------------------
 // getAttentionItems
 // ---------------------------------------------------------------------------
-export async function getAttentionItems(): Promise<AttentionItem[]> {
-  const { supabase, user } = await getServerContext();
-  if (!user) return [];
+const _cachedGetAttentionItems = unstable_cache(
+  async (userId: string): Promise<AttentionItem[]> => {
+    const { supabase } = await getServerContext();
 
-  const now = new Date();
-  const today = startOfDay(now);
-  const inThreeDays = addDays(now, 3).toISOString().slice(0, 10);
-  const inSevenDays = addDays(now, 7).toISOString().slice(0, 10);
-  const sevenDaysAgo = subDays(now, 7).toISOString();
-  const todayStr = now.toISOString().slice(0, 10);
+    const now = new Date();
+    const today = startOfDay(now);
+    const inThreeDays = addDays(now, 3).toISOString().slice(0, 10);
+    const inSevenDays = addDays(now, 7).toISOString().slice(0, 10);
+    const sevenDaysAgo = subDays(now, 7).toISOString();
+    const todayStr = now.toISOString().slice(0, 10);
 
-  const [invoicesRes, quotesRes, projectsRes] = await Promise.all([
-    supabase
-      .from("documents")
-      .select(
-        "id, invoice_number, due_date, discount_value, discount_type, clients:client_id(name)"
-      )
-      .eq("user_id", user.id)
-      .eq("type", "invoice")
-      .in("status", ["sent", "viewed"])
-      .not("due_date", "is", null)
-      .lt("due_date", todayStr),
-    supabase
-      .from("documents")
-      .select(
-        "id, quote_number, valid_until, sent_at, discount_value, discount_type, clients:client_id(name)"
-      )
-      .eq("user_id", user.id)
-      .eq("type", "quote")
-      .eq("status", "sent"),
-    supabase
-      .from("projects")
-      .select("id, title, deadline, status, clients:client_id(name)")
-      .eq("user_id", user.id)
-      .in("status", DEADLINE_ATTENTION_STATUSES)
-      .not("deadline", "is", null)
-      .gte("deadline", todayStr)
-      .lte("deadline", inSevenDays),
-  ]);
+    const [invoicesRes, quotesRes, projectsRes] = await Promise.all([
+      supabase
+        .from("documents")
+        .select(
+          "id, invoice_number, due_date, discount_value, discount_type, clients:client_id(name)"
+        )
+        .eq("user_id", userId)
+        .eq("type", "invoice")
+        .in("status", ["sent", "viewed"])
+        .not("due_date", "is", null)
+        .lt("due_date", todayStr),
+      supabase
+        .from("documents")
+        .select(
+          "id, quote_number, valid_until, sent_at, discount_value, discount_type, clients:client_id(name)"
+        )
+        .eq("user_id", userId)
+        .eq("type", "quote")
+        .eq("status", "sent"),
+      supabase
+        .from("projects")
+        .select("id, title, deadline, status, clients:client_id(name)")
+        .eq("user_id", userId)
+        .in("status", DEADLINE_ATTENTION_STATUSES)
+        .not("deadline", "is", null)
+        .gte("deadline", todayStr)
+        .lte("deadline", inSevenDays),
+    ]);
 
-  const invoiceIds = (invoicesRes.data ?? []).map((d) => d.id);
-  const quoteIds = (quotesRes.data ?? []).map((d) => d.id);
-  const lineItemsByDoc = await fetchLineItemsByDocIds(supabase, [
-    ...invoiceIds,
-    ...quoteIds,
-  ]);
+    const invoiceIds = (invoicesRes.data ?? []).map((d) => d.id);
+    const quoteIds = (quotesRes.data ?? []).map((d) => d.id);
+    const lineItemsByDoc = await fetchLineItemsByDocIds(supabase, [
+      ...invoiceIds,
+      ...quoteIds,
+    ]);
 
-  const items: AttentionItem[] = [];
+    const items: AttentionItem[] = [];
 
-  for (const doc of invoicesRes.data ?? []) {
-    const due = parseISO(`${doc.due_date}T12:00:00.000Z`);
-    const daysOverdue = differenceInCalendarDays(today, startOfDay(due));
-    const itemsLi = lineItemsByDoc.get(doc.id) ?? [];
-    const amount = computeDocTotal(
-      itemsLi,
-      doc.discount_type,
-      doc.discount_value
-    );
-    const client = clientNameFromJoin(doc.clients) ?? "Client";
-    const number = doc.invoice_number ?? "—";
-    items.push({
-      type: "overdue_invoice",
-      id: doc.id,
-      href: `/documents/${doc.id}`,
-      label: `Invoice #${number} · ${client} · ${formatCurrency(amount)} · ${daysOverdue} days overdue`,
-      urgencyDays: daysOverdue,
-    });
-  }
-
-  for (const doc of quotesRes.data ?? []) {
-    const client = clientNameFromJoin(doc.clients) ?? "Client";
-    const number = doc.quote_number ?? "—";
-    const validUntil = doc.valid_until;
-
-    if (
-      validUntil &&
-      validUntil >= todayStr &&
-      validUntil <= inThreeDays
-    ) {
-      const expires = parseISO(`${validUntil}T12:00:00.000Z`);
-      const daysLeft = differenceInCalendarDays(startOfDay(expires), today);
+    for (const doc of invoicesRes.data ?? []) {
+      const due = parseISO(`${doc.due_date}T12:00:00.000Z`);
+      const daysOverdue = differenceInCalendarDays(today, startOfDay(due));
+      const itemsLi = lineItemsByDoc.get(doc.id) ?? [];
+      const amount = computeDocTotal(
+        itemsLi,
+        doc.discount_type,
+        doc.discount_value
+      );
+      const client = clientNameFromJoin(doc.clients) ?? "Client";
+      const number = doc.invoice_number ?? "—";
       items.push({
-        type: "expiring_quote",
+        type: "overdue_invoice",
         id: doc.id,
         href: `/documents/${doc.id}`,
-        label: `Quote #${number} · ${client} · expires in ${daysLeft} days`,
+        label: `Invoice #${number} · ${client} · ${formatCurrency(amount)} · ${daysOverdue} days overdue`,
+        urgencyDays: daysOverdue,
+      });
+    }
+
+    for (const doc of quotesRes.data ?? []) {
+      const client = clientNameFromJoin(doc.clients) ?? "Client";
+      const number = doc.quote_number ?? "—";
+      const validUntil = doc.valid_until;
+
+      if (
+        validUntil &&
+        validUntil >= todayStr &&
+        validUntil <= inThreeDays
+      ) {
+        const expires = parseISO(`${validUntil}T12:00:00.000Z`);
+        const daysLeft = differenceInCalendarDays(startOfDay(expires), today);
+        items.push({
+          type: "expiring_quote",
+          id: doc.id,
+          href: `/documents/${doc.id}`,
+          label: `Quote #${number} · ${client} · expires in ${daysLeft} days`,
+          urgencyDays: daysLeft,
+        });
+        continue;
+      }
+
+      if (
+        doc.sent_at &&
+        doc.sent_at < sevenDaysAgo &&
+        validUntil &&
+        validUntil > todayStr
+      ) {
+        const sent = parseISO(doc.sent_at);
+        const daysSince = differenceInCalendarDays(today, startOfDay(sent));
+        items.push({
+          type: "quote_no_response",
+          id: doc.id,
+          href: `/documents/${doc.id}`,
+          label: `Quote #${number} · ${client} · no response in ${daysSince} days`,
+          urgencyDays: daysSince,
+        });
+      }
+    }
+
+    for (const project of projectsRes.data ?? []) {
+      if (!project.deadline) continue;
+      const deadline = parseISO(`${project.deadline}T12:00:00.000Z`);
+      const daysLeft = differenceInCalendarDays(startOfDay(deadline), today);
+      const client = clientNameFromJoin(project.clients) ?? "Client";
+      items.push({
+        type: "project_deadline",
+        id: project.id,
+        href: `/projects/${project.id}`,
+        label: `${project.title} · ${client} · due in ${daysLeft} days`,
         urgencyDays: daysLeft,
       });
-      continue;
     }
 
-    if (
-      doc.sent_at &&
-      doc.sent_at < sevenDaysAgo &&
-      validUntil &&
-      validUntil > todayStr
-    ) {
-      const sent = parseISO(doc.sent_at);
-      const daysSince = differenceInCalendarDays(today, startOfDay(sent));
-      items.push({
-        type: "quote_no_response",
-        id: doc.id,
-        href: `/documents/${doc.id}`,
-        label: `Quote #${number} · ${client} · no response in ${daysSince} days`,
-        urgencyDays: daysSince,
-      });
-    }
-  }
+    return sortAttentionItems(deduplicateAttentionItems(items));
+  },
+  ["dashboard-attention"],
+  { revalidate: 60, tags: ["dashboard"] }
+);
 
-  for (const project of projectsRes.data ?? []) {
-    if (!project.deadline) continue;
-    const deadline = parseISO(`${project.deadline}T12:00:00.000Z`);
-    const daysLeft = differenceInCalendarDays(startOfDay(deadline), today);
-    const client = clientNameFromJoin(project.clients) ?? "Client";
-    items.push({
-      type: "project_deadline",
-      id: project.id,
-      href: `/projects/${project.id}`,
-      label: `${project.title} · ${client} · due in ${daysLeft} days`,
-      urgencyDays: daysLeft,
-    });
-  }
-
-  return sortAttentionItems(deduplicateAttentionItems(items));
+export async function getAttentionItems(): Promise<AttentionItem[]> {
+  const { user } = await getServerContext();
+  if (!user) return [];
+  return _cachedGetAttentionItems(user.id);
 }
 
 // ---------------------------------------------------------------------------
 // getRecentActivity
 // ---------------------------------------------------------------------------
-export async function getRecentActivity(): Promise<ActivityEvent[]> {
-  const { supabase, user } = await getServerContext();
-  if (!user) return [];
+const _cachedGetRecentActivity = unstable_cache(
+  async (userId: string): Promise<ActivityEvent[]> => {
+    const { supabase } = await getServerContext();
 
-  const since = subDays(new Date(), 30).toISOString();
+    const since = subDays(new Date(), 30).toISOString();
 
-  const [docsRes, projectsRes] = await Promise.all([
-    supabase
-      .from("documents")
-      .select(
-        "id, type, status, sent_at, paid_at, approved_at, declined_at, invoice_number, quote_number, title, updated_at, discount_value, discount_type, clients:client_id(name)"
-      )
-      .eq("user_id", user.id)
-      .gte("updated_at", since)
-      .order("updated_at", { ascending: false })
-      .limit(30),
-    supabase
-      .from("projects")
-      .select("id, title, status, updated_at, clients:client_id(name)")
-      .eq("user_id", user.id)
-      .gte("updated_at", since)
-      .order("updated_at", { ascending: false })
-      .limit(20),
-  ]);
+    const [docsRes, projectsRes] = await Promise.all([
+      supabase
+        .from("documents")
+        .select(
+          "id, type, status, sent_at, paid_at, approved_at, declined_at, invoice_number, quote_number, title, updated_at, discount_value, discount_type, clients:client_id(name)"
+        )
+        .eq("user_id", userId)
+        .gte("updated_at", since)
+        .order("updated_at", { ascending: false })
+        .limit(30),
+      supabase
+        .from("projects")
+        .select("id, title, status, updated_at, clients:client_id(name)")
+        .eq("user_id", userId)
+        .gte("updated_at", since)
+        .order("updated_at", { ascending: false })
+        .limit(20),
+    ]);
 
-  const docIds = (docsRes.data ?? []).map((d) => d.id);
-  const lineItemsByDoc = await fetchLineItemsByDocIds(supabase, docIds);
+    const docIds = (docsRes.data ?? []).map((d) => d.id);
+    const lineItemsByDoc = await fetchLineItemsByDocIds(supabase, docIds);
 
-  const docEvents = (docsRes.data ?? []).flatMap((row) => {
-    const items = lineItemsByDoc.get(row.id) ?? [];
-    const amount = computeDocTotal(
-      items,
-      row.discount_type,
-      row.discount_value
+    const docEvents = (docsRes.data ?? []).flatMap((row) => {
+      const items = lineItemsByDoc.get(row.id) ?? [];
+      const amount = computeDocTotal(
+        items,
+        row.discount_type,
+        row.discount_value
+      );
+      const source: DocumentActivitySource = {
+        id: row.id,
+        type: row.type,
+        sent_at: row.sent_at,
+        paid_at: row.paid_at,
+        approved_at: row.approved_at,
+        declined_at: row.declined_at,
+        invoice_number: row.invoice_number,
+        quote_number: row.quote_number,
+        title: row.title,
+        clientName: clientNameFromJoin(row.clients),
+        amount,
+      };
+      return extractDocumentEvents(source);
+    });
+
+    const projectEvents = (projectsRes.data ?? []).flatMap((row) =>
+      extractProjectEvents({
+        id: row.id,
+        title: row.title,
+        status: row.status,
+        updated_at: row.updated_at,
+        clientName: clientNameFromJoin(row.clients),
+      })
     );
-    const source: DocumentActivitySource = {
-      id: row.id,
-      type: row.type,
-      sent_at: row.sent_at,
-      paid_at: row.paid_at,
-      approved_at: row.approved_at,
-      declined_at: row.declined_at,
-      invoice_number: row.invoice_number,
-      quote_number: row.quote_number,
-      title: row.title,
-      clientName: clientNameFromJoin(row.clients),
-      amount,
-    };
-    return extractDocumentEvents(source);
-  });
 
-  const projectEvents = (projectsRes.data ?? []).flatMap((row) =>
-    extractProjectEvents({
-      id: row.id,
-      title: row.title,
-      status: row.status,
-      updated_at: row.updated_at,
-      clientName: clientNameFromJoin(row.clients),
-    })
-  );
+    return mergeAndSortEvents([...docEvents, ...projectEvents], 10);
+  },
+  ["dashboard-activity"],
+  { revalidate: 60, tags: ["dashboard"] }
+);
 
-  return mergeAndSortEvents([...docEvents, ...projectEvents], 10);
+export async function getRecentActivity(): Promise<ActivityEvent[]> {
+  const { user } = await getServerContext();
+  if (!user) return [];
+  return _cachedGetRecentActivity(user.id);
 }
 
 // ---------------------------------------------------------------------------
 // getActivePipeline
 // ---------------------------------------------------------------------------
-export async function getActivePipeline(): Promise<ActivePipelineResult> {
-  const { supabase, user } = await getServerContext();
-  if (!user) return { projects: [], totalCount: 0 };
+const _cachedGetActivePipeline = unstable_cache(
+  async (userId: string): Promise<ActivePipelineResult> => {
+    const { supabase } = await getServerContext();
 
-  const { data, count } = await supabase
-    .from("projects")
-    .select("id, title, deadline, status, clients:client_id(name)", {
-      count: "exact",
-    })
-    .eq("user_id", user.id)
-    .in("status", ACTIVE_PROJECT_STATUSES)
-    .order("deadline", { ascending: true, nullsFirst: false })
-    .limit(5);
+    const { data, count } = await supabase
+      .from("projects")
+      .select("id, title, deadline, status, clients:client_id(name)", {
+        count: "exact",
+      })
+      .eq("user_id", userId)
+      .in("status", ACTIVE_PROJECT_STATUSES)
+      .order("deadline", { ascending: true, nullsFirst: false })
+      .limit(5);
 
-  const now = new Date();
-  const withDeadline = (data ?? []).filter((p) => p.deadline);
-  const withoutDeadline = (data ?? []).filter((p) => !p.deadline);
-  const ordered = [...withDeadline, ...withoutDeadline];
+    const now = new Date();
+    const withDeadline = (data ?? []).filter((p) => p.deadline);
+    const withoutDeadline = (data ?? []).filter((p) => !p.deadline);
+    const ordered = [...withDeadline, ...withoutDeadline];
 
-  const projects = ordered.map((row) => {
-    const deadline = parseDeadlineDate(row.deadline);
-    const risk = classifyProjectRisk(deadline, now);
+    const projects = ordered.map((row) => {
+      const deadline = parseDeadlineDate(row.deadline);
+      const risk = classifyProjectRisk(deadline, now);
+      return {
+        id: row.id,
+        title: row.title,
+        clientName: clientNameFromJoin(row.clients),
+        deadline,
+        risk,
+        daysLabel: formatPipelineDaysLabel(deadline, now),
+        statusLabel: projectStatusLabel(row.status as ProjectStatus),
+      };
+    });
+
     return {
-      id: row.id,
-      title: row.title,
-      clientName: clientNameFromJoin(row.clients),
-      deadline,
-      risk,
-      daysLabel: formatPipelineDaysLabel(deadline, now),
-      statusLabel: projectStatusLabel(row.status as ProjectStatus),
+      projects,
+      totalCount: count ?? projects.length,
     };
-  });
+  },
+  ["dashboard-pipeline"],
+  { revalidate: 60, tags: ["dashboard"] }
+);
 
-  return {
-    projects,
-    totalCount: count ?? projects.length,
-  };
+export async function getActivePipeline(): Promise<ActivePipelineResult> {
+  const { user } = await getServerContext();
+  if (!user) return { projects: [], totalCount: 0 };
+  return _cachedGetActivePipeline(user.id);
 }

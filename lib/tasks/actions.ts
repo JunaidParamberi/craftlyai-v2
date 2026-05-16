@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
@@ -54,6 +54,8 @@ function revalidateTaskPaths(projectId: string) {
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/edit`);
   revalidatePath("/projects/new");
+  revalidateTag("tasks");
+  revalidateTag("dashboard");
 }
 
 export type ListTasksForProjectResult =

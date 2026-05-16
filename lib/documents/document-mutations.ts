@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
 import {
@@ -86,6 +86,8 @@ export async function createDocument(
   }
 
   revalidatePath("/documents");
+  revalidateTag("dashboard");
+  revalidateTag("finance");
 
   return { ok: true, document: normalizeDocumentRow(data) };
 }
@@ -147,6 +149,8 @@ export async function updateDocument(
   revalidatePath("/documents");
   revalidatePath(`/documents/${parsedId.data}`);
   revalidatePath(`/documents/${parsedId.data}/edit`);
+  revalidateTag("dashboard");
+  revalidateTag("finance");
 
   return { ok: true, document: normalizeDocumentRow(data) };
 }
@@ -187,6 +191,8 @@ export async function deleteDocument(
   }
 
   revalidatePath("/documents");
+  revalidateTag("dashboard");
+  revalidateTag("finance");
 
   return { ok: true };
 }

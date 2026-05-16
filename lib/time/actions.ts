@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { pickEmbed } from "@/lib/supabase/pick-embed";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
@@ -28,6 +28,7 @@ async function projectBelongsToUser(
 
 function revalidateTimePaths() {
   revalidatePath("/time");
+  revalidateTag("dashboard");
 }
 
 type TimeEntryRowRaw = {
