@@ -30,7 +30,7 @@ function SidebarNavGroup({ label, items }: { label: string; items: NavItem[] }) 
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-[9px] font-semibold uppercase tracking-[0.1em] text-sidebar-foreground/25 px-2">
+      <SidebarGroupLabel className="text-[9px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/22 px-2 mb-1">
         {label}
       </SidebarGroupLabel>
       <SidebarGroupContent>
