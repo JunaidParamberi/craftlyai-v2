@@ -17,9 +17,24 @@ type Props = {
   currency: string;
 };
 
-function formatYAxis(value: number): string {
-  if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
-  return `$${value}`;
+function getCurrencySymbol(currency: string): string {
+  return (
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 0,
+    })
+      .formatToParts(0)
+      .find((p) => p.type === "currency")?.value ?? currency
+  );
+}
+
+function makeYAxisFormatter(currency: string): (value: number) => string {
+  const symbol = getCurrencySymbol(currency);
+  return (value: number) => {
+    if (value >= 1000) return `${symbol}${(value / 1000).toFixed(0)}k`;
+    return `${symbol}${value}`;
+  };
 }
 
 function makeTooltip(currency: string) {
@@ -78,6 +93,7 @@ export function RevenueAreaChart({ data, currency }: Props) {
       : data;
 
   const fewPoints = chartData.length <= 3;
+  const formatYAxis = makeYAxisFormatter(currency);
   const ChartTooltip = makeTooltip(currency);
 
   return (

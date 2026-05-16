@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -6,11 +7,13 @@ type KpiCardProps = {
   value: string;
   subLabel: string;
   icon: LucideIcon;
-  accentColor: string;   // Tailwind border-l color class e.g. "border-blue-500"
-  iconBg: string;        // Tailwind bg class e.g. "bg-blue-50"
-  iconColor: string;     // Tailwind text class e.g. "text-blue-600"
+  accentColor: string;
+  iconBg: string;
+  iconColor: string;
   subLabelColor?: string;
-  index?: number;        // for staggered animation delay
+  index?: number;
+  href?: string;
+  isActive?: boolean;
 };
 
 export function KpiCard({
@@ -23,14 +26,18 @@ export function KpiCard({
   iconColor,
   subLabelColor = "text-muted-foreground",
   index = 0,
+  href,
+  isActive,
 }: KpiCardProps) {
-  return (
+  const card = (
     <div
       className={cn(
         "relative overflow-hidden rounded-lg border border-border bg-card px-5 py-4",
         "border-l-[3px]",
         accentColor,
-        "opacity-0 animate-[fadeUp_0.4s_ease_forwards]"
+        "opacity-0 animate-[fadeUp_0.4s_ease_forwards]",
+        href && "cursor-pointer transition-shadow hover:shadow-md",
+        isActive && "ring-2 ring-primary ring-offset-1"
       )}
       style={{ animationDelay: `${index * 80}ms` }}
     >
@@ -48,4 +55,7 @@ export function KpiCard({
       <p className={cn("mt-2 text-[11px]", subLabelColor)}>{subLabel}</p>
     </div>
   );
+
+  if (href) return <Link href={href} className="block">{card}</Link>;
+  return card;
 }

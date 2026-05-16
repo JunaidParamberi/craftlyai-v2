@@ -6,8 +6,17 @@ import { format, parseISO } from "date-fns";
 import { type createClient } from "@/lib/supabase/server";
 import { getServerContext } from "@/lib/supabase/get-server-context";
 import { normalizeDocumentListRow } from "@/lib/documents/normalize-document-row";
-import type { DocumentListRow } from "@/types";
-import type { DateRange, FinancialSummary, MonthlyRevenuePoint } from "./types";
+import type {
+  DateRange,
+  FinancialSummary,
+  MonthlyRevenuePoint,
+  SortKey,
+  InvoiceFilters,
+  FinanceInvoiceRow,
+  PaginatedInvoices,
+  AgingBucket,
+  AgingReport,
+} from "./types";
 import {
   applyDiscount,
   calcAvgPayDays,
@@ -19,6 +28,39 @@ import {
 function coerceDiscountType(val: string | null | undefined): "percent" | "flat" {
   return val === "flat" ? "flat" : "percent";
 }
+
+type LineItemLike = {
+  quantity: number | string;
+  unit_price: number | string;
+  tax_rate: number | string | null;
+};
+
+function sortInvoices(invoices: FinanceInvoiceRow[], sort: SortKey): FinanceInvoiceRow[] {
+  const underscoreIdx = sort.lastIndexOf("_");
+  const field = sort.slice(0, underscoreIdx);
+  const dir = sort.slice(underscoreIdx + 1) as "asc" | "desc";
+  const asc = dir === "asc";
+
+  return [...invoices].sort((a, b) => {
+    switch (field) {
+      case "date":
+        return asc
+          ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          : new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      case "amount":
+        return asc ? a.computedTotal - b.computedTotal : b.computedTotal - a.computedTotal;
+      case "client":
+        return asc
+          ? (a.client?.name ?? "").localeCompare(b.client?.name ?? "")
+          : (b.client?.name ?? "").localeCompare(a.client?.name ?? "");
+      case "status":
+        return asc ? a.status.localeCompare(b.status) : b.status.localeCompare(a.status);
+      default:
+        return 0;
+    }
+  });
+}
+
 import { previousPeriodRange } from "./date-utils";
 
 // ---------------------------------------------------------------------------
@@ -56,7 +98,7 @@ async function computeRangeRevenue(
 ): Promise<number> {
   const docs = await fetchPaidInvoicesWithLineItems(supabase, userId, from, to);
   return docs.reduce((total, doc) => {
-    const items = (doc.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
+    const items = (doc.line_items ?? []) as LineItemLike[];
     const subtotal = calcLineItemsTotal(items);
     const tax = calcTaxTotal(items);
     const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
@@ -92,7 +134,7 @@ const _cachedGetFinancialSummary = unstable_cache(
     ]);
 
     const totalRevenue = paidDocs.reduce((sum, doc) => {
-      const items = (doc.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
+      const items = (doc.line_items ?? []) as LineItemLike[];
       const subtotal = calcLineItemsTotal(items);
       const tax = calcTaxTotal(items);
       const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
@@ -105,7 +147,7 @@ const _cachedGetFinancialSummary = unstable_cache(
     let overdueCount = 0;
 
     for (const doc of outstandingDocs.data ?? []) {
-      const items = (doc.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
+      const items = (doc.line_items ?? []) as LineItemLike[];
       const subtotal = calcLineItemsTotal(items);
       const tax = calcTaxTotal(items);
       const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
@@ -170,7 +212,7 @@ const _cachedGetMonthlyRevenue = unstable_cache(
     for (const doc of docs) {
       if (!doc.paid_at) continue;
       const monthKey = format(parseISO(doc.paid_at), "yyyy-MM");
-      const items = (doc.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
+      const items = (doc.line_items ?? []) as LineItemLike[];
       const subtotal = calcLineItemsTotal(items);
       const tax = calcTaxTotal(items);
       const net = applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) + tax;
@@ -199,32 +241,69 @@ export async function getMonthlyRevenue(
 }
 
 // ---------------------------------------------------------------------------
-// listFinanceInvoices — returns invoices with pre-computed totals (avoids N+1)
+// Internal: fetch all invoices matching date + status + search (no pagination)
+// Sort + pagination applied in-memory after cache hit.
 // ---------------------------------------------------------------------------
-const _cachedListFinanceInvoices = unstable_cache(
-  async (userId: string, fromIso: string, toIso: string): Promise<(DocumentListRow & { computedTotal: number })[]> => {
+const _cachedFetchFilteredInvoices = unstable_cache(
+  async (
+    userId: string,
+    fromIso: string,
+    toIso: string,
+    statusKey: string,
+    search: string
+  ): Promise<FinanceInvoiceRow[]> => {
     const { supabase } = await getServerContext();
     const from = new Date(fromIso);
     const to = new Date(toIso);
+    const now = new Date().toISOString();
 
-    const { data: docs } = await supabase
+    let query = supabase
       .from("documents")
-      .select("*, clients:client_id(id, name), projects:project_id(id, title), line_items(quantity, unit_price, tax_rate)")
+      .select(
+        "*, clients:client_id(id, name), projects:project_id(id, title), line_items(quantity, unit_price, tax_rate)"
+      )
       .eq("user_id", userId)
       .eq("type", "invoice")
       .gte("created_at", from.toISOString())
       .lte("created_at", to.toISOString())
-      .order("created_at", { ascending: false })
-      .limit(20);
+      .order("created_at", { ascending: false });
 
-    if (!docs || docs.length === 0) return [];
+    if (statusKey === "overdue") {
+      query = query.in("status", ["sent", "viewed"]).lt("due_date", now);
+    } else if (statusKey === "outstanding") {
+      query = query.in("status", ["sent", "viewed"]);
+    } else if (statusKey) {
+      query = query.eq("status", statusKey);
+    }
 
-    return docs.map((row) => {
+    if (search) {
+      const { data: matchingClients } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("user_id", userId)
+        .ilike("name", `%${search}%`);
+      const clientIds = (matchingClients ?? []).map((c) => c.id);
+
+      if (clientIds.length > 0) {
+        query = query.or(
+          `invoice_number.ilike.%${search}%,client_id.in.(${clientIds.join(",")})`
+        );
+      } else {
+        query = query.ilike("invoice_number", `%${search}%`);
+      }
+    }
+
+    const { data: docs, error } = await query;
+    if (error) console.error("[finance-queries] fetch invoices error:", error.message);
+
+    return (docs ?? []).map((row) => {
       const normalized = normalizeDocumentListRow(row);
-      const items = (row.line_items ?? []) as { quantity: number | string; unit_price: number | string; tax_rate: number | string | null }[];
+      const items = (row.line_items ?? []) as LineItemLike[];
       const subtotal = calcLineItemsTotal(items);
       const tax = calcTaxTotal(items);
-      const computedTotal = applyDiscount(subtotal, coerceDiscountType(row.discount_type), row.discount_value ?? 0) + tax;
+      const computedTotal =
+        applyDiscount(subtotal, coerceDiscountType(row.discount_type), row.discount_value ?? 0) +
+        tax;
       return { ...normalized, computedTotal };
     });
   },
@@ -232,10 +311,124 @@ const _cachedListFinanceInvoices = unstable_cache(
   { revalidate: 60, tags: ["finance"] }
 );
 
-export async function listFinanceInvoices(
-  range: DateRange
-): Promise<(DocumentListRow & { computedTotal: number })[]> {
+export async function listFinanceInvoices(filters: InvoiceFilters): Promise<PaginatedInvoices> {
+  const { user } = await getServerContext();
+  if (!user) return { invoices: [], total: 0, pageCount: 0 };
+
+  const all = await _cachedFetchFilteredInvoices(
+    user.id,
+    filters.dateRange.from.toISOString(),
+    filters.dateRange.to.toISOString(),
+    filters.status ?? "",
+    filters.search ?? ""
+  );
+
+  const sorted = sortInvoices(all, filters.sort);
+  const total = sorted.length;
+  const pageCount = Math.ceil(total / filters.pageSize);
+  const start = (filters.page - 1) * filters.pageSize;
+  const invoices = sorted.slice(start, start + filters.pageSize);
+
+  return { invoices, total, pageCount };
+}
+
+// ---------------------------------------------------------------------------
+// exportFinanceInvoices — all matching rows for CSV download (no page limit)
+// ---------------------------------------------------------------------------
+export async function exportFinanceInvoices(
+  filters: Omit<InvoiceFilters, "page">
+): Promise<FinanceInvoiceRow[]> {
   const { user } = await getServerContext();
   if (!user) return [];
-  return _cachedListFinanceInvoices(user.id, range.from.toISOString(), range.to.toISOString());
+
+  const all = await _cachedFetchFilteredInvoices(
+    user.id,
+    filters.dateRange.from.toISOString(),
+    filters.dateRange.to.toISOString(),
+    filters.status ?? "",
+    filters.search ?? ""
+  );
+
+  return sortInvoices(all, filters.sort);
+}
+
+// ---------------------------------------------------------------------------
+// getAgingReport — overdue buckets for all unpaid invoices (ignores date filter)
+// ---------------------------------------------------------------------------
+const _cachedGetAgingReport = unstable_cache(
+  async (userId: string): Promise<AgingReport> => {
+    const { supabase } = await getServerContext();
+    const now = new Date();
+
+    const { data: docs, error } = await supabase
+      .from("documents")
+      .select("id, due_date, discount_value, discount_type, status, line_items(quantity, unit_price, tax_rate)")
+      .eq("user_id", userId)
+      .eq("type", "invoice")
+      .in("status", ["sent", "viewed"]);
+
+    if (error) console.error("[finance-queries] aging report error:", error.message);
+
+    const empty = (label: string): AgingBucket => ({ label, count: 0, total: 0 });
+
+    const report = {
+      current: empty("Current (not yet due)"),
+      overdue1to30: empty("1–30 days overdue"),
+      overdue31to60: empty("31–60 days overdue"),
+      overdue60plus: empty("60+ days overdue"),
+      grandTotal: 0,
+    };
+
+    for (const doc of docs ?? []) {
+      const items = (doc.line_items ?? []) as LineItemLike[];
+      const subtotal = calcLineItemsTotal(items);
+      const tax = calcTaxTotal(items);
+      const amount =
+        applyDiscount(subtotal, coerceDiscountType(doc.discount_type), doc.discount_value ?? 0) +
+        tax;
+
+      report.grandTotal += amount;
+
+      if (!doc.due_date) {
+        report.current.count++;
+        report.current.total += amount;
+        continue;
+      }
+
+      const daysOverdue = Math.floor(
+        (now.getTime() - new Date(doc.due_date).getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (daysOverdue <= 0) {
+        report.current.count++;
+        report.current.total += amount;
+      } else if (daysOverdue <= 30) {
+        report.overdue1to30.count++;
+        report.overdue1to30.total += amount;
+      } else if (daysOverdue <= 60) {
+        report.overdue31to60.count++;
+        report.overdue31to60.total += amount;
+      } else {
+        report.overdue60plus.count++;
+        report.overdue60plus.total += amount;
+      }
+    }
+
+    return report;
+  },
+  ["finance-aging"],
+  { revalidate: 60, tags: ["finance"] }
+);
+
+export async function getAgingReport(): Promise<AgingReport> {
+  const { user } = await getServerContext();
+  if (!user)
+    return {
+      current: { label: "Current (not yet due)", count: 0, total: 0 },
+      overdue1to30: { label: "1–30 days overdue", count: 0, total: 0 },
+      overdue31to60: { label: "31–60 days overdue", count: 0, total: 0 },
+      overdue60plus: { label: "60+ days overdue", count: 0, total: 0 },
+      grandTotal: 0,
+    };
+  return _cachedGetAgingReport(user.id);
 }

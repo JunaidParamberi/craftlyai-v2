@@ -1,5 +1,6 @@
 import {
   startOfDay,
+  endOfDay,
   startOfMonth,
   startOfYear,
   subMonths,
@@ -39,7 +40,7 @@ export function parseDateRangeParams(
 ): DateRange {
   if (!from || !to) return currentMonthRange();
   const parsedFrom = parseISO(from);
-  const parsedTo = parseISO(to);
+  const parsedTo = endOfDay(parseISO(to));
   if (!isValid(parsedFrom) || !isValid(parsedTo)) return currentMonthRange();
   return { from: parsedFrom, to: parsedTo };
 }

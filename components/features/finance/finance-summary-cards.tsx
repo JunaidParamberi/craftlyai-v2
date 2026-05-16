@@ -3,7 +3,12 @@ import { AlertTriangle, Clock, DollarSign, Timer } from "lucide-react";
 import type { FinancialSummary } from "@/lib/finance/types";
 import { KpiCard } from "./kpi-card";
 
-type Props = { summary: FinancialSummary; currency: string };
+type Props = {
+  summary: FinancialSummary;
+  currency: string;
+  dateParams: string;
+  activeStatus?: string;
+};
 
 function formatMoney(amount: number, currency: string): string {
   return new Intl.NumberFormat("en-US", {
@@ -14,7 +19,7 @@ function formatMoney(amount: number, currency: string): string {
   }).format(amount);
 }
 
-export function FinanceSummaryCards({ summary, currency }: Props) {
+export function FinanceSummaryCards({ summary, currency, dateParams, activeStatus }: Props) {
   const {
     totalRevenue,
     outstanding,
@@ -53,6 +58,8 @@ export function FinanceSummaryCards({ summary, currency }: Props) {
         ? "text-emerald-600"
         : "text-amber-600";
 
+  const sep = dateParams ? `${dateParams}&` : "";
+
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <KpiCard
@@ -75,6 +82,8 @@ export function FinanceSummaryCards({ summary, currency }: Props) {
         accentColor="border-l-emerald-500"
         iconBg="bg-emerald-50"
         iconColor="text-emerald-600"
+        href={`/finance?${sep}status=outstanding`}
+        isActive={activeStatus === "outstanding"}
       />
       <KpiCard
         index={2}
@@ -90,6 +99,8 @@ export function FinanceSummaryCards({ summary, currency }: Props) {
         iconBg="bg-amber-50"
         iconColor="text-amber-600"
         subLabelColor={overdueCount > 0 ? "text-amber-600" : undefined}
+        href={`/finance?${sep}status=overdue`}
+        isActive={activeStatus === "overdue"}
       />
       <KpiCard
         index={3}

@@ -1,3 +1,6 @@
+import type { DocumentStatus } from "@/types";
+import type { DocumentListRow } from "@/types";
+
 export type FinancialSummary = {
   totalRevenue: number;
   outstanding: number;
@@ -9,8 +12,8 @@ export type FinancialSummary = {
 };
 
 export type MonthlyRevenuePoint = {
-  month: string;     // "Jan 2026" — display label
-  monthKey: string;  // "2026-01" — sort key
+  month: string;
+  monthKey: string;
   revenue: number;
   isCurrent: boolean;
 };
@@ -18,4 +21,47 @@ export type MonthlyRevenuePoint = {
 export type DateRange = {
   from: Date;
   to: Date;
+};
+
+export type SortKey =
+  | "date_asc"
+  | "date_desc"
+  | "amount_asc"
+  | "amount_desc"
+  | "client_asc"
+  | "client_desc"
+  | "status_asc"
+  | "status_desc";
+
+export type StatusFilter = DocumentStatus | "overdue" | "outstanding";
+
+export type InvoiceFilters = {
+  dateRange: DateRange;
+  page: number;
+  pageSize: number;
+  sort: SortKey;
+  search?: string;
+  status?: StatusFilter;
+};
+
+export type FinanceInvoiceRow = DocumentListRow & { computedTotal: number };
+
+export type PaginatedInvoices = {
+  invoices: FinanceInvoiceRow[];
+  total: number;
+  pageCount: number;
+};
+
+export type AgingBucket = {
+  label: string;
+  count: number;
+  total: number;
+};
+
+export type AgingReport = {
+  current: AgingBucket;
+  overdue1to30: AgingBucket;
+  overdue31to60: AgingBucket;
+  overdue60plus: AgingBucket;
+  grandTotal: number;
 };
