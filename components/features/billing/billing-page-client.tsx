@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { AlertTriangle, Zap } from "lucide-react";
+import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { mockUpgradePlan, mockDowngradePlan } from "@/lib/billing/actions";
 import { PLANS, PLAN_ORDER, type PlanTier } from "@/config/plans";
@@ -72,12 +73,11 @@ export function BillingPageClient({
         </div>
       </div>
 
-      {/* Page header */}
-      <div className="mb-10">
-        <div className="flex flex-wrap items-baseline gap-3 mb-2">
-          <h1 className="font-display text-[1.85rem] font-bold tracking-tight text-foreground leading-none">
-            Billing &amp; Plans
-          </h1>
+      <PageHeader
+        eyebrow="Settings"
+        title="Billing &amp; Plans"
+        description="Choose the plan that grows with your business. Upgrade or downgrade at any time."
+        actions={
           <Badge
             variant="outline"
             className={cn(
@@ -87,25 +87,20 @@ export function BillingPageClient({
           >
             {currentPlanConfig.name}
           </Badge>
-        </div>
-        <p className="text-[14px] text-muted-foreground max-w-md leading-relaxed">
-          Choose the plan that grows with your business. Upgrade or downgrade at
-          any time — changes take effect immediately.
+        }
+      />
+      {subscription?.current_period_end && plan !== "free" && (
+        <p className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground rounded-lg border border-border bg-muted/40 px-3 py-1.5 w-fit">
+          <Zap className="size-3 text-amber-500" />
+          Renews{" "}
+          <span className="font-medium text-foreground">
+            {new Date(subscription.current_period_end).toLocaleDateString(
+              "en-US",
+              { month: "short", day: "numeric", year: "numeric" },
+            )}
+          </span>
         </p>
-
-        {subscription?.current_period_end && plan !== "free" && (
-          <p className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-muted-foreground rounded-lg border border-border bg-muted/40 px-3 py-1.5">
-            <Zap className="size-3 text-amber-500" />
-            Renews{" "}
-            <span className="font-medium text-foreground">
-              {new Date(subscription.current_period_end).toLocaleDateString(
-                "en-US",
-                { month: "short", day: "numeric", year: "numeric" },
-              )}
-            </span>
-          </p>
-        )}
-      </div>
+      )}
 
       {/* Plan cards grid */}
       <div

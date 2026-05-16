@@ -28,6 +28,7 @@ import type { ProjectListRow, TaskRow, TimeEntryListRow } from "@/types";
 
 import { FormDatePicker } from "@/components/shared/form-date-picker";
 import { FormTimePopover } from "@/components/shared/form-time-popover";
+import { PageHeader } from "@/components/shared/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -430,15 +431,11 @@ export function TimeTracker({ projects, entries }: TimeTrackerProps) {
     <div className="flex flex-col gap-8">
       <SkeletonCountRecorder id="time:today" count={todayEntries.length} />
       <SkeletonCountRecorder id="time:earlier" count={earlierEntries.length} />
-      <div className="flex flex-col gap-1">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-          Time tracker
-        </h1>
-        <p className="max-w-lg text-muted-foreground text-sm">
-          Track billable hours by project. Start a live timer or log time
-          manually.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Work"
+        title="Time tracker"
+        description="Track billable hours by project. Start a live timer or log time manually."
+      />
 
       {error ? (
         <Alert variant="destructive">

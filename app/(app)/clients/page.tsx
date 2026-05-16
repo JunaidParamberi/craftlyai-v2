@@ -8,6 +8,7 @@ import { paginatedListSkeletonCount } from "@/lib/ui/skeleton-count";
 import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 import { ClientsTable } from "@/components/features/clients/clients-table";
 import { AddClientButton } from "@/components/features/clients/add-client-button";
+import { PageHeader } from "@/components/shared/page-header";
 import { UpgradeGhostRow } from "@/components/features/billing/upgrade-ghost-row";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,22 +50,18 @@ export default async function ClientsPage() {
         id="clients:list"
         count={paginatedListSkeletonCount(clients.length)}
       />
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-            Clients
-          </h1>
-          <p className="max-w-lg text-muted-foreground text-sm">
-            People and companies you work with. Add billing details now or come
-            back anytime.
-          </p>
-        </div>
-        <AddClientButton
-          atLimit={atLimit}
-          planTier={planTier}
-          clientLimit={clientLimit}
-        />
-      </div>
+      <PageHeader
+        eyebrow="Clients"
+        title="Clients"
+        description="People and companies you work with. Add billing details now or come back anytime."
+        actions={
+          <AddClientButton
+            atLimit={atLimit}
+            planTier={planTier}
+            clientLimit={clientLimit}
+          />
+        }
+      />
 
       {clients.length === 0 ? (
         <Card className="border-dashed">

@@ -11,6 +11,7 @@ import { SkeletonCountRecorder } from "@/hooks/use-skeleton-count";
 
 import { DocumentsTable } from "@/components/features/documents/documents-table";
 import { AddDocumentButton } from "@/components/features/documents/add-document-button";
+import { PageHeader } from "@/components/shared/page-header";
 import { UpgradeGhostRow } from "@/components/features/billing/upgrade-ghost-row";
 import { Button } from "@/components/ui/button";
 import {
@@ -65,22 +66,18 @@ export default async function DocumentsPage() {
         id="documents:list"
         count={paginatedListSkeletonCount(documents.length)}
       />
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-            Documents
-          </h1>
-          <p className="max-w-lg text-muted-foreground text-sm">
-            Proposals, quotes, invoices, and everything you send to clients —
-            written here, sent from here.
-          </p>
-        </div>
-        <AddDocumentButton
-          atLimit={atLimit}
-          planTier={planTier}
-          docLimit={docLimit}
-        />
-      </div>
+      <PageHeader
+        eyebrow="Studio"
+        title="Documents"
+        description="Proposals, quotes, invoices, and everything you send to clients — written here, sent from here."
+        actions={
+          <AddDocumentButton
+            atLimit={atLimit}
+            planTier={planTier}
+            docLimit={docLimit}
+          />
+        }
+      />
 
       {documents.length === 0 ? (
         <Card className="border-dashed">

@@ -5,6 +5,7 @@ import { ChevronLeftIcon } from "lucide-react";
 import { BrandKitForm } from "@/components/onboarding/brand-kit-form";
 import { getBrandKit } from "@/lib/brand-kit/actions";
 import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/shared/page-header";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -49,15 +50,11 @@ export default async function SettingsBrandPage() {
           <ChevronLeftIcon className="size-3.5" aria-hidden />
           Settings
         </Link>
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-            Brand kit
-          </h1>
-          <p className="max-w-lg text-sm text-muted-foreground">
-            Your logo, colors, and font are applied to invoices, proposals, and
-            client portals.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Settings"
+          title="Brand kit"
+          description="Your logo, colors, and font are applied to invoices, proposals, and client portals."
+        />
       </div>
 
       <BrandKitForm

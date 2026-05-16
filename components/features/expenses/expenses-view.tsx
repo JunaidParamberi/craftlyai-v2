@@ -17,6 +17,7 @@ import { Filter, Plus, Search } from "lucide-react";
 import { ExpenseFormSheet } from "@/components/features/expenses/expense-form-sheet";
 import { ExpenseRow } from "@/components/features/expenses/expense-row";
 import { ExpenseSummaryCard } from "@/components/features/expenses/expense-summary-card";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -158,14 +159,11 @@ export function ExpensesView({
   return (
     <div className="flex flex-col gap-8">
       {showPageHeader ? (
-        <div className="flex flex-col gap-2">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-            Expenses
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-base">
-            Track business spending, attach receipts, and link costs to projects.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Finance"
+          title="Expenses"
+          description="Track business spending, attach receipts, and link costs to projects."
+        />
       ) : null}
 
       <ExpenseSummaryCard

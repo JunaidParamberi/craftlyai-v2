@@ -28,6 +28,7 @@ import {
 } from "@/lib/finance/filter-utils";
 import type { InvoiceFilters } from "@/lib/finance/types";
 import { getProfile } from "@/lib/profile/actions";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = { title: "Finance" };
 
@@ -78,14 +79,11 @@ export default async function FinancePage({
         id="finance:invoices"
         count={paginatedInvoices.invoices.length}
       />
-      <div className="flex flex-col gap-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-          Finance
-        </p>
-        <h1 className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
-          Revenue Overview
-        </h1>
-      </div>
+      <PageHeader
+        eyebrow="Finance"
+        title="Revenue Overview"
+        description="Track income, outstanding invoices, and monthly trends."
+      />
 
       <Suspense fallback={null}>
         <FinanceFilterBar />

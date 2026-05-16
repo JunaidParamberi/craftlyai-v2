@@ -6,6 +6,7 @@ import { AttentionBanner } from "@/components/features/dashboard/attention-banne
 import { DashboardKpiCards } from "@/components/features/dashboard/kpi-cards";
 import { PipelinePanel } from "@/components/features/dashboard/pipeline-panel";
 import { PlanLimitBanner } from "@/components/features/billing/plan-limit-banner";
+import { PageHeader } from "@/components/shared/page-header";
 import {
   getActivePipeline,
   getAttentionItems,
@@ -39,14 +40,11 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <PlanLimitBanner />
-      <div className="flex flex-col gap-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-          Overview
-        </p>
-        <h1 className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
-          Welcome back, {firstName}
-        </h1>
-      </div>
+      <PageHeader
+        eyebrow="Overview"
+        title={`Welcome back, ${firstName}`}
+        description="Here's what's happening with your projects today."
+      />
 
       <DashboardKpiCards summary={summary} counts={counts} />
 

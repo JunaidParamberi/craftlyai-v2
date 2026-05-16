@@ -12,6 +12,7 @@ import {
 import type { ProjectListRow, TaskListRow } from "@/types";
 
 import { QuickAddTaskDialog } from "@/components/features/tasks/quick-add-task-dialog";
+import { PageHeader } from "@/components/shared/page-header";
 import { TaskFilters } from "@/components/features/tasks/task-filters";
 import { TaskRow } from "@/components/features/tasks/task-row";
 import { TasksSummaryStrip } from "@/components/features/tasks/tasks-summary-strip";
@@ -91,25 +92,22 @@ export function TasksView({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-            Tasks
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-base">
-            All deliverables across your projects.
-          </p>
-        </div>
-        <Button
-          type="button"
-          className="shrink-0"
-          onClick={() => setAddOpen(true)}
-          disabled={projects.length === 0}
-        >
-          <Plus data-icon="inline-start" />
-          Add task
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Work"
+        title="Tasks"
+        description="All deliverables across your projects."
+        actions={
+          <Button
+            type="button"
+            className="shrink-0"
+            onClick={() => setAddOpen(true)}
+            disabled={projects.length === 0}
+          >
+            <Plus data-icon="inline-start" />
+            Add task
+          </Button>
+        }
+      />
 
       <TasksSummaryStrip tasks={tasks} />
 
