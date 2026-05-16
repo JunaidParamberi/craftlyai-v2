@@ -67,6 +67,7 @@ const TYPE_ACCENTS: Record<DocumentType, string> = {
   quote: "bg-amber-500",
   invoice: "bg-emerald-500",
   payment_voucher: "bg-emerald-400",
+  local_purchase_order: "bg-blue-500",
   other: "bg-zinc-400",
 };
 
@@ -78,6 +79,7 @@ const TYPE_FILTER_LABELS: Record<TypeFilter, string> = {
   quote: "Quotes",
   invoice: "Invoices",
   payment_voucher: "Payment Vouchers",
+  local_purchase_order: "LPOs",
   other: "Other",
 };
 

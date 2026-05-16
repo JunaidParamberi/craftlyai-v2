@@ -25,6 +25,7 @@ const TYPE_LABELS: Record<DocumentListRow["type"], string> = {
   quote: "Quote",
   proposal: "Proposal",
   payment_voucher: "Payment Voucher",
+  local_purchase_order: "LPO",
   other: "Other",
 };
 

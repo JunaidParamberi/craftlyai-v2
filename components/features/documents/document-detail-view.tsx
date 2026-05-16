@@ -1,6 +1,7 @@
 import { Fragment, type ReactNode } from "react";
 
 import type { PricingRow, PricingTableAttrs } from "./editor/pricing-table-view";
+import { LPODetailPanel } from "@/components/features/documents/lpo-detail-panel";
 import {
   documentStatusLabel,
   documentStatusVariant,
@@ -21,6 +22,7 @@ const TYPE_ACCENTS: Record<DocumentType, string> = {
   quote: "bg-amber-500",
   invoice: "bg-emerald-500",
   payment_voucher: "bg-emerald-400",
+  local_purchase_order: "bg-blue-500",
   other: "bg-zinc-400",
 };
 
@@ -85,6 +87,10 @@ export function DocumentDetailView({
           <Fragment key={i}>{renderNode(node, variableContext)}</Fragment>
         ))}
       </div>
+
+      {document.type === "local_purchase_order" ? (
+        <LPODetailPanel document={document} />
+      ) : null}
     </article>
   );
 }

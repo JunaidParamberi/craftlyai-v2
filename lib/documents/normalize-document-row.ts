@@ -39,6 +39,11 @@ type DocumentRowRaw = {
   voucher_number?: string | null;
   source_document_id?: string | null;
   payment_id?: string | null;
+  lpo_number?: string | null;
+  lpo_validity_date?: string | null;
+  lpo_amount?: number | null;
+  lpo_pdf_url?: string | null;
+  lpo_reference_number?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -82,6 +87,11 @@ export function normalizeDocumentRow(row: DocumentRowRaw): DocumentRow {
     voucher_number: row.voucher_number ?? null,
     source_document_id: row.source_document_id ?? null,
     payment_id: row.payment_id ?? null,
+    lpo_number: row.lpo_number ?? null,
+    lpo_validity_date: row.lpo_validity_date ?? null,
+    lpo_amount: row.lpo_amount ?? null,
+    lpo_pdf_url: row.lpo_pdf_url ?? null,
+    lpo_reference_number: row.lpo_reference_number ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };

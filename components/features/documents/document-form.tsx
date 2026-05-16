@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import type { ClientRow, LineItemRow, ProjectListRow, TiptapDoc } from "@/types";
 import { InvoiceMetaFields } from "./invoice-meta-fields";
 import { InvoiceLineItemsEditor } from "./invoice-line-items-editor";
+import { LPOMetaFields } from "@/components/features/documents/lpo-meta-fields";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,12 @@ type DocumentFormProps = (CreateProps | EditProps) & {
     notes_footer: string | null;
     line_items: LineItemRow[];
     currency?: string;
+  };
+  lpoData?: {
+    lpo_number: string | null;
+    lpo_validity_date: string | null;
+    lpo_amount: number | null;
+    lpo_pdf_url: string | null;
   };
 };
 
@@ -204,6 +211,18 @@ export function DocumentForm(props: DocumentFormProps) {
               documentId={documentId!}
               initialItems={props.invoiceData.line_items}
               currency={props.invoiceData.currency}
+            />
+          ) : null}
+
+          {isEditMode && watchedType === "local_purchase_order" && props.lpoData ? (
+            <LPOMetaFields
+              documentId={documentId!}
+              initialValues={{
+                lpo_number: props.lpoData.lpo_number ?? null,
+                lpo_validity_date: props.lpoData.lpo_validity_date ?? null,
+                lpo_amount: props.lpoData.lpo_amount ?? null,
+                lpo_pdf_url: props.lpoData.lpo_pdf_url ?? null,
+              }}
             />
           ) : null}
         </div>
@@ -440,5 +459,6 @@ const TYPE_COLORS: Record<DocumentInputForm["type"], string> = {
   quote: "bg-amber-500",
   invoice: "bg-emerald-500",
   payment_voucher: "bg-emerald-400",
+  local_purchase_order: "bg-blue-500",
   other: "bg-zinc-400",
 };

@@ -18,6 +18,7 @@ const TYPE_LABELS: Record<DocumentType, string> = {
   quote: "Quote",
   invoice: "Invoice",
   payment_voucher: "Payment Voucher",
+  local_purchase_order: "Local Purchase Order",
   other: "Document",
 };
 
@@ -46,6 +47,7 @@ type DocumentPdfProps = {
     due_date: string | null;
     payment_terms: string | null;
     notes_footer: string | null;
+    lpo_reference_number?: string | null;
     line_items: LineItemRow[];
     currency: string;
     discount_value?: number;
@@ -214,6 +216,12 @@ export function DocumentPdf({
               <View>
                 <Text style={styles.metaLabel}>Terms</Text>
                 <Text style={styles.metaValue}>{invoiceData.payment_terms}</Text>
+              </View>
+            ) : null}
+            {invoiceData.lpo_reference_number ? (
+              <View>
+                <Text style={styles.metaLabel}>LPO Reference</Text>
+                <Text style={styles.metaValue}>{invoiceData.lpo_reference_number}</Text>
               </View>
             ) : null}
           </View>

@@ -31,6 +31,7 @@ const DOC_TYPE_LABELS: Record<DocumentType, string> = {
   quote: "Quote",
   proposal: "Proposal",
   payment_voucher: "Payment Voucher",
+  local_purchase_order: "LPO",
   other: "Document",
 };
 

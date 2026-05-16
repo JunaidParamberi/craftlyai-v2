@@ -18,6 +18,7 @@ import { QuoteEditForm } from "@/components/features/documents/quote-edit-form";
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 import { ProposalEditForm } from "@/components/features/documents/proposal-edit-form";
 import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
+import { getActiveLPOsForClient } from "@/lib/documents/lpo-queries";
 
 export const metadata: Metadata = {
   title: "Edit document",
@@ -64,6 +65,10 @@ export default async function EditDocumentPage({ params }: PageProps) {
       currency = (client as { currency: string } | null)?.currency ?? profileCurrency;
     }
 
+    const lpos = document.client_id
+      ? await getActiveLPOsForClient(document.client_id)
+      : [];
+
     return (
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
@@ -92,11 +97,13 @@ export default async function EditDocumentPage({ params }: PageProps) {
             due_date: invoiceData?.due_date ?? null,
             payment_terms: invoiceData?.payment_terms ?? null,
             notes_footer: invoiceData?.notes_footer ?? null,
+            lpo_reference_number: invoiceData?.lpo_reference_number ?? null,
             line_items: invoiceData?.line_items ?? [],
             currency,
             discount_value: invoiceData?.discount_value ?? 0,
             discount_type: (invoiceData?.discount_type ?? 'percent') as 'percent' | 'flat',
           }}
+          lpos={lpos}
         />
       </div>
     );
@@ -195,6 +202,16 @@ export default async function EditDocumentPage({ params }: PageProps) {
     projectId: document.project_id,
   });
 
+  const lpoData =
+    document.type === "local_purchase_order"
+      ? {
+          lpo_number: document.lpo_number ?? null,
+          lpo_validity_date: document.lpo_validity_date ?? null,
+          lpo_amount: document.lpo_amount ?? null,
+          lpo_pdf_url: document.lpo_pdf_url ?? null,
+        }
+      : undefined;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
@@ -219,6 +236,7 @@ export default async function EditDocumentPage({ params }: PageProps) {
         clients={clients}
         projects={projects}
         initialVariableContext={variableContext}
+        lpoData={lpoData}
       />
     </div>
   );
