@@ -162,6 +162,12 @@ craftlyai.app/
 - **Streaming:** all AI responses stream to UI via Server-Sent Events (SSE). Never block UI waiting for full response.
 - **RLS:** every Supabase table has Row Level Security. Users can only access their own data.
 - **Testing:** every feature ships with Vitest tests for all Zod schemas, validation logic, normalizers, and pure utility functions. No new feature is complete without tests. Co-locate test files next to the file under test (`foo.ts` → `foo.test.ts`). Server actions and DB queries are not unit-tested (they require Supabase); test the pure logic layers instead. Run `npm run test` before marking a feature done.
+- **Auth deduplication:** all query functions get `{ supabase, user }` from `getServerContext()` (`lib/supabase/get-server-context.ts`) — never call `createClient()` + `auth.getUser()` independently inside a query. React `cache()` reduces ~N auth calls per render to 1.
+- **Query caching:** every new exported read query function must be wrapped with `unstable_cache` from `next/cache`. Define a module-level `_cached*` worker that receives only serializable args (strings, not Date/object). The public function calls `getServerContext()` for auth then delegates. Use 60 s TTL for most data, 30 s for notifications, 300 s for profile. Tag the cache (see tag table below).
+- **Cache tag table:** `"dashboard"` (projects, pipeline, activity, attention, financial summary) · `"finance"` (invoices, revenue) · `"clients"` · `"tasks"` · `"expenses"` · `"notifications"` · `"profile"`. Add new tags when adding new data domains.
+- **Mutation cache busting:** every mutation server action must call `revalidateTag(tag)` (import from `next/cache`) for every tag whose cached data it changes, alongside existing `revalidatePath` calls. Never add caching without also wiring invalidation.
+- **Date fields in cached results:** `unstable_cache` serializes via JSON — `Date` objects become ISO strings on the way out. Type any date field in a cached return type as `Date | string` and coerce with `new Date(value)` at the consumer. Never call `.getTime()` or `.toISOString()` on a field typed as `Date` if it passes through a cache.
+- **Nested Supabase selects:** prefer `table(col1, col2)` nested select syntax over 2-step fetch (fetch IDs → `.in("foreign_id", ids)`). One round trip beats two. Apply whenever fetching a parent + related rows (e.g., documents + line_items).
 
 ## Coding patterns — NEVER do these
 
@@ -173,6 +179,10 @@ craftlyai.app/
 - Never modify files in `components/ui/` — shadcn/ui owns those
 - Never write DB schema changes in code — always write a migration file
 - Never continue old Claude.ai chats — start fresh each session, paste this file first
+- Never add a new exported query function without `unstable_cache` + a cache tag
+- Never add a mutation without `revalidateTag` for every tag the mutation affects
+- Never call `createClient()` + `auth.getUser()` independently — use `getServerContext()`
+- Never pass `Date`, objects, or arrays directly as args to `unstable_cache` workers — serialize to string first
 
 ---
 
