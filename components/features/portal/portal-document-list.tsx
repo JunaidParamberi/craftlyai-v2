@@ -16,6 +16,7 @@ const TYPE_LABELS: Record<DocumentType, string> = {
   invoice: "Invoice",
   quote: "Quote",
   proposal: "Proposal",
+  payment_voucher: "Payment Voucher",
   other: "Document",
 };
 

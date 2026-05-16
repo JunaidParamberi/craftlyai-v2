@@ -39,6 +39,8 @@ type DocumentPortalRow = {
   invoice_number: string | null;
   quote_number: string | null;
   proposal_number: string | null;
+  voucher_number: string | null;
+  source_document_id: string | null;
   due_date: string | null;
   valid_until: string | null;
   pay_token: string | null;
@@ -61,6 +63,7 @@ function referenceNumberFor(doc: DocumentPortalRow): string | null {
   if (doc.type === "invoice") return doc.invoice_number;
   if (doc.type === "quote") return doc.quote_number;
   if (doc.type === "proposal") return doc.proposal_number;
+  if (doc.type === "payment_voucher") return doc.voucher_number;
   return null;
 }
 
@@ -93,6 +96,12 @@ function actionForDoc(
     return {
       actionUrl: `${appUrl}/${path}/${doc.approval_token}`,
       actionLabel: label,
+    };
+  }
+  if (doc.type === "payment_voucher") {
+    return {
+      actionUrl: `${appUrl}/api/documents/${doc.id}/pdf`,
+      actionLabel: "Download Voucher",
     };
   }
   return null;
@@ -209,10 +218,10 @@ export async function listPortalDocuments(
   const { data, error } = await admin
     .from("documents")
     .select(
-      "id, type, title, status, updated_at, invoice_number, quote_number, proposal_number, due_date, valid_until, pay_token, approval_token",
+      "id, type, title, status, updated_at, invoice_number, quote_number, proposal_number, voucher_number, source_document_id, due_date, valid_until, pay_token, approval_token",
     )
     .eq("client_id", clientId)
-    .in("type", ["invoice", "quote", "proposal"])
+    .in("type", ["invoice", "quote", "proposal", "payment_voucher"])
     .in("status", [
       "sent",
       "viewed",
