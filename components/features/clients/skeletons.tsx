@@ -22,13 +22,14 @@ export function ClientsPageSkeleton({ rowCount = 0 }: ClientsPageSkeletonProps) 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-9 w-40 md:h-10 md:w-44" />
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-[10px] w-14 rounded-[3px]" />
+          <Skeleton className="h-7 w-32 rounded-[4px] md:h-8 md:w-36" />
           <Skeleton className="h-4 w-full max-w-lg" />
         </div>
         <Skeleton className="h-9 w-[9.5rem] shrink-0" />
       </div>
-      <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm ring-1 ring-border/50">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         <div className="flex flex-col gap-3 border-b border-border/80 p-4 sm:flex-row sm:items-center sm:justify-between">
           <Skeleton className="h-9 w-full max-w-sm" />
           <Skeleton className="h-9 w-full sm:w-28" />

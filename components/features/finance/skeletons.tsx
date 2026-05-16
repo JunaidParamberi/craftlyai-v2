@@ -27,16 +27,9 @@ export function FinancePageSkeleton({
       aria-label="Loading finance"
       className="flex flex-col gap-6"
     >
-      <div className="relative shrink-0 rounded-3xl border border-border/60 bg-gradient-to-br from-muted/40 via-background to-background px-4 py-6 md:overflow-hidden md:px-8 md:py-10">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -end-24 -top-24 hidden size-72 rounded-full bg-primary/[0.07] blur-3xl md:block"
-        />
-        <div className="relative flex flex-col gap-2">
-          <Skeleton className="h-2.5 w-16" />
-          <Skeleton className="h-9 w-full max-w-xs md:h-10" />
-          <Skeleton className="h-4 w-full max-w-xl" />
-        </div>
+      <div className="flex flex-col gap-1">
+        <Skeleton className="h-[10px] w-16 rounded-[3px]" />
+        <Skeleton className="h-7 w-36 rounded-[4px] md:h-8" />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -63,8 +56,8 @@ export function FinancePageSkeleton({
                 <Skeleton className="h-2.5 w-20" />
                 <Skeleton className="size-7 rounded-md" />
               </div>
-              <Skeleton className="h-[1.6rem] w-32" />
-              <Skeleton className="mt-2 h-[11px] w-32" />
+              <Skeleton className="h-7 w-32 rounded-[4px]" />
+              <Skeleton className="mt-2 h-[10px] w-28 rounded-[3px]" />
             </div>
           )}
         />

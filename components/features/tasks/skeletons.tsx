@@ -5,15 +5,23 @@ export function TasksPageSkeleton() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-9 w-32" />
-          <Skeleton className="h-4 w-64 max-w-full" />
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-[10px] w-12 rounded-[3px]" />
+          <Skeleton className="h-7 w-32 rounded-[4px] md:h-8" />
         </div>
-        <Skeleton className="h-9 w-28" />
+        <Skeleton className="h-8 w-28 rounded-md" />
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-[7.5rem] w-full rounded-lg" />
+          <Card key={i} size="sm">
+            <CardHeader className="pb-2">
+              <Skeleton className="h-[10px] w-20 rounded-[3px]" />
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2 pt-0">
+              <Skeleton className="h-7 w-16 rounded-[4px]" />
+              <Skeleton className="h-[10px] w-24 rounded-[3px]" />
+            </CardContent>
+          </Card>
         ))}
       </div>
       <Card>

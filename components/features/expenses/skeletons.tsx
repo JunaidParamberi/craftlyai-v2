@@ -8,9 +8,9 @@ import {
 export function ExpensesPageSkeleton() {
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-9 w-40" />
-        <Skeleton className="h-4 w-72 max-w-full" />
+      <div className="flex flex-col gap-1">
+        <Skeleton className="h-[10px] w-16 rounded-[3px]" />
+        <Skeleton className="h-7 w-40 rounded-[4px] md:h-8" />
       </div>
       <Card>
         <CardHeader>
@@ -28,7 +28,7 @@ export function ExpensesPageSkeleton() {
         </CardHeader>
         <CardContent className="space-y-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+            <Skeleton key={i} className="h-[3.25rem] w-full rounded-[6px]" />
           ))}
         </CardContent>
       </Card>
