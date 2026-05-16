@@ -18,12 +18,10 @@ import {
   PROJECT_LIST_FILTER_TABS,
   formatProjectDate,
   projectMatchesListFilter,
-  projectStatusBadgePresentation,
   projectStatusLabel,
 } from "@/lib/projects/display";
+import { statusPillClass } from "@/lib/ui/status-styles";
 import type { ProjectListRow } from "@/types";
-
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -231,7 +229,6 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                 </TableRow>
               ) : (
                 pageRows.map((p) => {
-                  const badge = projectStatusBadgePresentation(p.status);
                   return (
                     <TableRow key={p.id}>
                       <TableCell className="ps-4 sm:ps-6">
@@ -261,12 +258,9 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={badge.variant}
-                          className={badge.className}
-                        >
+                        <span className={statusPillClass(p.status)}>
                           {projectStatusLabel(p.status)}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell className="hidden text-muted-foreground text-sm sm:table-cell">
                         {formatProjectDate(p.deadline)}

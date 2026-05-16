@@ -14,9 +14,9 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { deleteDocument } from "@/lib/documents/document-mutations";
 import {
   documentStatusLabel,
-  documentStatusVariant,
   documentTypeLabel,
 } from "@/lib/documents/display";
+import { statusPillClass } from "@/lib/ui/status-styles";
 import { cn } from "@/lib/utils";
 import type { DocumentListRow, DocumentType } from "@/types";
 
@@ -274,12 +274,9 @@ export function DocumentsTable({ documents }: DocumentsTableProps) {
                       {d.client?.name ?? "—"}
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant={documentStatusVariant(d.status)}
-                        className="font-normal"
-                      >
+                      <span className={statusPillClass(d.status)}>
                         {documentStatusLabel(d.status)}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell className="hidden text-end text-muted-foreground tabular-nums lg:table-cell">
                       {formatUpdated(d.updated_at)}
