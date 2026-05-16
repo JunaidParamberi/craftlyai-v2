@@ -172,23 +172,24 @@
 }
 
 :root {
-  --background: oklch(0.972 0.003 247);
-  --foreground: oklch(0.118 0.026 264);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.118 0.026 264);
+  /* Notion light — neutral grey, zero blue cast except brand primary */
+  --background: oklch(0.971 0 0);       /* #f7f7f7 near-white neutral */
+  --foreground: oklch(0.12 0 0);        /* #1a1a1a near-black neutral */
+  --card: oklch(1 0 0);                 /* pure white */
+  --card-foreground: oklch(0.12 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.118 0.026 264);
+  --popover-foreground: oklch(0.12 0 0);
   --primary: oklch(0.496 0.233 264);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.944 0.008 264);
-  --secondary-foreground: oklch(0.118 0.026 264);
-  --muted: oklch(0.944 0.008 264);
-  --muted-foreground: oklch(0.556 0.04 264);
-  --accent: oklch(0.944 0.008 264);
-  --accent-foreground: oklch(0.118 0.026 264);
+  --secondary: oklch(0.944 0 0);        /* #f0f0f0 neutral */
+  --secondary-foreground: oklch(0.12 0 0);
+  --muted: oklch(0.944 0 0);            /* #f0f0f0 */
+  --muted-foreground: oklch(0.52 0 0);  /* #7a7a7a neutral mid-grey */
+  --accent: oklch(0.944 0 0);
+  --accent-foreground: oklch(0.12 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.878 0.018 264);
-  --input: oklch(0.878 0.018 264);
+  --border: oklch(0.88 0 0);            /* #e2e2e2 neutral border */
+  --input: oklch(0.88 0 0);
   --ring: oklch(0.496 0.233 264);
   --chart-1: oklch(0.62 0.18 264);
   --chart-2: oklch(0.55 0.21 264);
