@@ -335,7 +335,17 @@ tr[data-interactive="true"]:hover {
   background: linear-gradient(
     90deg,
     var(--muted) 25%,
-    color-mix(in srgb, var(--muted) 60%, white) 50%,
+    color-mix(in srgb, var(--muted) 75%, white) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+}
+
+.dark [data-slot="skeleton"] {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    color-mix(in srgb, var(--muted) 60%, oklch(0.35 0 0)) 50%,
     var(--muted) 75%
   );
   background-size: 200% 100%;
