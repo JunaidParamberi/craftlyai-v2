@@ -1,6 +1,6 @@
 "use server";
 
-import { unstable_cache } from "next/cache";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { getServerContext } from "@/lib/supabase/get-server-context";
 import { mergeAndValidateProfile } from "@/lib/validations/profile";
 import type { ProfileRow } from "@/types";
@@ -147,5 +147,6 @@ export async function updateProfile(patchInput: unknown): Promise<UpdateProfileR
     return { ok: false, message: "Profile could not be saved." };
   }
 
+  revalidateTag("profile");
   return { ok: true, profile: normalizeProfileRow(data) };
 }

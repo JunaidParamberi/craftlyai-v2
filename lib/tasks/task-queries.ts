@@ -70,7 +70,7 @@ export type ListAllTasksResult =
   | { ok: false; message: string };
 
 const _cachedListAllTasksForUser = unstable_cache(
-  async (userId: string): Promise<ListAllTasksResult> => {
+  async (_userId: string): Promise<ListAllTasksResult> => {
     const { supabase } = await getServerContext();
 
     const { data, error } = await supabase
