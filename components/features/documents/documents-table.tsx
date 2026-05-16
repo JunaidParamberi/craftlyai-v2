@@ -20,7 +20,6 @@ import { statusPillClass } from "@/lib/ui/status-styles";
 import { cn } from "@/lib/utils";
 import type { DocumentListRow, DocumentType } from "@/types";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,

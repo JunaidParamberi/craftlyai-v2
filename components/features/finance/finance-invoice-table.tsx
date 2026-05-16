@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { format, parseISO, isPast } from "date-fns";
 import { ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
