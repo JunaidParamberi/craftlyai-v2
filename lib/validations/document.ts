@@ -225,7 +225,14 @@ export type ProposalMetaInput = z.infer<typeof proposalMetaSchema>;
 export const lpoMetaSchema = z.object({
   lpo_number: z.string().trim().min(1, "LPO number is required.").max(100),
   lpo_validity_date: z.string().nullable().optional(),
-  lpo_amount: z.coerce.number().positive("Amount must be positive.").nullable().optional(),
+  lpo_amount: z.preprocess(
+    (val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      const n = Number(val);
+      return isNaN(n) ? undefined : n;
+    },
+    z.number().positive("Amount must be positive.").optional(),
+  ),
 });
 
 export type LPOMetaInput = z.infer<typeof lpoMetaSchema>;

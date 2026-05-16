@@ -1,7 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 
 import type { PricingRow, PricingTableAttrs } from "./editor/pricing-table-view";
-import { LPODetailPanel } from "@/components/features/documents/lpo-detail-panel";
 import {
   documentStatusLabel,
   documentStatusVariant,
@@ -88,9 +87,6 @@ export function DocumentDetailView({
         ))}
       </div>
 
-      {document.type === "local_purchase_order" ? (
-        <LPODetailPanel document={document} />
-      ) : null}
     </article>
   );
 }

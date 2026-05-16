@@ -13,6 +13,7 @@ import {
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
 import { getVouchersForInvoice, getPaymentVoucherData } from "@/lib/documents/payment-voucher-queries";
+import { getLinkedInvoicesForLPO } from "@/lib/documents/lpo-queries";
 import { calculateInvoiceBalance } from "@/lib/documents/payment-balance";
 import { buildVariableContext } from "@/lib/documents/variables-server";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
@@ -24,6 +25,7 @@ import { SendQuoteButton } from "@/components/features/documents/send-quote-butt
 import { SendProposalButton } from "@/components/features/documents/send-proposal-button";
 import { QuoteApprovalStatus } from "@/components/features/documents/quote-approval-status";
 import { PaymentHistory } from "@/components/features/documents/payment-history";
+import { LPODetailPanel } from "@/components/features/documents/lpo-detail-panel";
 import { Button } from "@/components/ui/button";
 import type { LineItemRow } from "@/types";
 
@@ -44,7 +46,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const [client, projectTitle, variableContext, invoiceData, quoteData, proposalData, payments, adjustments, voucherDocs, voucherData] = await Promise.all([
+  const [client, projectTitle, variableContext, invoiceData, quoteData, proposalData, payments, adjustments, voucherDocs, voucherData, linkedLPOInvoices] = await Promise.all([
     document.client_id ? getClientById(document.client_id) : Promise.resolve(null),
     document.project_id ? fetchProjectTitle(document.project_id) : Promise.resolve(null),
     buildVariableContext({
@@ -58,6 +60,9 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     document.type === "invoice" ? getInvoiceAdjustmentsForDocument(id) : Promise.resolve([]),
     document.type === "invoice" ? getVouchersForInvoice(id) : Promise.resolve([]),
     document.type === "payment_voucher" ? getPaymentVoucherData(id) : Promise.resolve(null),
+    document.type === "local_purchase_order" && document.lpo_number
+      ? getLinkedInvoicesForLPO(document.lpo_number)
+      : Promise.resolve([]),
   ]);
   const invoiceTotal = invoiceData
     ? calculateInvoiceTotal(
@@ -406,6 +411,10 @@ export default async function DocumentDetailPage({ params }: PageProps) {
         clientName={client?.name ?? null}
         projectTitle={projectTitle}
       />
+
+      {document.type === "local_purchase_order" ? (
+        <LPODetailPanel document={document} linkedInvoices={linkedLPOInvoices} />
+      ) : null}
     </div>
   );
 }

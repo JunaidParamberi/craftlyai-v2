@@ -4,6 +4,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { lpoMetaSchema, type LPOMetaInput } from "@/lib/validations/document";
+
+type LPOFormValues = {
+  lpo_number: string;
+  lpo_validity_date?: string | null;
+  lpo_amount?: string | number | null;
+};
 import { updateLPOMeta, uploadLPOPdf } from "@/lib/documents/lpo-mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +34,9 @@ export function LPOMetaFields({ documentId, initialValues }: Props) {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LPOMetaInput>({
-    resolver: zodResolver(lpoMetaSchema),
+  } = useForm<LPOFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(lpoMetaSchema) as any,
     defaultValues: {
       lpo_number: initialValues.lpo_number ?? "",
       lpo_validity_date: initialValues.lpo_validity_date ?? "",
@@ -37,9 +44,12 @@ export function LPOMetaFields({ documentId, initialValues }: Props) {
     },
   });
 
-  function onSubmit(data: LPOMetaInput) {
+  function onSubmit(data: LPOFormValues) {
+    const parsed = lpoMetaSchema.safeParse(data);
+    if (!parsed.success) return;
+    const validData: LPOMetaInput = parsed.data;
     startTransition(async () => {
-      const metaResult = await updateLPOMeta(documentId, data);
+      const metaResult = await updateLPOMeta(documentId, validData);
       if (!metaResult.ok) {
         toast.error(metaResult.error ?? "Failed to save LPO details.");
         return;

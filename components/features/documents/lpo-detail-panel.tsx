@@ -1,16 +1,20 @@
-import { getLinkedInvoicesForLPO } from "@/lib/documents/lpo-queries";
 import type { DocumentRow } from "@/types";
 import { FileDown, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+type LinkedInvoice = {
+  id: string;
+  title: string;
+  invoice_number: string | null;
+  status: string;
+};
+
 interface Props {
   document: DocumentRow;
+  linkedInvoices: LinkedInvoice[];
 }
 
-export async function LPODetailPanel({ document }: Props) {
-  const linkedInvoices = document.lpo_number
-    ? await getLinkedInvoicesForLPO(document.lpo_number)
-    : [];
+export function LPODetailPanel({ document, linkedInvoices }: Props) {
 
   const isExpired =
     document.lpo_validity_date != null
