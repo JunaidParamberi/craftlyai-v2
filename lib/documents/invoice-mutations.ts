@@ -6,6 +6,10 @@ import { parseLineItemInput } from "@/lib/validations/line-item";
 import { invoiceMetaSchema } from "@/lib/validations/document";
 import { markPaidInputSchema } from "@/lib/validations/payment";
 import { createPaymentVoucher } from "@/lib/documents/payment-voucher-mutations";
+import {
+  calculateInvoiceBalance,
+  getInvoicePaymentStatus,
+} from "@/lib/documents/payment-balance";
 import type { LineItemRow } from "@/types";
 
 // Generate next invoice number for user: INV-0001, INV-0002, etc.
@@ -131,11 +135,11 @@ export async function updateInvoiceMeta(
   return { ok: true };
 }
 
-// Mark invoice as paid, recording payment method and optional reference
-export async function markInvoicePaid(
+// Record an invoice payment, supporting full, partial, and write-off closure.
+export async function recordInvoicePayment(
   documentId: string,
   rawInput: unknown
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; status?: string }> {
   const parsed = markPaidInputSchema.safeParse(rawInput);
   if (!parsed.success) return { ok: false, error: "Invalid payment details" };
 
@@ -183,34 +187,109 @@ export async function markInvoicePaid(
       : subtotal * (discountValue / 100);
   const total = subtotal - discount + taxTotal;
 
+  const [{ data: existingPayments }, { data: existingAdjustments }] =
+    await Promise.all([
+      supabase
+        .from("payments")
+        .select("amount")
+        .eq("document_id", documentId)
+        .eq("user_id", user.id),
+      supabase
+        .from("invoice_adjustments")
+        .select("amount")
+        .eq("document_id", documentId)
+        .eq("user_id", user.id)
+        .eq("type", "write_off"),
+    ]);
+
+  const currentBalance = calculateInvoiceBalance({
+    invoiceTotal: total,
+    payments: (existingPayments ?? []).map((p) => Number(p.amount)),
+    writeOffs: (existingAdjustments ?? []).map((a) => Number(a.amount)),
+  });
+  if (currentBalance.balanceDue <= 0) {
+    return { ok: false, error: "This invoice has no remaining balance." };
+  }
+
+  const paymentAmount = Math.round(parsed.data.amount * 100) / 100;
+  if (paymentAmount > currentBalance.balanceDue) {
+    return { ok: false, error: "Payment amount cannot exceed the remaining balance." };
+  }
+
+  const remainingAfterPayment =
+    Math.round((currentBalance.balanceDue - paymentAmount) * 100) / 100;
+  const writeOffAmount =
+    parsed.data.remainingAction === "write_off" && remainingAfterPayment > 0
+      ? remainingAfterPayment
+      : 0;
+
   const clientRecord = (doc.clients as unknown) as { currency: string | null } | null;
   const currency = clientRecord?.currency ?? "USD";
   const paidAt = new Date().toISOString();
 
-  // Mark document paid
+  // Insert payment record
+  const { data: payment, error: paymentError } = await supabase
+    .from("payments")
+    .insert({
+      document_id: documentId,
+      user_id: user.id,
+      amount: paymentAmount,
+      currency,
+      method: parsed.data.method,
+      reference: parsed.data.reference ?? null,
+      notes: parsed.data.notes ?? null,
+      paid_at: paidAt,
+    })
+    .select("id")
+    .single();
+  if (paymentError || !payment) {
+    return { ok: false, error: paymentError?.message ?? "Failed to record payment." };
+  }
+
+  if (writeOffAmount > 0) {
+    const { error: adjustmentError } = await supabase
+      .from("invoice_adjustments")
+      .insert({
+        document_id: documentId,
+        user_id: user.id,
+        type: "write_off",
+        amount: writeOffAmount,
+        reason: parsed.data.writeOffReason ?? "",
+      });
+    if (adjustmentError) return { ok: false, error: adjustmentError.message };
+  }
+
+  const nextBalance = calculateInvoiceBalance({
+    invoiceTotal: total,
+    payments: [
+      ...(existingPayments ?? []).map((p) => Number(p.amount)),
+      paymentAmount,
+    ],
+    writeOffs: [
+      ...(existingAdjustments ?? []).map((a) => Number(a.amount)),
+      writeOffAmount,
+    ],
+  });
+  const nextStatus = getInvoicePaymentStatus({
+    invoiceTotal: total,
+    totalPaid: nextBalance.totalPaid,
+    totalWrittenOff: nextBalance.totalWrittenOff,
+  });
+
   const { error: updateError } = await supabase
     .from("documents")
-    .update({ status: "paid", paid_at: paidAt })
+    .update({
+      status: nextStatus,
+      paid_at: nextStatus === "paid" ? paidAt : null,
+    })
     .eq("id", documentId)
     .eq("user_id", user.id);
   if (updateError) return { ok: false, error: updateError.message };
 
-  // Insert payment record
-  const { error: paymentError } = await supabase.from("payments").insert({
-    document_id: documentId,
-    user_id: user.id,
-    amount: total,
-    currency,
-    method: parsed.data.method,
-    reference: parsed.data.reference ?? null,
-    notes: parsed.data.notes ?? null,
-    paid_at: paidAt,
-  });
-  if (paymentError) return { ok: false, error: paymentError.message };
-
   // Auto-generate payment voucher document
   await createPaymentVoucher(supabase, user.id, documentId, {
-    amount: total,
+    paymentId: payment.id,
+    amount: paymentAmount,
     currency,
     method: parsed.data.method,
     reference: parsed.data.reference ?? null,
@@ -218,15 +297,19 @@ export async function markInvoicePaid(
     paidAt,
   });
 
-  const { notifyDocumentEvent } = await import(
-    "@/lib/notifications/document-notification"
-  );
-  await notifyDocumentEvent(supabase, user.id, documentId, "invoice_paid");
+  if (nextStatus === "paid") {
+    const { notifyDocumentEvent } = await import(
+      "@/lib/notifications/document-notification"
+    );
+    await notifyDocumentEvent(supabase, user.id, documentId, "invoice_paid");
+  }
 
   revalidatePath(`/documents/${documentId}`);
   revalidatePath("/documents");
   revalidatePath("/dashboard", "layout");
   revalidateTag("dashboard");
   revalidateTag("finance");
-  return { ok: true };
+  return { ok: true, status: nextStatus };
 }
+
+export const markInvoicePaid = recordInvoicePayment;

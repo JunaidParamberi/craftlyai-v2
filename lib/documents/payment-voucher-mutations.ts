@@ -18,6 +18,7 @@ async function generateVoucherNumber(
 }
 
 type PaymentInput = {
+  paymentId: string;
   amount: number;
   currency: string;
   method: string;
@@ -27,7 +28,7 @@ type PaymentInput = {
 };
 
 /**
- * Called from markInvoicePaid after the payment row is inserted.
+ * Called from recordInvoicePayment after the payment row is inserted.
  * Creates a payment_voucher document linked to the source invoice.
  * Returns the new voucher document id, or null on failure.
  */
@@ -60,6 +61,7 @@ export async function createPaymentVoucher(
       content_json: { type: "doc", content: [] },
       voucher_number: voucherNumber,
       source_document_id: invoiceId,
+      payment_id: payment.paymentId,
       paid_at: payment.paidAt,
     })
     .select("id")

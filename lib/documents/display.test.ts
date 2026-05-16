@@ -38,6 +38,8 @@ describe("documentStatusLabel", () => {
       ["viewed", "Viewed"],
       ["signed", "Signed"],
       ["paid", "Paid"],
+      ["partially_paid" as DocumentStatus, "Partially Paid"],
+      ["written_off" as DocumentStatus, "Written Off"],
       ["archived", "Archived"],
       ["approved", "Approved"],
       ["declined", "Declined"],
@@ -45,6 +47,11 @@ describe("documentStatusLabel", () => {
     for (const [status, expected] of cases) {
       expect(documentStatusLabel(status)).toBe(expected);
     }
+  });
+
+  it("DOCUMENT_STATUS_LABELS has entry for partial and written-off states", () => {
+    expect(DOCUMENT_STATUS_LABELS["partially_paid" as DocumentStatus]).toBe("Partially Paid");
+    expect(DOCUMENT_STATUS_LABELS["written_off" as DocumentStatus]).toBe("Written Off");
   });
 
   it("DOCUMENT_STATUS_LABELS has entry for approved and declined", () => {
@@ -70,9 +77,26 @@ describe("documentStatusVariant", () => {
     expect(documentStatusVariant("paid")).toBe("default");
   });
 
+  it("partially paid maps to secondary variant", () => {
+    expect(documentStatusVariant("partially_paid" as DocumentStatus)).toBe("secondary");
+  });
+
+  it("written off maps to outline variant", () => {
+    expect(documentStatusVariant("written_off" as DocumentStatus)).toBe("outline");
+  });
+
   it("DOCUMENT_STATUS_VARIANTS covers all statuses", () => {
     const statuses: DocumentStatus[] = [
-      "draft", "sent", "viewed", "signed", "paid", "archived", "approved", "declined",
+      "draft",
+      "sent",
+      "viewed",
+      "signed",
+      "paid",
+      "partially_paid" as DocumentStatus,
+      "written_off" as DocumentStatus,
+      "archived",
+      "approved",
+      "declined",
     ];
     for (const s of statuses) {
       expect(DOCUMENT_STATUS_VARIANTS[s]).toBeDefined();

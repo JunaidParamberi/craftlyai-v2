@@ -16,16 +16,38 @@ describe("paymentMethodSchema", () => {
 });
 
 describe("markPaidInputSchema", () => {
-  it("accepts method only", () => {
-    const result = markPaidInputSchema.parse({ method: "cash" });
+  it("accepts a full payment amount with method only", () => {
+    const result = markPaidInputSchema.parse({ method: "cash", amount: 250 });
     expect(result.method).toBe("cash");
+    expect(result.amount).toBe(250);
     expect(result.reference).toBeUndefined();
     expect(result.notes).toBeUndefined();
+  });
+
+  it("accepts a partial payment kept as balance due", () => {
+    const result = markPaidInputSchema.parse({
+      method: "bank_transfer",
+      amount: 400,
+      remainingAction: "keep_due",
+    });
+    expect(result.remainingAction).toBe("keep_due");
+  });
+
+  it("accepts a partial payment with a write-off reason", () => {
+    const result = markPaidInputSchema.parse({
+      method: "card",
+      amount: 400,
+      remainingAction: "write_off",
+      writeOffReason: "Goodwill adjustment",
+    });
+    expect(result.remainingAction).toBe("write_off");
+    expect(result.writeOffReason).toBe("Goodwill adjustment");
   });
 
   it("accepts method with reference and notes", () => {
     const result = markPaidInputSchema.parse({
       method: "cheque",
+      amount: 250,
       reference: "CHQ-12345",
       notes: "Paid in full",
     });
@@ -37,20 +59,40 @@ describe("markPaidInputSchema", () => {
   it("accepts bank_transfer with long reference", () => {
     const result = markPaidInputSchema.parse({
       method: "bank_transfer",
+      amount: 250,
       reference: "A".repeat(200),
     });
     expect(result.reference).toHaveLength(200);
   });
 
+  it("rejects zero or negative amounts", () => {
+    expect(() =>
+      markPaidInputSchema.parse({ method: "cash", amount: 0 })
+    ).toThrow();
+    expect(() =>
+      markPaidInputSchema.parse({ method: "cash", amount: -10 })
+    ).toThrow();
+  });
+
+  it("rejects write-off without a reason", () => {
+    expect(() =>
+      markPaidInputSchema.parse({
+        method: "cash",
+        amount: 100,
+        remainingAction: "write_off",
+      })
+    ).toThrow();
+  });
+
   it("rejects reference over 200 chars", () => {
     expect(() =>
-      markPaidInputSchema.parse({ method: "card", reference: "A".repeat(201) })
+      markPaidInputSchema.parse({ method: "card", amount: 250, reference: "A".repeat(201) })
     ).toThrow();
   });
 
   it("rejects notes over 500 chars", () => {
     expect(() =>
-      markPaidInputSchema.parse({ method: "other", notes: "N".repeat(501) })
+      markPaidInputSchema.parse({ method: "other", amount: 250, notes: "N".repeat(501) })
     ).toThrow();
   });
 

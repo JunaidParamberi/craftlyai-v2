@@ -185,6 +185,8 @@ export type DocumentStatus =
   | "viewed"
   | "signed"
   | "paid"
+  | "partially_paid"
+  | "written_off"
   | "archived"
   | "approved"
   | "declined";
@@ -241,6 +243,7 @@ export type DocumentRow = {
   approval_message: string | null;
   voucher_number: string | null;
   source_document_id: string | null;
+  payment_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -363,6 +366,20 @@ export type PaymentRow = {
   reference: string | null;
   notes: string | null;
   paid_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type InvoiceAdjustmentType = "write_off";
+
+/** Row shape for `public.invoice_adjustments`. */
+export type InvoiceAdjustmentRow = {
+  id: string;
+  document_id: string;
+  user_id: string;
+  type: InvoiceAdjustmentType;
+  amount: number;
+  reason: string;
   created_at: string;
   updated_at: string;
 };

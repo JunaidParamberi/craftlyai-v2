@@ -38,6 +38,7 @@ type DocumentRowRaw = {
   approval_message?: string | null;
   voucher_number?: string | null;
   source_document_id?: string | null;
+  payment_id?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -80,6 +81,7 @@ export function normalizeDocumentRow(row: DocumentRowRaw): DocumentRow {
     approval_message: row.approval_message ?? null,
     voucher_number: row.voucher_number ?? null,
     source_document_id: row.source_document_id ?? null,
+    payment_id: row.payment_id ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
