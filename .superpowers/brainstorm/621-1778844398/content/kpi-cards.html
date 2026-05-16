@@ -1,0 +1,109 @@
+<h2>KPI Card Style</h2>
+<p class="subtitle">How should the 4 metric cards look at the top of the dashboard?</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8f9fa;border-radius:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Total Revenue</div>
+          <div style="font-size:22px;font-weight:700;color:#0f172a;line-height:1;">$12,400</div>
+          <div style="font-size:10px;color:#10b981;margin-top:6px;">↑ 18% vs last period</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Outstanding</div>
+          <div style="font-size:22px;font-weight:700;color:#0f172a;line-height:1;">$3,200</div>
+          <div style="font-size:10px;color:#64748b;margin-top:6px;">4 invoices pending</div>
+        </div>
+        <div style="background:white;border:1px solid #fbbf24;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Overdue</div>
+          <div style="font-size:22px;font-weight:700;color:#d97706;line-height:1;">$800</div>
+          <div style="font-size:10px;color:#d97706;margin-top:6px;">2 invoices overdue</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+          <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Avg Pay Time</div>
+          <div style="font-size:22px;font-weight:700;color:#0f172a;line-height:1;">14d</div>
+          <div style="font-size:10px;color:#10b981;margin-top:6px;">Good — industry avg 30d</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Clean White Cards</h3>
+      <p>White bg, subtle border, amber border accent on overdue card only. Minimal, matches existing shadcn Card component pattern.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8f9fa;border-radius:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:10px;padding:14px;color:white;">
+          <div style="font-size:10px;opacity:0.8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Total Revenue</div>
+          <div style="font-size:22px;font-weight:700;line-height:1;">$12,400</div>
+          <div style="font-size:10px;opacity:0.9;margin-top:6px;">↑ 18% vs last period</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:10px;padding:14px;color:white;">
+          <div style="font-size:10px;opacity:0.8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Outstanding</div>
+          <div style="font-size:22px;font-weight:700;line-height:1;">$3,200</div>
+          <div style="font-size:10px;opacity:0.9;margin-top:6px;">4 invoices pending</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:10px;padding:14px;color:white;">
+          <div style="font-size:10px;opacity:0.8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Overdue</div>
+          <div style="font-size:22px;font-weight:700;line-height:1;">$800</div>
+          <div style="font-size:10px;opacity:0.9;margin-top:6px;">2 invoices overdue</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);border-radius:10px;padding:14px;color:white;">
+          <div style="font-size:10px;opacity:0.8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Avg Pay Time</div>
+          <div style="font-size:22px;font-weight:700;line-height:1;">14d</div>
+          <div style="font-size:10px;opacity:0.9;margin-top:6px;">Good — industry avg 30d</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Gradient Colored Cards</h3>
+      <p>Each KPI gets its own gradient color. Bold, high visual impact. Uses the --color-chart-* tokens already defined in globals.css.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8f9fa;border-radius:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:14px;border-top:3px solid #3b82f6;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <div style="width:28px;height:28px;background:#eff6ff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;">💰</div>
+            <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">Total Revenue</div>
+          </div>
+          <div style="font-size:22px;font-weight:700;color:#0f172a;line-height:1;">$12,400</div>
+          <div style="font-size:10px;color:#10b981;margin-top:6px;">↑ 18% vs last period</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:14px;border-top:3px solid #10b981;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <div style="width:28px;height:28px;background:#f0fdf4;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;">📤</div>
+            <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">Outstanding</div>
+          </div>
+          <div style="font-size:22px;font-weight:700;color:#0f172a;line-height:1;">$3,200</div>
+          <div style="font-size:10px;color:#64748b;margin-top:6px;">4 invoices pending</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:14px;border-top:3px solid #f59e0b;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <div style="width:28px;height:28px;background:#fffbeb;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;">⚠️</div>
+            <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">Overdue</div>
+          </div>
+          <div style="font-size:22px;font-weight:700;color:#d97706;line-height:1;">$800</div>
+          <div style="font-size:10px;color:#d97706;margin-top:6px;">2 invoices overdue</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:14px;border-top:3px solid #8b5cf6;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <div style="width:28px;height:28px;background:#f5f3ff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;">⏱</div>
+            <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">Avg Pay Time</div>
+          </div>
+          <div style="font-size:22px;font-weight:700;color:#0f172a;line-height:1;">14d</div>
+          <div style="font-size:10px;color:#10b981;margin-top:6px;">Good — industry avg 30d</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Icon + Top Border Accent</h3>
+      <p>White cards with colored top border + tinted icon pill. Professional balance — color accent without full saturation. Lucide icons replace emojis in real build.</p>
+    </div>
+  </div>
+</div>

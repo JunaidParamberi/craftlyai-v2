@@ -1,0 +1,40 @@
+<h2>Attention list — what triggers an item?</h2>
+<p class="subtitle">These show in the amber banner. Select all that should trigger attention.</p>
+
+<div class="options" data-multiselect>
+
+  <div class="option" data-choice="overdue_invoice" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>Overdue invoice</h3>
+      <p>Invoice past due date, still unpaid. E.g. "Invoice #38 · Acme · $850 · 5 days overdue"</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="expiring_quote" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>Quote expiring soon</h3>
+      <p>valid_until within 3 days, still pending. E.g. "Quote #12 · Globex · expires in 2 days"</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="project_deadline" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>Project deadline approaching</h3>
+      <p>Active project deadline within 7 days. E.g. "Brand Refresh · Acme · due in 3 days"</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="quote_no_response" onclick="toggleSelect(this)">
+    <div class="letter">4</div>
+    <div class="content">
+      <h3>Quote sent but no response</h3>
+      <p>Quote sent 7+ days ago, still pending. E.g. "Quote #10 · TechCo · no response in 8 days"</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px">Select all, then confirm in terminal.</p>

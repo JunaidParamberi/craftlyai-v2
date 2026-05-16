@@ -1,0 +1,143 @@
+<h2>Financial Dashboard — Layout Options</h2>
+<p class="subtitle">Which overall page structure feels right for CraftlyAI's finance page?</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8f9fa;border-radius:8px;font-size:12px;font-family:monospace;">
+      <div style="background:#e2e8f0;padding:6px 10px;border-radius:6px;margin-bottom:8px;font-size:11px;color:#64748b;">
+        📅 This Month &nbsp;|&nbsp; Last 3 Months &nbsp;|&nbsp; This Year &nbsp;|&nbsp; 📆 Custom
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:8px;">
+        <div style="background:#3b82f6;color:white;padding:8px;border-radius:6px;text-align:center;font-size:10px;">
+          <div style="font-size:14px;font-weight:bold;">$12,400</div>
+          <div>Revenue</div>
+        </div>
+        <div style="background:#10b981;color:white;padding:8px;border-radius:6px;text-align:center;font-size:10px;">
+          <div style="font-size:14px;font-weight:bold;">$3,200</div>
+          <div>Outstanding</div>
+        </div>
+        <div style="background:#f59e0b;color:white;padding:8px;border-radius:6px;text-align:center;font-size:10px;">
+          <div style="font-size:14px;font-weight:bold;">$800</div>
+          <div>Overdue</div>
+        </div>
+        <div style="background:#8b5cf6;color:white;padding:8px;border-radius:6px;text-align:center;font-size:10px;">
+          <div style="font-size:14px;font-weight:bold;">14d</div>
+          <div>Avg Pay Time</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:6px;">
+        <div style="background:#f1f5f9;border-radius:6px;padding:8px;min-height:60px;">
+          <div style="font-size:10px;color:#64748b;margin-bottom:4px;">Monthly Revenue</div>
+          <div style="display:flex;align-items:flex-end;gap:3px;height:40px;">
+            <div style="background:#3b82f6;width:12px;height:20px;border-radius:2px;"></div>
+            <div style="background:#3b82f6;width:12px;height:30px;border-radius:2px;"></div>
+            <div style="background:#3b82f6;width:12px;height:25px;border-radius:2px;"></div>
+            <div style="background:#3b82f6;width:12px;height:38px;border-radius:2px;"></div>
+            <div style="background:#3b82f6;width:12px;height:28px;border-radius:2px;"></div>
+            <div style="background:#3b82f6;width:12px;height:40px;border-radius:2px;opacity:0.5;"></div>
+          </div>
+        </div>
+        <div style="background:#f1f5f9;border-radius:6px;padding:8px;min-height:60px;">
+          <div style="font-size:10px;color:#64748b;margin-bottom:4px;">Status Mix</div>
+          <div style="font-size:9px;">
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;"><span style="width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block;"></span> Paid 68%</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;"><span style="width:8px;height:8px;background:#3b82f6;border-radius:50%;display:inline-block;"></span> Sent 22%</div>
+            <div style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;background:#f59e0b;border-radius:50%;display:inline-block;"></span> Overdue 10%</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#f1f5f9;border-radius:6px;padding:8px;margin-top:6px;font-size:9px;color:#64748b;">
+        Recent Invoices table →
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Full-Width Stack</h3>
+      <p>Filter bar → 4 KPI cards → chart row → invoice table. Clean top-to-bottom flow. Best readability on all screen sizes.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8f9fa;border-radius:8px;font-size:12px;font-family:monospace;">
+      <div style="background:#e2e8f0;padding:6px 10px;border-radius:6px;margin-bottom:8px;font-size:11px;color:#64748b;">
+        📅 This Month &nbsp;|&nbsp; Last 3M &nbsp;|&nbsp; YTD &nbsp;|&nbsp; 📆 Custom
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+        <div style="background:#3b82f6;color:white;padding:8px;border-radius:6px;text-align:center;font-size:10px;">
+          <div style="font-size:14px;font-weight:bold;">$12,400</div><div>Revenue YTD</div>
+        </div>
+        <div style="background:#10b981;color:white;padding:8px;border-radius:6px;text-align:center;font-size:10px;">
+          <div style="font-size:14px;font-weight:bold;">$3,200</div><div>Outstanding</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:6px;margin-bottom:8px;">
+        <div style="background:#f1f5f9;border-radius:6px;padding:8px;min-height:70px;">
+          <div style="font-size:10px;color:#64748b;margin-bottom:4px;">Revenue Trend (bar)</div>
+          <div style="display:flex;align-items:flex-end;gap:3px;height:45px;">
+            <div style="background:#3b82f6;width:14px;height:22px;border-radius:2px;"></div>
+            <div style="background:#3b82f6;width:14px;height:33px;border-radius:2px;"></div>
+            <div style="background:#3b82f6;width:14px;height:28px;border-radius:2px;"></div>
+            <div style="background:#3b82f6;width:14px;height:42px;border-radius:2px;"></div>
+            <div style="background:#3b82f6;width:14px;height:45px;border-radius:2px;opacity:0.5;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="background:#f59e0b20;border-left:3px solid #f59e0b;padding:6px;border-radius:4px;margin-bottom:6px;font-size:9px;">
+            <div style="font-weight:bold;color:#92400e;">$800 Overdue</div>
+            <div style="color:#b45309;">2 invoices past due</div>
+          </div>
+          <div style="background:#8b5cf620;border-left:3px solid #8b5cf6;padding:6px;border-radius:4px;font-size:9px;">
+            <div style="font-weight:bold;color:#5b21b6;">14d avg pay</div>
+            <div style="color:#6d28d9;">On track</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#f1f5f9;border-radius:6px;padding:8px;font-size:9px;color:#64748b;">
+        Invoice table + client breakdown side-by-side →
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Editorial Grid</h3>
+      <p>2 hero KPIs → chart + stat cards side-by-side → table. More visual hierarchy, emphasizes the two most important numbers.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8f9fa;border-radius:8px;font-size:12px;font-family:monospace;">
+      <div style="background:#e2e8f0;padding:6px 10px;border-radius:6px;margin-bottom:8px;font-size:11px;color:#64748b;">
+        📅 Filters &nbsp;|&nbsp; 📆 Custom
+      </div>
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:8px;">
+        <div>
+          <div style="background:#3b82f6;color:white;padding:8px;border-radius:6px;margin-bottom:6px;font-size:10px;">
+            <div style="font-size:16px;font-weight:bold;">$12,400</div><div>Total Revenue</div>
+          </div>
+          <div style="background:#f1f5f9;padding:6px;border-radius:6px;margin-bottom:4px;font-size:9px;">💚 $3,200 outstanding</div>
+          <div style="background:#fef3c7;padding:6px;border-radius:6px;margin-bottom:4px;font-size:9px;">⚠️ $800 overdue</div>
+          <div style="background:#f1f5f9;padding:6px;border-radius:6px;font-size:9px;">⏱ 14d avg payment</div>
+          <div style="background:#f1f5f9;padding:8px;border-radius:6px;margin-top:6px;min-height:40px;">
+            <div style="font-size:9px;color:#64748b;">Status donut</div>
+            <div style="font-size:9px;margin-top:4px;">● Paid 68% &nbsp; ● Sent 22%</div>
+          </div>
+        </div>
+        <div>
+          <div style="background:#f1f5f9;border-radius:6px;padding:8px;min-height:80px;margin-bottom:6px;">
+            <div style="font-size:10px;color:#64748b;">Monthly Revenue Chart</div>
+            <div style="display:flex;align-items:flex-end;gap:4px;height:50px;margin-top:8px;">
+              <div style="background:#3b82f6;flex:1;height:30px;border-radius:2px;"></div>
+              <div style="background:#3b82f6;flex:1;height:45px;border-radius:2px;"></div>
+              <div style="background:#3b82f6;flex:1;height:35px;border-radius:2px;"></div>
+              <div style="background:#3b82f6;flex:1;height:50px;border-radius:2px;opacity:0.5;"></div>
+            </div>
+          </div>
+          <div style="background:#f1f5f9;border-radius:6px;padding:8px;font-size:9px;color:#64748b;min-height:50px;">
+            Invoice table (full width)
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Left Panel + Main</h3>
+      <p>Sticky left sidebar with KPIs + donut → main area has chart + invoice table. Dashboard-app feel, but tighter on small screens.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,72 @@
+<h2>Avatar dropdown — plan info placement</h2>
+<p class="subtitle">Where and how should the plan appear in the user menu?</p>
+
+<div class="split">
+  <div class="mockup" data-choice="a" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="mockup-header">A — Plan badge + usage summary at top</div>
+    <div class="mockup-body" style="font-family:system-ui;font-size:13px;padding:0;">
+      <!-- Dropdown -->
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.12);overflow:hidden;">
+        <!-- Plan block at top -->
+        <div style="padding:12px 14px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-bottom:1px solid #fcd34d;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#92400e;font-weight:600;">Free Plan</div>
+              <div style="font-size:11px;color:#78350f;margin-top:1px;">3/3 clients · 4/5 docs</div>
+            </div>
+            <div style="background:#d97706;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;">Upgrade</div>
+          </div>
+        </div>
+        <!-- User info -->
+        <div style="padding:10px 14px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px;">
+          <div style="width:30px;height:30px;background:#e5e7eb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;color:#374151;">JP</div>
+          <div>
+            <div style="font-weight:500;font-size:12px;">Junaid P.</div>
+            <div style="font-size:11px;color:#9ca3af;">junaid@email.com</div>
+          </div>
+        </div>
+        <!-- Menu items -->
+        <div style="padding:6px;">
+          <div style="padding:7px 10px;border-radius:6px;font-size:12px;color:#374151;">Settings</div>
+          <div style="padding:7px 10px;border-radius:6px;font-size:12px;color:#374151;">Billing &amp; Plans</div>
+          <div style="padding:7px 10px;border-radius:6px;font-size:12px;color:#374151;">Support</div>
+          <div style="height:1px;background:#f3f4f6;margin:4px 0;"></div>
+          <div style="padding:7px 10px;border-radius:6px;font-size:12px;color:#ef4444;">Sign out</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup" data-choice="b" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="mockup-header">B — Subtle plan chip inline with user info</div>
+    <div class="mockup-body" style="font-family:system-ui;font-size:13px;padding:0;">
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.12);overflow:hidden;">
+        <!-- User info with plan inline -->
+        <div style="padding:12px 14px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;color:#374151;">JP</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:500;font-size:12px;">Junaid P.</div>
+            <div style="font-size:11px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">junaid@email.com</div>
+          </div>
+          <div style="background:#f3f4f6;color:#6b7280;font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;white-space:nowrap;">Free</div>
+        </div>
+        <!-- Usage bar -->
+        <div style="padding:8px 14px;background:#fafafa;border-bottom:1px solid #f3f4f6;">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-bottom:4px;"><span>Clients</span><span style="color:#ef4444;font-weight:600;">3 / 3</span></div>
+          <div style="height:4px;background:#fee2e2;border-radius:999px;"><div style="width:100%;height:100%;background:#ef4444;border-radius:999px;"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-bottom:4px;margin-top:6px;"><span>Documents this month</span><span>4 / 5</span></div>
+          <div style="height:4px;background:#fef3c7;border-radius:999px;"><div style="width:80%;height:100%;background:#f59e0b;border-radius:999px;"></div></div>
+          <a style="display:block;text-align:center;margin-top:8px;background:#111;color:#fff;font-size:11px;font-weight:600;padding:5px;border-radius:6px;text-decoration:none;">Upgrade plan →</a>
+        </div>
+        <!-- Menu items -->
+        <div style="padding:6px;">
+          <div style="padding:7px 10px;border-radius:6px;font-size:12px;color:#374151;">Settings</div>
+          <div style="padding:7px 10px;border-radius:6px;font-size:12px;color:#374151;">Billing &amp; Plans</div>
+          <div style="padding:7px 10px;border-radius:6px;font-size:12px;color:#374151;">Support</div>
+          <div style="height:1px;background:#f3f4f6;margin:4px 0;"></div>
+          <div style="padding:7px 10px;border-radius:6px;font-size:12px;color:#ef4444;">Sign out</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

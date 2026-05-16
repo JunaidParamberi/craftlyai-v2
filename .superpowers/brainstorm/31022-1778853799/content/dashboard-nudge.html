@@ -1,0 +1,52 @@
+<h2>Dashboard — plan awareness</h2>
+<p class="subtitle">Free user, dashboard. How do they see their plan status without it feeling like an ad?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Usage card in the stats row</h3>
+      <p>A 4th KPI card beside Revenue / Projects / Messages. Shows "3/3 clients · 4/5 docs" with small progress bars and an "Upgrade" link. Feels native to the dashboard, not an add-on.</p>
+      <div style="margin-top:10px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;font-size:11px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;margin-bottom:6px;">Plan Usage · Free</div>
+        <div style="display:flex;gap:16px;">
+          <div>
+            <div style="color:#374151;font-weight:600;font-size:13px;">3 / 3</div>
+            <div style="color:#9ca3af;">Clients</div>
+            <div style="height:3px;background:#fee2e2;border-radius:999px;margin-top:3px;width:60px;"><div style="width:100%;height:100%;background:#ef4444;border-radius:999px;"></div></div>
+          </div>
+          <div>
+            <div style="color:#374151;font-weight:600;font-size:13px;">4 / 5</div>
+            <div style="color:#9ca3af;">Docs/mo</div>
+            <div style="height:3px;background:#fef3c7;border-radius:999px;margin-top:3px;width:60px;"><div style="width:80%;height:100%;background:#f59e0b;border-radius:999px;"></div></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:#6366f1;font-weight:600;cursor:pointer;">Upgrade to Starter →</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Contextual banner — only when near a limit</h3>
+      <p>No persistent widget. A slim top-of-page banner appears only when usage ≥ 80% of a limit. Disappears once dismissed. "You've used 4/5 docs this month — upgrade for unlimited." Silent otherwise.</p>
+      <div style="margin-top:10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 14px;font-size:11px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="color:#92400e;">⚡ 4/5 documents used this month — <strong>1 remaining</strong></span>
+        <span style="background:#d97706;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;cursor:pointer;">Upgrade</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>No dashboard widget — avatar dropdown is enough</h3>
+      <p>Dashboard stays clean. Plan info lives only in the avatar dropdown and at friction points (ghost rows, locked buttons). No proactive nudge on the dashboard at all.</p>
+      <div style="margin-top:10px;font-size:11px;color:#9ca3af;background:#f9fafb;border-radius:8px;padding:10px 14px;">
+        Dashboard shows only: Revenue · Projects · Messages · Activity feed.<br/>
+        No plan widget. No banner. Zero clutter.
+      </div>
+    </div>
+  </div>
+</div>

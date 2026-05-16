@@ -1,0 +1,103 @@
+<h2>Revenue Chart Style</h2>
+<p class="subtitle">Which chart type for the monthly revenue trend?</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8f9fa;border-radius:8px;">
+      <div style="font-size:11px;color:#64748b;margin-bottom:8px;font-weight:600;">Monthly Revenue — Bar Chart</div>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:0 4px;">
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+          <div style="background:#3b82f6;width:100%;height:35px;border-radius:4px 4px 0 0;"></div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:3px;">Jan</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+          <div style="background:#3b82f6;width:100%;height:55px;border-radius:4px 4px 0 0;"></div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:3px;">Feb</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+          <div style="background:#3b82f6;width:100%;height:42px;border-radius:4px 4px 0 0;"></div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:3px;">Mar</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+          <div style="background:#3b82f6;width:100%;height:65px;border-radius:4px 4px 0 0;"></div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:3px;">Apr</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+          <div style="background:#3b82f6;width:100%;height:48px;border-radius:4px 4px 0 0;"></div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:3px;">May</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+          <div style="background:#3b82f6;width:100%;height:70px;border-radius:4px 4px 0 0;opacity:0.4;border:2px dashed #3b82f6;border-bottom:none;"></div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:3px;">Jun▸</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:#64748b;margin-top:8px;text-align:right;">Current month shown lighter/dashed</div>
+    </div>
+    <div class="card-body">
+      <h3>A — Bar Chart</h3>
+      <p>Clear month-by-month comparison. Best for spotting high/low months at a glance. Standard for revenue dashboards.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8f9fa;border-radius:8px;position:relative;">
+      <div style="font-size:11px;color:#64748b;margin-bottom:8px;font-weight:600;">Monthly Revenue — Area Chart</div>
+      <div style="height:80px;position:relative;overflow:hidden;">
+        <svg viewBox="0 0 300 80" style="width:100%;height:100%;">
+          <defs>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.02"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,60 C40,60 40,40 60,40 C80,40 80,20 120,20 C160,20 160,35 180,35 C200,35 200,10 240,10 C260,10 280,15 300,15 L300,80 L0,80 Z" fill="url(#areaGrad)"/>
+          <path d="M0,60 C40,60 40,40 60,40 C80,40 80,20 120,20 C160,20 160,35 180,35 C200,35 200,10 240,10 C260,10 280,15 300,15" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+          <circle cx="240" cy="10" r="4" fill="#3b82f6"/>
+          <text x="242" y="8" font-size="8" fill="#3b82f6" font-weight="bold">$8.2k</text>
+          <text x="0" y="75" font-size="8" fill="#94a3b8">Jan</text>
+          <text x="50" y="75" font-size="8" fill="#94a3b8">Feb</text>
+          <text x="110" y="75" font-size="8" fill="#94a3b8">Mar</text>
+          <text x="165" y="75" font-size="8" fill="#94a3b8">Apr</text>
+          <text x="220" y="75" font-size="8" fill="#94a3b8">May</text>
+          <text x="272" y="75" font-size="8" fill="#94a3b8">Jun▸</text>
+        </svg>
+      </div>
+      <div style="font-size:10px;color:#64748b;margin-top:4px;text-align:right;">Gradient fill under curve</div>
+    </div>
+    <div class="card-body">
+      <h3>B — Area Chart</h3>
+      <p>Shows revenue momentum and trend direction. Gradient fill looks premium. Better when you want "growth story" feel.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px;background:#f8f9fa;border-radius:8px;">
+      <div style="font-size:11px;color:#64748b;margin-bottom:8px;font-weight:600;">Monthly Revenue — Bar + Line Combo</div>
+      <div style="height:80px;position:relative;overflow:hidden;">
+        <svg viewBox="0 0 300 80" style="width:100%;height:100%;">
+          <!-- Bars -->
+          <rect x="10" y="48" width="30" height="30" fill="#3b82f6" opacity="0.7" rx="2"/>
+          <rect x="60" y="28" width="30" height="50" fill="#3b82f6" opacity="0.7" rx="2"/>
+          <rect x="110" y="38" width="30" height="40" fill="#3b82f6" opacity="0.7" rx="2"/>
+          <rect x="160" y="18" width="30" height="60" fill="#3b82f6" opacity="0.7" rx="2"/>
+          <rect x="210" y="32" width="30" height="46" fill="#3b82f6" opacity="0.7" rx="2"/>
+          <rect x="260" y="12" width="30" height="66" fill="#3b82f6" opacity="0.3" stroke="#3b82f6" stroke-width="1.5" rx="2"/>
+          <!-- Trend line -->
+          <path d="M25,48 L75,28 L125,38 L175,18 L225,32 L275,12" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,2"/>
+          <circle cx="275" cy="12" r="3" fill="#f59e0b"/>
+          <text x="10" y="78" font-size="8" fill="#94a3b8">Jan</text>
+          <text x="60" y="78" font-size="8" fill="#94a3b8">Feb</text>
+          <text x="110" y="78" font-size="8" fill="#94a3b8">Mar</text>
+          <text x="160" y="78" font-size="8" fill="#94a3b8">Apr</text>
+          <text x="210" y="78" font-size="8" fill="#94a3b8">May</text>
+          <text x="260" y="78" font-size="8" fill="#94a3b8">Jun▸</text>
+        </svg>
+      </div>
+      <div style="font-size:10px;color:#64748b;margin-top:4px;text-align:right;">Blue bars = monthly total · Amber line = trend</div>
+    </div>
+    <div class="card-body">
+      <h3>C — Bar + Trend Line</h3>
+      <p>Bars show each month's total, dashed line shows the trend direction. More information density, slightly more complex.</p>
+    </div>
+  </div>
+</div>

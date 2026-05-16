@@ -1,0 +1,125 @@
+<h2>Full dashboard design — confirm before spec</h2>
+<p class="subtitle">Live data layout B. Review each section top to bottom.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Dashboard — /dashboard (live data)</div>
+  <div class="mockup-body" style="font-family:system-ui;font-size:12px;color:#ccc;display:flex;flex-direction:column;gap:10px">
+
+    <!-- Hero -->
+    <div style="background:linear-gradient(135deg,#1a1a2e,#0f0f1a);border:1px solid #2a2a3e;border-radius:10px;padding:16px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-30px;top:-30px;width:100px;height:100px;background:rgba(99,102,241,0.07);border-radius:50%;filter:blur(20px)"></div>
+      <div style="font-size:9px;letter-spacing:0.15em;color:#666;text-transform:uppercase;margin-bottom:4px">OVERVIEW</div>
+      <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:3px">Welcome back, Junaid</div>
+      <div style="color:#888;font-size:11px">Here's what's happening with your projects today.</div>
+    </div>
+
+    <!-- 4 KPI cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+      <div style="background:#141414;border:1px solid #222;border-radius:8px;padding:12px">
+        <div style="color:#666;font-size:10px;margin-bottom:6px">Monthly revenue</div>
+        <div style="font-size:20px;font-weight:700;color:#fff">$4,200</div>
+        <div style="background:#1a2a1a;color:#4ade80;font-size:9px;padding:2px 6px;border-radius:20px;display:inline-flex;align-items:center;gap:2px;margin-top:4px">↑ +18% vs last month</div>
+      </div>
+      <div style="background:#141414;border:1px solid #222;border-radius:8px;padding:12px">
+        <div style="color:#666;font-size:10px;margin-bottom:6px">Active projects</div>
+        <div style="font-size:20px;font-weight:700;color:#fff">6</div>
+        <div style="color:#888;font-size:10px;margin-top:4px">🕐 2 nearing deadline</div>
+      </div>
+      <div style="background:#141414;border:1px solid #222;border-radius:8px;padding:12px">
+        <div style="color:#666;font-size:10px;margin-bottom:6px">Outstanding</div>
+        <div style="font-size:20px;font-weight:700;color:#f59e0b">$3,100</div>
+        <div style="color:#888;font-size:10px;margin-top:4px">4 unpaid invoices</div>
+      </div>
+      <div style="background:#141414;border:1px solid #3d1f1f;border-radius:8px;padding:12px">
+        <div style="color:#666;font-size:10px;margin-bottom:6px">Overdue</div>
+        <div style="font-size:20px;font-weight:700;color:#ef4444">2</div>
+        <div style="color:#ef4444;font-size:10px;margin-top:4px">$1,650 at risk</div>
+      </div>
+    </div>
+
+    <!-- Attention banner — only shows when items exist -->
+    <div style="background:#1c1409;border:1px solid #92400e;border-radius:8px;padding:12px">
+      <div style="color:#f59e0b;font-size:11px;font-weight:600;margin-bottom:6px">⚠ 4 items need your attention</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;background:#231a08;border-radius:6px;padding:6px 10px">
+          <span style="color:#fbbf24;font-size:11px">Invoice #38 · Acme Corp · $850 · <b>5 days overdue</b></span>
+          <span style="color:#666;font-size:10px">View →</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:#231a08;border-radius:6px;padding:6px 10px">
+          <span style="color:#fbbf24;font-size:11px">Invoice #35 · TechCo · $800 · <b>2 days overdue</b></span>
+          <span style="color:#666;font-size:10px">View →</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:#231a08;border-radius:6px;padding:6px 10px">
+          <span style="color:#fbbf24;font-size:11px">Quote #12 · Globex · <b>expires in 2 days</b></span>
+          <span style="color:#666;font-size:10px">View →</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:#231a08;border-radius:6px;padding:6px 10px">
+          <span style="color:#fbbf24;font-size:11px">Brand Refresh · Acme · <b>deadline in 3 days</b></span>
+          <span style="color:#666;font-size:10px">View →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2-col bottom: activity + pipeline -->
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:8px">
+
+      <!-- Recent activity -->
+      <div style="background:#141414;border:1px solid #222;border-radius:8px;padding:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;padding-bottom:8px;margin-bottom:8px">
+          <div>
+            <div style="font-weight:600;color:#fff;font-size:12px">Recent activity</div>
+            <div style="color:#666;font-size:10px">Payments, documents, project updates</div>
+          </div>
+          <div style="color:#6366f1;font-size:10px">View all →</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a">
+            <div style="width:28px;height:28px;background:#1a2a1a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">✓</div>
+            <div><div style="color:#fff;font-size:11px">Invoice #42 paid · Acme Corp · $1,200</div><div style="color:#666;font-size:10px">2 hours ago</div></div>
+          </div>
+          <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a">
+            <div style="width:28px;height:28px;background:#1a1a2e;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">📤</div>
+            <div><div style="color:#fff;font-size:11px">Quote #15 sent to Globex · $3,400</div><div style="color:#666;font-size:10px">5 hours ago</div></div>
+          </div>
+          <div style="display:flex;gap:8px;padding:6px 0">
+            <div style="width:28px;height:28px;background:#2a1a2e;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">✅</div>
+            <div><div style="color:#fff;font-size:11px">Quote #11 approved by Initech</div><div style="color:#666;font-size:10px">Yesterday</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline -->
+      <div style="background:#141414;border:1px solid #222;border-radius:8px;padding:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;padding-bottom:8px;margin-bottom:8px">
+          <div>
+            <div style="font-weight:600;color:#fff;font-size:12px">Active pipeline</div>
+            <div style="color:#666;font-size:10px">6 projects in progress</div>
+          </div>
+          <div style="color:#6366f1;font-size:10px">View all →</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="background:#1c1409;border:1px solid #3d2a08;border-radius:6px;padding:6px 8px">
+            <div style="color:#fff;font-size:11px;font-weight:500">Brand Refresh</div>
+            <div style="color:#888;font-size:10px">Acme Corp · due in 3 days</div>
+            <div style="color:#f59e0b;font-size:10px">🔴 At risk</div>
+          </div>
+          <div style="background:#1a1a0e;border:1px solid #3d3d08;border-radius:6px;padding:6px 8px">
+            <div style="color:#fff;font-size:11px;font-weight:500">API Integration v2</div>
+            <div style="color:#888;font-size:10px">Globex · due in 12 days</div>
+            <div style="color:#eab308;font-size:10px">🟡 Watch</div>
+          </div>
+          <div style="background:#0f1a0f;border:1px solid #1a3a1a;border-radius:6px;padding:6px 8px">
+            <div style="color:#fff;font-size:11px;font-weight:500">SEO Overhaul</div>
+            <div style="color:#888;font-size:10px">TechCo · due in 28 days</div>
+            <div style="color:#4ade80;font-size:10px">🟢 On track</div>
+          </div>
+          <div style="color:#666;font-size:10px;text-align:center;padding:4px">+3 more</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:12px">Does this look right? Confirm in terminal or flag anything to change.</p>

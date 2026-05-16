@@ -1,0 +1,80 @@
+<h2>Dashboard layout — which approach?</h2>
+<p class="subtitle">Three ways to structure the real dashboard. All use live data. Pick the layout that feels right.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="font-family:monospace;font-size:11px;line-height:1.6;background:#0f0f0f;color:#aaa;padding:12px;border-radius:8px;text-align:left">
+        <div style="background:#1a1a2e;padding:6px 8px;border-radius:4px;margin-bottom:4px;color:#6b7cff">▬▬▬▬▬▬▬▬  Welcome back, Junaid</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:4px">
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">💰 Revenue<br/><b style="color:#fff">$4,200</b></div>
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">📁 Projects<br/><b style="color:#fff">6 active</b></div>
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">⏳ Outstanding<br/><b style="color:#f59e0b">$1,800</b></div>
+        </div>
+        <div style="background:#1a1a1a;padding:6px;border-radius:4px;margin-bottom:4px;color:#888;font-size:10px">── Pipeline ─────────────────────────────
+  [Brand Refresh · Acme]  [API v2 · Globex]  [SEO · TechCo]  →</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:4px">
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px;color:#888;font-size:10px">Recent activity<br/>✓ Invoice #42 paid · 2h ago<br/>📄 Quote sent to Globex · 5h ago</div>
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px;color:#ef4444;font-size:10px">⚠ Attention<br/>Invoice #38 overdue<br/>Acme deadline tmrw</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Extend current</h3>
+      <p>Keep existing hero + 3 KPI cards. Add pipeline strip row below, then split bottom: recent activity (2/3) + attention list (1/3). Minimal layout change, just fill in live data.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="font-family:monospace;font-size:11px;line-height:1.6;background:#0f0f0f;color:#aaa;padding:12px;border-radius:8px;text-align:left">
+        <div style="background:#1a1a2e;padding:6px 8px;border-radius:4px;margin-bottom:4px;color:#6b7cff">▬▬▬▬▬▬▬▬  Welcome back, Junaid</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-bottom:4px">
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">💰 Revenue<br/><b style="color:#fff">$4,200</b></div>
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">📁 Active<br/><b style="color:#fff">6</b></div>
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">⏳ Outstanding<br/><b style="color:#f59e0b">$1,800</b></div>
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">⚠ Overdue<br/><b style="color:#ef4444">2</b></div>
+        </div>
+        <div style="background:#271a1a;border:1px solid #3d1f1f;padding:6px;border-radius:4px;margin-bottom:4px;font-size:10px">
+          ⚠ ATTENTION (3 items)<br/>
+          Invoice #38 overdue $850 · Acme deadline tomorrow · Quote #12 expiring
+        </div>
+        <div style="display:grid;grid-template-columns:3fr 2fr;gap:4px">
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px;color:#888;font-size:10px">Recent activity<br/>✓ Invoice #42 paid<br/>📄 Quote sent · 5h ago<br/>+ New client added</div>
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px;color:#888;font-size:10px">Pipeline<br/>[Brand·Acme]<br/>[API·Globex]<br/>[SEO·TechCo]</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Attention-first</h3>
+      <p>4 KPI cards (adds overdue count). Full-width attention banner below KPIs — always visible if items need action. Bottom splits: activity (3/5) + pipeline list (2/5).</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="font-family:monospace;font-size:11px;line-height:1.6;background:#0f0f0f;color:#aaa;padding:12px;border-radius:8px;text-align:left">
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:4px;margin-bottom:4px">
+          <div style="background:#1a1a2e;padding:6px 8px;border-radius:4px;color:#6b7cff">▬▬▬  Welcome back, Junaid<br/><span style="font-size:9px;color:#888">Today: 2 items need attention</span></div>
+          <div style="background:#271a1a;border:1px solid #3d1f1f;padding:6px;border-radius:4px;font-size:10px;color:#ef4444">⚠ 2 overdue · 1 expiring</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:4px">
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">💰 This month<br/><b style="color:#fff">$4,200</b></div>
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">📁 Projects<br/><b style="color:#fff">6 active</b></div>
+          <div style="background:#1a1a1a;padding:6px;border-radius:4px">⏳ Unpaid<br/><b style="color:#f59e0b">$1,800</b></div>
+        </div>
+        <div style="background:#1a1a1a;padding:6px;border-radius:4px;margin-bottom:4px;color:#888;font-size:10px">── Active pipeline ───────────────────────────────<br/>
+  [🔴 Brand Refresh · Acme · due 3d]  [🟡 API v2 · Globex · 60%]  [🟢 SEO · TechCo · on track]</div>
+        <div style="background:#1a1a1a;padding:6px;border-radius:4px;color:#888;font-size:10px">Recent activity (full width)<br/>✓ Invoice #42 paid by Acme Corp · $1,200 · 2h ago<br/>📄 Quote #15 sent to Globex · $3,400 · 5h ago<br/>🕐 Timer stopped: Brand Refresh · 2.5h logged</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Status in hero</h3>
+      <p>Attention count embedded in hero band (not a separate section). 3 KPIs. Pipeline strip with status indicators. Full-width recent activity at bottom. Cleanest feel, attention is ambient not alarming.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px">Click to select, then tell me in the terminal. Or just tell me directly.</p>
