@@ -72,7 +72,7 @@ export function AppHeader({
       <Button
         type="button"
         variant="outline"
-        className="hidden h-8 min-w-0 max-w-md flex-1 justify-start gap-2 rounded-[10px] border border-border bg-card px-3 text-muted-foreground md:flex"
+        className="hidden h-8 min-w-0 max-w-md flex-1 justify-start gap-2 rounded-[6px] border border-border bg-card px-3 text-muted-foreground md:flex"
         onClick={onOpenSearch}
       >
         <Search data-icon="inline-start" />

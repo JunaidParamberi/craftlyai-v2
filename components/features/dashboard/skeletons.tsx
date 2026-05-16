@@ -52,7 +52,7 @@ export function DashboardPageSkeleton({
       </div>
 
       {showAttentionBanner ? (
-        <Skeleton className="h-14 w-full rounded-[10px]" />
+        <Skeleton className="h-14 w-full rounded-[6px]" />
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-5">
@@ -95,7 +95,7 @@ export function DashboardPageSkeleton({
             <SkeletonRepeat
               count={3}
               render={(i) => (
-                <Skeleton key={i} className="h-[4.5rem] w-full rounded-[12px]" />
+                <Skeleton key={i} className="h-[4.5rem] w-full rounded-[6px]" />
               )}
             />
           </CardContent>

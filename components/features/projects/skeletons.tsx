@@ -197,7 +197,7 @@ export function ProjectDetailPageSkeleton() {
                     <Skeleton className="h-8 w-24" />
                   </div>
                   {Array.from({ length: 3 }, (_, i) => (
-                    <Skeleton key={i} className="min-h-[88px] w-full rounded-[14px]" />
+                    <Skeleton key={i} className="min-h-[88px] w-full rounded-[6px]" />
                   ))}
                 </div>
                 <div className="flex flex-col gap-6">

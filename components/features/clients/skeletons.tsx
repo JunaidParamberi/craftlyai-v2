@@ -116,7 +116,7 @@ function ClientFormCardSkeleton() {
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-16" />
-          <Skeleton className="min-h-[4.5rem] w-full rounded-[14px]" />
+          <Skeleton className="min-h-[4.5rem] w-full rounded-[6px]" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
@@ -126,7 +126,7 @@ function ClientFormCardSkeleton() {
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-14" />
-          <Skeleton className="min-h-[6rem] w-full rounded-[14px]" />
+          <Skeleton className="min-h-[6rem] w-full rounded-[6px]" />
         </div>
       </CardContent>
       <CardFooter className={FORM_CARD_FOOTER_END_ACTIONS}>
@@ -223,7 +223,7 @@ export function ClientsTestPageSkeleton() {
             <Skeleton className="h-9 w-full" />
             <Skeleton className="h-9 w-full" />
           </div>
-          <Skeleton className="min-h-[120px] w-full rounded-[14px]" />
+          <Skeleton className="min-h-[120px] w-full rounded-[6px]" />
           <div className="flex flex-wrap gap-2">
             <Skeleton className="h-9 w-24" />
             <Skeleton className="h-9 w-28" />

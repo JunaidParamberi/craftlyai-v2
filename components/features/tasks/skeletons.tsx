@@ -36,7 +36,7 @@ export function TasksPageSkeleton() {
           </div>
           <div className="flex flex-col gap-2">
             {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-[3.25rem] w-full rounded-[8px]" />
+              <Skeleton key={i} className="h-[3.25rem] w-full rounded-[6px]" />
             ))}
           </div>
         </CardContent>
