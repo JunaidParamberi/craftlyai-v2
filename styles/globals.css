@@ -135,6 +135,22 @@
     @apply font-sans;
   }
 
+  /* Unified focus ring — same style across every focusable element */
+  :focus-visible {
+    outline: none;
+  }
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid color-mix(in oklch, var(--primary) 50%, transparent);
+    outline-offset: 2px;
+    border-radius: inherit;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -286,6 +302,14 @@
   );
   pointer-events: none;
   opacity: 0.45;
+}
+
+/* Interactive table rows — subtle tint on hover (opt-in via data-interactive) */
+tr[data-interactive="true"] {
+  transition: background-color 120ms ease;
+}
+tr[data-interactive="true"]:hover {
+  background-color: color-mix(in oklch, var(--muted) 50%, transparent);
 }
 
 /* Interactive card — soft elevation on hover (opt-in via data-interactive) */

@@ -287,6 +287,7 @@ export function FinanceInvoiceTable({
                 return (
                   <TableRow
                     key={invoice.id}
+                    data-interactive="true"
                     className="group border-border/40 transition-colors hover:bg-muted/30"
                   >
                     <TableCell className="px-6 py-4">

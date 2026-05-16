@@ -42,7 +42,7 @@ function PipelineRow({ project }: { project: PipelineProject }) {
     <Link
       href={`/projects/${project.id}`}
       className={cn(
-        "block rounded-lg border border-border/60 border-l-2 bg-card/50 px-3 py-3 transition-colors hover:bg-muted/40",
+        "block rounded-[12px] border border-border/60 border-l-2 bg-card/50 px-3 py-3 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1",
         RISK_BORDER[project.risk]
       )}
     >
