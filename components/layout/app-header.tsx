@@ -64,7 +64,7 @@ export function AppHeader({
     <header
       className={cn(
         SHELL_HEADER_CLASS,
-        "sticky top-0 z-20 flex items-center gap-3 border-b border-sidebar-border/70 bg-background/80 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 md:gap-4 md:px-6",
+        "sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur-sm md:gap-4 md:px-6",
       )}
     >
       <SidebarTrigger className="shrink-0" />
@@ -72,7 +72,7 @@ export function AppHeader({
       <Button
         type="button"
         variant="outline"
-        className="hidden h-9 min-w-0 max-w-lg flex-1 justify-start gap-2 px-3 text-muted-foreground md:flex"
+        className="hidden h-8 min-w-0 max-w-md flex-1 justify-start gap-2 rounded-lg px-3 text-muted-foreground md:flex"
         onClick={onOpenSearch}
       >
         <Search data-icon="inline-start" />
