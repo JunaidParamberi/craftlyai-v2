@@ -146,16 +146,7 @@ export async function GET(
               }
             : null
         }
-        voucherData={
-          voucherData
-            ? {
-                voucher_number: voucherData.voucher_number,
-                notes_footer: voucherData.notes_footer,
-                line_items: voucherData.line_items,
-                currency: clientCurrency,
-              }
-            : null
-        }
+        voucherData={voucherData}
       />,
     );
   } catch (err) {

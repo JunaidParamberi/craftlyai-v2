@@ -74,7 +74,7 @@ export function RevenueAreaChart({ data, currency }: Props) {
   // Recharts needs ≥2 points to draw line/area; pad with a leading zero when needed
   const chartData: MonthlyRevenuePoint[] =
     data.length === 1
-      ? [{ month: getPrevMonthLabel(data[0].month), revenue: 0, isCurrent: false }, ...data]
+      ? [{ month: getPrevMonthLabel(data[0].month), monthKey: "", revenue: 0, isCurrent: false }, ...data]
       : data;
 
   const fewPoints = chartData.length <= 3;
@@ -95,20 +95,20 @@ export function RevenueAreaChart({ data, currency }: Props) {
         </defs>
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="hsl(var(--border))"
+          stroke="var(--border)"
           strokeOpacity={0.5}
           vertical={false}
         />
         <XAxis
           dataKey="month"
-          tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))", fontWeight: 400 }}
+          tick={{ fontSize: 11, fill: "var(--muted-foreground)", fontWeight: 400 }}
           axisLine={false}
           tickLine={false}
           tickFormatter={(v: string) => v.split(" ")[0]}
           dy={4}
         />
         <YAxis
-          tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+          tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
           axisLine={false}
           tickLine={false}
           tickFormatter={formatYAxis}
@@ -116,7 +116,7 @@ export function RevenueAreaChart({ data, currency }: Props) {
         />
         <Tooltip
           content={<ChartTooltip />}
-          cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
+          cursor={{ stroke: "var(--border)", strokeWidth: 1 }}
         />
         <Area
           type="monotone"
@@ -124,11 +124,15 @@ export function RevenueAreaChart({ data, currency }: Props) {
           stroke="#3b82f6"
           strokeWidth={2.5}
           fill="url(#revenueGradient)"
-          dot={fewPoints ? { r: 4, fill: "#3b82f6", stroke: "white", strokeWidth: 2 } : false}
+          dot={
+            fewPoints
+              ? { r: 4, fill: "#3b82f6", stroke: "var(--card)", strokeWidth: 2 }
+              : false
+          }
           activeDot={{
             r: 4,
             fill: "#3b82f6",
-            stroke: "white",
+            stroke: "var(--card)",
             strokeWidth: 2,
           }}
         />

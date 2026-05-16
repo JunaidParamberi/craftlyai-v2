@@ -24,6 +24,7 @@ const TYPE_LABELS: Record<DocumentListRow["type"], string> = {
   invoice: "Invoice",
   quote: "Quote",
   proposal: "Proposal",
+  payment_voucher: "Payment Voucher",
   other: "Other",
 };
 

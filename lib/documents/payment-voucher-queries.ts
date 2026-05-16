@@ -42,6 +42,7 @@ export async function getVoucherForInvoice(
   invoiceId: string,
 ): Promise<VoucherDocRow | null> {
   const { user } = await getServerContext();
+  if (!user) return null;
   return _cachedGetVoucherForInvoice(invoiceId, user.id);
 }
 
@@ -106,5 +107,6 @@ export async function getPaymentVoucherData(
   voucherDocumentId: string,
 ): Promise<PaymentVoucherData | null> {
   const { user } = await getServerContext();
+  if (!user) return null;
   return _cachedGetPaymentVoucherData(voucherDocumentId, user.id);
 }
