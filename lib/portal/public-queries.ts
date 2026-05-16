@@ -26,7 +26,7 @@ export type PortalDocumentItem = {
   updated_at: string;
   referenceNumber: string | null;
   dueOrValidLabel: string | null;
-  actionUrl: string;
+  actionUrl: string | null;
   actionLabel: string;
 };
 
@@ -80,7 +80,7 @@ function dueOrValidLabelFor(doc: DocumentPortalRow): string | null {
 function actionForDoc(
   doc: DocumentPortalRow,
   appUrl: string,
-): { actionUrl: string; actionLabel: string } | null {
+): { actionUrl: string | null; actionLabel: string } | null {
   if (doc.type === "invoice") {
     if (!doc.pay_token) return null;
     const label = doc.status === "paid" ? "View invoice" : "Pay invoice";
@@ -103,6 +103,9 @@ function actionForDoc(
       actionUrl: `${appUrl}/api/documents/${doc.id}/pdf`,
       actionLabel: "Download Voucher",
     };
+  }
+  if (doc.type === "local_purchase_order") {
+    return { actionUrl: null, actionLabel: "View LPO" };
   }
   return null;
 }
@@ -221,7 +224,7 @@ export async function listPortalDocuments(
       "id, type, title, status, updated_at, invoice_number, quote_number, proposal_number, voucher_number, source_document_id, due_date, valid_until, pay_token, approval_token",
     )
     .eq("client_id", clientId)
-    .in("type", ["invoice", "quote", "proposal", "payment_voucher"])
+    .in("type", ["invoice", "quote", "proposal", "payment_voucher", "local_purchase_order"])
     .in("status", [
       "sent",
       "viewed",

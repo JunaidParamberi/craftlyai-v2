@@ -17,6 +17,7 @@ const TYPE_LABELS: Record<DocumentType, string> = {
   quote: "Quote",
   proposal: "Proposal",
   payment_voucher: "Payment Voucher",
+  local_purchase_order: "Purchase Order",
   other: "Document",
 };
 
@@ -96,19 +97,21 @@ export function PortalDocumentList({
                   })}
                 </p>
               </div>
-              <Button
-                nativeButton={false}
-                render={<Link href={doc.actionUrl} />}
-                className="shrink-0"
-                style={
-                  {
-                    backgroundColor: "var(--portal-primary)",
-                    borderColor: "var(--portal-primary)",
-                  } as React.CSSProperties
-                }
-              >
-                {doc.actionLabel}
-              </Button>
+              {doc.actionUrl ? (
+                <Button
+                  nativeButton={false}
+                  render={<Link href={doc.actionUrl} />}
+                  className="shrink-0"
+                  style={
+                    {
+                      backgroundColor: "var(--portal-primary)",
+                      borderColor: "var(--portal-primary)",
+                    } as React.CSSProperties
+                  }
+                >
+                  {doc.actionLabel}
+                </Button>
+              ) : null}
             </CardContent>
           </Card>
         </li>
