@@ -4,6 +4,7 @@ import React from "react";
 import { getBrandKit } from "@/lib/brand-kit/actions";
 import { getDocumentById } from "@/lib/documents/document-queries";
 import { getInvoiceWithLineItems } from "@/lib/documents/invoice-queries";
+import { getPaymentVoucherData } from "@/lib/documents/payment-voucher-queries";
 import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 import { substituteInTiptapDoc } from "@/lib/documents/variables";
@@ -54,6 +55,12 @@ export async function GET(
   const proposalData =
     document.type === "proposal"
       ? await getProposalWithLineItems(id)
+      : null;
+
+  // Fetch payment voucher data if applicable.
+  const voucherData =
+    document.type === "payment_voucher"
+      ? await getPaymentVoucherData(id)
       : null;
 
   // Fetch client currency for invoice, quote, or proposal.
@@ -136,6 +143,16 @@ export async function GET(
                 currency: clientCurrency,
                 discount_value: proposalData.discount_value ?? 0,
                 discount_type: proposalData.discount_type ?? 'percent',
+              }
+            : null
+        }
+        voucherData={
+          voucherData
+            ? {
+                voucher_number: voucherData.voucher_number,
+                notes_footer: voucherData.notes_footer,
+                line_items: voucherData.line_items,
+                currency: clientCurrency,
               }
             : null
         }
