@@ -247,7 +247,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                 </TableRow>
               ) : (
                 pageRows.map((c) => (
-                  <TableRow key={c.id}>
+                  <TableRow key={c.id} data-interactive="true">
                     <TableCell className="ps-4 sm:ps-6">
                       <div className="flex min-w-0 flex-col gap-1">
                         <Link

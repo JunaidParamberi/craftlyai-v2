@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronRightIcon, CreditCardIcon, PaletteIcon } from "lucide-react";
+import { PageHeader } from "@/components/shared/page-header";
 
 import {
   Card,
@@ -26,14 +27,11 @@ const SETTINGS_SECTIONS = [
 export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-          Settings
-        </h1>
-        <p className="max-w-lg text-sm text-muted-foreground">
-          Manage your workspace preferences and account details.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Settings"
+        title="Settings"
+        description="Manage your workspace preferences and account details."
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {SETTINGS_SECTIONS.map(({ href, icon: Icon, title, description }) => (

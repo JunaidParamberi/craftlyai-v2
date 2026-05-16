@@ -2,12 +2,10 @@ import Link from "next/link";
 
 import {
   formatProjectDate,
-  projectStatusBadgePresentation,
   projectStatusLabel,
 } from "@/lib/projects/display";
+import { statusPillClass } from "@/lib/ui/status-styles";
 import type { ProjectListRow } from "@/types";
-
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -110,7 +108,6 @@ export function ClientProjectsSection({
           </TableHeader>
           <TableBody>
             {rows.map((p) => {
-              const badge = projectStatusBadgePresentation(p.status);
               return (
                 <TableRow key={p.id}>
                   <TableCell className="ps-4 sm:ps-6">
@@ -122,9 +119,9 @@ export function ClientProjectsSection({
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={badge.variant} className={badge.className}>
+                    <span className={statusPillClass(p.status)}>
                       {projectStatusLabel(p.status)}
-                    </Badge>
+                    </span>
                   </TableCell>
                   <TableCell className="hidden pe-4 text-muted-foreground text-sm sm:table-cell sm:pe-6">
                     {formatProjectDate(p.deadline)}

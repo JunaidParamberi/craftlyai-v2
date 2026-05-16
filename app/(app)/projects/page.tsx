@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { ProjectsTable } from "@/components/features/projects/projects-table";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/shared/page-header";
 import {
   Card,
   CardContent,
@@ -36,23 +37,17 @@ export default async function ProjectsPage() {
         id="projects:list"
         count={paginatedListSkeletonCount(projects.length)}
       />
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight md:text-3xl">
-            Projects
-          </h1>
-          <p className="max-w-lg text-muted-foreground text-sm">
-            Manage your active work and upcoming deadlines.
-          </p>
-        </div>
-        <Button
-          nativeButton={false}
-          render={<Link href="/projects/new" />}
-        >
-          <Plus />
-          New project
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Work"
+        title="Projects"
+        description="Manage your active work and upcoming deadlines."
+        actions={
+          <Button nativeButton={false} render={<Link href="/projects/new" />}>
+            <Plus />
+            New project
+          </Button>
+        }
+      />
 
       {projects.length === 0 ? (
         <Card className="border-dashed">

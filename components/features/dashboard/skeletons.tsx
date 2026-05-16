@@ -52,7 +52,7 @@ export function DashboardPageSkeleton({
       </div>
 
       {showAttentionBanner ? (
-        <Skeleton className="h-14 w-full rounded-lg" />
+        <Skeleton className="h-14 w-full rounded-[10px]" />
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-5">
@@ -71,7 +71,7 @@ export function DashboardPageSkeleton({
                 <div key={row}>
                   {row > 0 ? <Separator className="my-0" /> : null}
                   <div className="flex gap-3 py-3">
-                    <Skeleton className="size-9 shrink-0 rounded-2xl" />
+                    <Skeleton className="size-9 shrink-0 rounded-full" />
                     <div className="flex min-w-0 flex-1 flex-col gap-2">
                       <Skeleton className="h-[14px] w-full max-w-xs rounded-[3px]" />
                       <Skeleton className="h-[10px] w-20 rounded-[3px]" />
@@ -95,7 +95,7 @@ export function DashboardPageSkeleton({
             <SkeletonRepeat
               count={3}
               render={(i) => (
-                <Skeleton key={i} className="h-[4.5rem] w-full rounded-lg" />
+                <Skeleton key={i} className="h-[4.5rem] w-full rounded-[12px]" />
               )}
             />
           </CardContent>

@@ -31,7 +31,7 @@ export function ProjectsPageSkeleton({
         </div>
         <Skeleton className="h-9 w-[9.5rem] shrink-0 rounded-md" />
       </div>
-      <Card className="overflow-hidden border border-border shadow-sm ring-1 ring-border/50">
+      <Card className="overflow-hidden border border-border">
         <CardHeader className="flex flex-col gap-4 border-b border-border/80 py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Skeleton className="h-9 w-full max-w-md rounded-md" />
@@ -88,7 +88,7 @@ export function ProjectsPageSkeleton({
 
 function ProjectFormCardSkeleton() {
   return (
-    <Card className="border border-border shadow-sm ring-1 ring-border dark:ring-border">
+    <Card className="border border-border">
       <CardHeader className="pb-2">
         <Skeleton className="h-6 w-40" />
       </CardHeader>
@@ -162,7 +162,7 @@ export function ProjectDetailPageSkeleton() {
           <Skeleton className="size-4 rounded-sm" />
           <Skeleton className="h-4 w-48 max-w-[60%]" />
         </div>
-        <Card className="overflow-hidden border-border/80 shadow-sm">
+        <Card className="overflow-hidden border-border/80">
           <CardHeader className="flex flex-col gap-4 border-b border-border/60 pb-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex flex-col gap-3">
@@ -197,7 +197,7 @@ export function ProjectDetailPageSkeleton() {
                     <Skeleton className="h-8 w-24" />
                   </div>
                   {Array.from({ length: 3 }, (_, i) => (
-                    <Skeleton key={i} className="min-h-[88px] w-full rounded-2xl" />
+                    <Skeleton key={i} className="min-h-[88px] w-full rounded-[14px]" />
                   ))}
                 </div>
                 <div className="flex flex-col gap-6">

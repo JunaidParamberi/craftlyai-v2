@@ -104,9 +104,8 @@ export function RevenueAreaChart({ data, currency }: Props) {
       >
         <defs>
           <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
-            <stop offset="80%" stopColor="#3b82f6" stopOpacity={0.08} />
-            <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+            <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.18} />
+            <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid
@@ -137,17 +136,17 @@ export function RevenueAreaChart({ data, currency }: Props) {
         <Area
           type="monotone"
           dataKey="revenue"
-          stroke="#3b82f6"
-          strokeWidth={2.5}
+          stroke="var(--chart-1)"
+          strokeWidth={2}
           fill="url(#revenueGradient)"
           dot={
             fewPoints
-              ? { r: 4, fill: "#3b82f6", stroke: "var(--card)", strokeWidth: 2 }
+              ? { r: 4, fill: "var(--chart-1)", stroke: "var(--card)", strokeWidth: 2 }
               : false
           }
           activeDot={{
             r: 4,
-            fill: "#3b82f6",
+            fill: "var(--chart-1)",
             stroke: "var(--card)",
             strokeWidth: 2,
           }}

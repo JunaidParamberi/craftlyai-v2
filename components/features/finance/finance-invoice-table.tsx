@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { format, parseISO, isPast } from "date-fns";
 import { ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -17,10 +16,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import {
-  documentStatusLabel,
-  documentStatusVariant,
-} from "@/lib/documents/display";
+import { documentStatusLabel } from "@/lib/documents/display";
+import { statusPillClass } from "@/lib/ui/status-styles";
 import type { FinanceInvoiceRow, InvoiceFilters, SortKey } from "@/lib/finance/types";
 import { exportFinanceInvoices } from "@/lib/finance/finance-queries";
 
@@ -289,6 +286,7 @@ export function FinanceInvoiceTable({
                 return (
                   <TableRow
                     key={invoice.id}
+                    data-interactive="true"
                     className="group border-border/40 transition-colors hover:bg-muted/30"
                   >
                     <TableCell className="px-6 py-4">
@@ -316,12 +314,9 @@ export function FinanceInvoiceTable({
                       </span>
                     </TableCell>
                     <TableCell className="px-4 py-4">
-                      <Badge
-                        variant={documentStatusVariant(invoice.status)}
-                        className="text-[11px] font-medium"
-                      >
+                      <span className={statusPillClass(invoice.status)}>
                         {documentStatusLabel(invoice.status)}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell className="px-6 py-4 text-right">
                       <span

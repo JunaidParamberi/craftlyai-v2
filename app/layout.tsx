@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Geist, Inter } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { branding } from "@/config/branding";
@@ -12,11 +12,11 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 
-const fraunces = Fraunces({
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-display",
+  variable: "--font-heading",
   display: "swap",
 });
 
@@ -60,14 +60,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("font-sans", inter.variable, fraunces.variable)}
+      className={cn("font-sans", inter.variable, geist.variable)}
     >
       <body
         suppressHydrationWarning
         className={cn(
           "min-h-dvh font-sans antialiased",
           inter.variable,
-          fraunces.variable,
+          geist.variable,
         )}
       >
         <ThemeProvider>
