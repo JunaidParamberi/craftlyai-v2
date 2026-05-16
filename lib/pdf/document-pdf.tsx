@@ -17,6 +17,7 @@ const TYPE_LABELS: Record<DocumentType, string> = {
   proposal: "Proposal",
   quote: "Quote",
   invoice: "Invoice",
+  payment_voucher: "Payment Voucher",
   other: "Document",
 };
 
@@ -67,7 +68,40 @@ type DocumentPdfProps = {
     discount_value?: number;
     discount_type?: 'percent' | 'flat';
   } | null;
+  voucherData?: {
+    voucherNumber: string | null;
+    paidAt: string | Date;
+    amount: number;
+    currency: string;
+    method: string;
+    reference: string | null;
+    notes: string | null;
+    invoiceNumber: string | null;
+    invoiceTitle: string;
+  } | null;
 };
+
+function formatPaymentMethod(method: string): string {
+  const labels: Record<string, string> = {
+    bank_transfer: "Bank Transfer",
+    cash: "Cash",
+    cheque: "Cheque",
+    card: "Card",
+    other: "Other",
+  };
+  return labels[method] ?? method;
+}
+
+function formatCurrencyAmount(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount.toFixed(2)}`;
+  }
+}
 
 export function DocumentPdf({
   document,
@@ -80,6 +114,7 @@ export function DocumentPdf({
   invoiceData,
   quoteData,
   proposalData,
+  voucherData,
 }: DocumentPdfProps) {
   const color = primaryColor || "#6366f1";
   const fontFamily = resolvePdfFont(brandFont);
@@ -257,7 +292,7 @@ export function DocumentPdf({
         ) : null}
 
         {/* Body content (Tiptap) — proposal, other */}
-        {document.type !== "invoice" && document.type !== "quote" ? (
+        {document.type !== "invoice" && document.type !== "quote" && document.type !== "payment_voucher" ? (
           renderTiptapContent(content.content, { styles, primaryColor: color })
         ) : null}
 
@@ -278,6 +313,96 @@ export function DocumentPdf({
           <View style={{ marginTop: 12, padding: "8 0", borderTop: "1 solid #e5e7eb" }}>
             <Text style={{ ...styles.metaLabel, marginBottom: 4 }}>Notes</Text>
             <Text style={{ fontSize: 9, color: "#666", lineHeight: 1.5 }}>{proposalData.notes_footer}</Text>
+          </View>
+        ) : null}
+
+        {/* Payment Voucher confirmation + details */}
+        {document.type === "payment_voucher" && voucherData ? (
+          <View style={{ marginTop: 8, marginBottom: 24 }}>
+            <View
+              style={{
+                backgroundColor: "#f0fdf4",
+                borderRadius: 4,
+                padding: 12,
+                marginBottom: 20,
+                borderWidth: 1,
+                borderColor: "#86efac",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#16a34a",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  fontFamily,
+                }}
+              >
+                PAYMENT CONFIRMED
+              </Text>
+              {voucherData.voucherNumber ? (
+                <Text style={{ color: "#166534", fontSize: 9, marginTop: 3, fontFamily }}>
+                  {voucherData.voucherNumber}
+                </Text>
+              ) : null}
+            </View>
+
+            {[
+              {
+                label: "Invoice Reference",
+                value: `${voucherData.invoiceTitle}${voucherData.invoiceNumber ? ` (${voucherData.invoiceNumber})` : ""}`,
+                bold: false,
+              },
+              {
+                label: "Date Paid",
+                value: new Date(voucherData.paidAt).toLocaleDateString("en-GB", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }),
+                bold: false,
+              },
+              {
+                label: "Amount Paid",
+                value: formatCurrencyAmount(voucherData.amount, voucherData.currency),
+                bold: true,
+              },
+              {
+                label: "Payment Method",
+                value: formatPaymentMethod(voucherData.method),
+                bold: false,
+              },
+              ...(voucherData.reference
+                ? [{ label: "Reference", value: voucherData.reference, bold: false }]
+                : []),
+              ...(voucherData.notes
+                ? [{ label: "Notes", value: voucherData.notes, bold: false }]
+                : []),
+            ].map((row, idx) => (
+              <View
+                key={row.label}
+                style={{
+                  flexDirection: "row",
+                  paddingVertical: 7,
+                  paddingHorizontal: 10,
+                  backgroundColor: idx % 2 === 0 ? "#f9fafb" : "#ffffff",
+                }}
+              >
+                <Text style={{ flex: 1, fontSize: 9, color: "#6b7280", fontFamily }}>
+                  {row.label}
+                </Text>
+                <Text
+                  style={{
+                    flex: 2,
+                    fontSize: 9,
+                    color: "#111827",
+                    fontWeight: row.bold ? 700 : 400,
+                    fontFamily,
+                  }}
+                >
+                  {row.value}
+                </Text>
+              </View>
+            ))}
           </View>
         ) : null}
 
