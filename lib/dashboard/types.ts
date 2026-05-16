@@ -29,7 +29,7 @@ export type ActivityEvent = {
   id: string;
   href: string;
   label: string;
-  timestamp: Date;
+  timestamp: Date | string;
 };
 
 export type PipelineProject = {

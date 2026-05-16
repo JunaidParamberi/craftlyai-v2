@@ -28,7 +28,7 @@ describe("extractDocumentEvents", () => {
     });
     expect(events).toHaveLength(2);
     const paid = events.find((e) => e.type === "invoice_paid");
-    expect(paid?.timestamp.toISOString()).toBe("2026-05-12T14:00:00.000Z");
+    expect(new Date(paid?.timestamp ?? "").toISOString()).toBe("2026-05-12T14:00:00.000Z");
     expect(paid?.label).toContain("1042");
     expect(paid?.label).toContain("Acme Corp");
   });

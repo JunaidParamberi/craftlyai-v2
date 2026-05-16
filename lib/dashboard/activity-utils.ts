@@ -111,16 +111,17 @@ export function mergeAndSortEvents(
   limit: number
 ): ActivityEvent[] {
   return [...events]
-    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, limit);
 }
 
-export function formatActivityTimestamp(date: Date, now = new Date()): string {
+export function formatActivityTimestamp(date: Date | string, now = new Date()): string {
+  const d = date instanceof Date ? date : new Date(date);
   const days = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24)
   );
   if (days > 7) {
-    return format(date, "MMM d");
+    return format(d, "MMM d");
   }
-  return formatDistanceToNow(date, { addSuffix: true });
+  return formatDistanceToNow(d, { addSuffix: true });
 }
