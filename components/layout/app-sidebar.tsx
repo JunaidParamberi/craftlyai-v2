@@ -71,6 +71,7 @@ export function AppSidebar() {
           className="items-center"
           linkClassName="flex h-full items-center px-2 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
           wordmarkWrapperClassName="group-data-[collapsible=icon]:hidden"
+          forceDarkWordmark
         />
       </SidebarHeader>
 

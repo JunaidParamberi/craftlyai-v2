@@ -8,6 +8,8 @@ type BrandLockupProps = {
   className?: string;
   /** Extra classes on the wordmark wrapper (e.g. sidebar `group-data-[collapsible=icon]:hidden`). */
   wordmarkWrapperClassName?: string;
+  /** Force dark-bg wordmark regardless of color scheme (use when container is always dark, e.g. navy sidebar). */
+  forceDarkWordmark?: boolean;
 };
 
 /**
@@ -16,6 +18,7 @@ type BrandLockupProps = {
 export function BrandLockup({
   className,
   wordmarkWrapperClassName,
+  forceDarkWordmark = false,
 }: BrandLockupProps) {
   return (
     <div className={cn("shrink-0", className)}>
@@ -34,21 +37,26 @@ export function BrandLockup({
             wordmarkWrapperClassName,
           )}
         >
-          <Image
-            src={branding.wordmarkOnLightBg}
-            alt=""
-            width={160}
-            height={36}
-            unoptimized
-            className="block h-[1.125rem] w-auto max-w-[min(100%,11rem)] object-contain object-left-bottom dark:hidden sm:h-5"
-          />
+          {!forceDarkWordmark && (
+            <Image
+              src={branding.wordmarkOnLightBg}
+              alt=""
+              width={160}
+              height={36}
+              unoptimized
+              className="block h-[1.125rem] w-auto max-w-[min(100%,11rem)] object-contain object-left-bottom dark:hidden sm:h-5"
+            />
+          )}
           <Image
             src={branding.wordmarkOnDarkBg}
             alt=""
             width={160}
             height={36}
             unoptimized
-            className="hidden h-[1.125rem] w-auto max-w-[min(100%,11rem)] object-contain object-left-bottom dark:block sm:h-5"
+            className={cn(
+              "h-[1.125rem] w-auto max-w-[min(100%,11rem)] object-contain object-left-bottom sm:h-5",
+              forceDarkWordmark ? "block" : "hidden dark:block",
+            )}
           />
         </span>
       </div>
@@ -66,6 +74,7 @@ export function BrandLockupLink({
   className,
   linkClassName,
   wordmarkWrapperClassName,
+  forceDarkWordmark,
 }: BrandLockupLinkProps) {
   return (
     <Link
@@ -79,6 +88,7 @@ export function BrandLockupLink({
       <BrandLockup
         className={className}
         wordmarkWrapperClassName={wordmarkWrapperClassName}
+        forceDarkWordmark={forceDarkWordmark}
       />
     </Link>
   );
