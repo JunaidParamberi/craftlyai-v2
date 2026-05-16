@@ -1,7 +1,7 @@
 # CLAUDE.md — CraftlyAI Project Context
 
-Last updated: 2026-05-15
-Current phase: Phase 2 complete; Phase 2.5 — Foundation Gaps in-progress (5/8)
+Last updated: 2026-05-16
+Current phase: Phase 2 complete; Phase 2.5 — Foundation Gaps in-progress (7/9)
 
 Tick **`[x]`** when a task is finished. For open tasks, put **`todo ·`** or **`in-progress ·`** right after the checkbox (before the task text).
 
@@ -227,9 +227,10 @@ Plan gating: Supabase RLS + middleware check plan tier before every AI call.
 | clients | id, user_id, name, email, phone, company, address, currency, notes, health_score |
 | projects | id, user_id, client_id, title, status, budget, spent, start_date, deadline |
 | tasks | id, project_id, title, status, due_date, priority |
-| documents | id, user_id, client_id, project_id, type, status, content_json, pdf_url, sent_at, viewed_at, signed_at |
+| documents | id, user_id, client_id, project_id, type, status, content_json, pdf_url, sent_at, viewed_at, signed_at, voucher_number, source_document_id, payment_id |
 | line_items | id, document_id, description, quantity, unit_price, tax_rate, amount |
-| payments | id, document_id, amount, currency, method, paid_at |
+| payments | id, document_id, amount, currency, method, reference, notes, paid_at |
+| invoice_adjustments | id, document_id, user_id, type, amount, reason |
 | expenses | id, user_id, project_id, category, amount, currency, vendor, notes, receipt_url, receipt_urls (jsonb), date |
 | time_entries | id, user_id, project_id, task_id, started_at, ended_at, duration_seconds, billed |
 | templates | id, user_id, name, type, content_json, is_default |
@@ -296,8 +297,8 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 - [x] Tasks standalone view — `/tasks` cross-project inbox: `listAllTasksForUser`, URL filters (`project`/`status`/`priority`/`sort`), KPI summary (open/overdue/done), shadcn table + Checkbox, quick-add dialog, sidebar nav; `lib/tasks/task-queries.ts`, `lib/tasks/task-utils.ts` (+ Vitest), `lib/tasks/display.ts`, `components/features/tasks/*`; revalidates `/tasks` on mutations (`feat/tasks-standalone` → `dev`)
 - [x] Project kanban board — board view toggle on project **Tasks** tab (`/projects/[id]`), 4 status columns, `@dnd-kit/core` drag-to-update status, edit sheet, per-project list/board in localStorage; `components/features/tasks/kanban-*`, `task-edit-sheet.tsx`, spec `docs/specs/2026-05-15-kanban-board-design.md` (`feat/kanban-board` → `dev`)
 - [x] Notifications UI — bell + drawer, unread badge, mark-read server actions
-- [x] Payment method detail — mark-paid modal with method/cheque/reference fields, payment history tab
-- [ ] todo · Payment Voucher document type — auto-generated on mark-paid, PDF, accessible in portal
+- [x] Payment method detail — record-payment modal with amount/method/reference/notes fields, payment history tab, partial-payment support (`partially_paid`, `written_off`, write-off reason, later payments)
+- [x] Payment Voucher document type — auto-generated per payment, PDF, accessible from invoice/payment history and portal
 - [ ] todo · LPO document type — record client LPO, linked to project, appears in portal
 - [ ] todo · Receipt document type — auto-generated after payment, Resend to client
 
@@ -385,6 +386,8 @@ Full spec: `docs/superpowers/specs/2026-05-15-craftlyai-master-roadmap.md`
 - 2026-05-15: **Project kanban board** merged to `dev` — **Tasks** tab on `/projects/[id]`: list/board toggle (per-project `localStorage`), 4-column kanban (`todo` / `in_progress` / `done` / `cancelled`), optimistic dnd-kit status drag, right Sheet edit/delete, column “Add task” pre-fills status via existing project add dialog; `@dnd-kit/core` + `@dnd-kit/utilities`. `feat/kanban-board` → `dev`. Phase 2.5 progress: 4/8. Next: **Notifications UI**.
 - 2026-05-15: **Notifications UI** merged to `dev` — `notifications` table + RLS (select/insert/update/delete policies) + 30-day backfill; bell icon + right Sheet drawer; unread badge, time-grouped list (Today/Yesterday/Older), colored accent bar per type; mark read on click, mark all read, clear all, per-item delete (hover-reveal trash); browser Notification API with permission prompt in sheet + localStorage dedup (auto-fires on mount for unseen unread); write hooks on invoice paid, quote/proposal sent/approved/declined, public quote respond route; `lib/notifications/*` + Vitest; `hooks/use-browser-notifications.ts`. `feat/notifications-ui` → `dev`. Phase 2.5 progress: 5/8. Next: **Payment method detail**.
 - 2026-05-16: **Payment method detail** merged to `dev` — `payments` table migration; `markInvoicePaid` now accepts method/reference/notes, computes total server-side, inserts payment record; `MarkPaidButton` replaced simple confirm dialog with method select + reference + notes form; `PaymentHistory` component shows date/method/reference/amount table below invoice; `getPaymentsForDocument` query; `PaymentRow` + `PaymentMethod` types; 10 Vitest tests. `feat/payment-method-detail` → `dev`. Phase 2.5 progress: 6/8. Next: **Payment Voucher document type**.
+- 2026-05-16: **Payment Voucher document type** — `payment_voucher` document type with `voucher_number` + `source_document_id`; vouchers auto-generate on recorded payment, render detail panel/PDF, appear in public portal, and link back from paid invoices. Remote DB has migration `20260528120000_payment_voucher.sql` applied. Phase 2.5 progress: 7/9.
+- 2026-05-16: **Partial invoice payments** on `feat/partial-invoice-payments` — `Record payment` flow now stores actual amount received, supports `partially_paid` and `written_off` invoice statuses, keeps balance due for later payments, writes off remaining balance with reason via `invoice_adjustments`, and creates one payment voucher per payment (`documents.payment_id`). Migration `20260529120000_partial_invoice_payments.sql` pushed to remote DB after repairing orphaned remote migration history entry `20260516125417` as reverted. Verification: `npm run test` (235 pass), `npm run lint` (existing warnings only), `npm run build` pass. Browser smoke reached login; authenticated invoice smoke not completed without session.
 
 ---
 
