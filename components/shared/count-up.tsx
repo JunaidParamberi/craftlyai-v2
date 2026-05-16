@@ -26,27 +26,18 @@ export function CountUp({
 }: Props) {
   const [displayed, setDisplayed] = useState(applyFormat(0, format));
   const frameRef = useRef<number | null>(null);
-  const mounted = useRef(false);
 
   useEffect(() => {
-    if (mounted.current) return;
-    mounted.current = true;
-
-    if (typeof window === "undefined") {
-      setDisplayed(applyFormat(value, format));
-      return;
-    }
+    // Reset to 0 so every mount (including back-navigation) animates cleanly
+    setDisplayed(applyFormat(0, format));
 
     const startTime = performance.now();
-    const startValue = 0;
 
     function tick(now: number) {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // easeOutCubic
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = startValue + (value - startValue) * eased;
-      setDisplayed(applyFormat(current, format));
+      setDisplayed(applyFormat(value * eased, format));
       if (progress < 1) {
         frameRef.current = requestAnimationFrame(tick);
       }
@@ -56,9 +47,8 @@ export function CountUp({
     return () => {
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
     };
-    // intentionally only runs on mount — value after first render is "target"
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [value]);
 
   return <span className={className}>{displayed}</span>;
 }
