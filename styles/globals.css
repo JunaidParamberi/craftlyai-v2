@@ -323,7 +323,7 @@ tr[data-interactive="true"]:hover {
   transform: translateY(-1px);
 }
 
-/* Skeleton shimmer — blue-tinted wave on cool grey base */
+/* Skeleton shimmer — neutral wave, no colour cast */
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
@@ -335,7 +335,7 @@ tr[data-interactive="true"]:hover {
   background: linear-gradient(
     90deg,
     var(--muted) 25%,
-    color-mix(in oklch, var(--muted) 86%, var(--primary)) 50%,
+    color-mix(in srgb, var(--muted) 60%, white) 50%,
     var(--muted) 75%
   );
   background-size: 200% 100%;
