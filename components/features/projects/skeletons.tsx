@@ -25,17 +25,17 @@ export function ProjectsPageSkeleton({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-9 w-40 md:h-10 md:w-44" />
-          <Skeleton className="h-4 w-full max-w-lg" />
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-8 w-40 rounded-[4px] md:h-9 md:w-44" />
+          <Skeleton className="h-4 w-full max-w-lg rounded-[3px]" />
         </div>
-        <Skeleton className="h-9 w-[9.5rem] shrink-0" />
+        <Skeleton className="h-9 w-[9.5rem] shrink-0 rounded-md" />
       </div>
-      <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm ring-1 ring-border/50">
-        <div className="flex flex-col gap-4 border-b border-border/80 p-4">
+      <Card className="overflow-hidden border border-border shadow-sm ring-1 ring-border/50">
+        <CardHeader className="flex flex-col gap-4 border-b border-border/80 py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Skeleton className="h-9 w-full max-w-md" />
-            <Skeleton className="h-9 w-full sm:w-28" />
+            <Skeleton className="h-9 w-full max-w-md rounded-md" />
+            <Skeleton className="h-9 w-full rounded-md sm:w-28" />
           </div>
           <div className="flex flex-wrap gap-2">
             <SkeletonRepeat
@@ -45,39 +45,43 @@ export function ProjectsPageSkeleton({
               )}
             />
           </div>
-        </div>
-        <div className="px-4 py-3 sm:px-6">
-          <div className="flex gap-4 border-b border-border py-3">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="hidden h-4 w-16 md:block" />
-            <Skeleton className="h-4 w-14" />
-            <Skeleton className="hidden h-4 w-20 sm:block" />
-            <Skeleton className="ms-auto h-4 w-8" />
+        </CardHeader>
+        <CardContent className="p-0">
+          {/* Table header */}
+          <div className="flex items-center gap-4 border-b border-border py-3 ps-4 pe-4 sm:ps-6 sm:pe-6">
+            <Skeleton className="h-3 w-20 flex-1 max-w-[120px] rounded-[3px]" />
+            <Skeleton className="hidden h-3 w-14 rounded-[3px] md:block" />
+            <Skeleton className="h-3 w-14 rounded-[3px]" />
+            <Skeleton className="hidden h-3 w-16 rounded-[3px] sm:block" />
+            <div className="w-12" />
           </div>
+          {/* Table rows */}
           <SkeletonRepeat
             count={rowCount}
             render={(i) => (
               <div
                 key={i}
-                className="flex items-center gap-4 border-b border-border py-4 last:border-0"
+                className="flex items-center gap-4 border-b border-border py-4 ps-4 pe-4 last:border-0 sm:ps-6 sm:pe-6"
               >
-                <Skeleton className="h-5 min-w-0 flex-1 max-w-[220px]" />
-                <Skeleton className="hidden h-4 w-28 md:block" />
+                <Skeleton className="h-4 min-w-0 flex-1 max-w-[220px] rounded-[3px]" />
+                <Skeleton className="hidden h-4 w-28 rounded-[3px] md:block" />
                 <Skeleton className="h-6 w-20 rounded-full" />
-                <Skeleton className="hidden h-4 w-24 sm:block" />
-                <Skeleton className="size-8 shrink-0 rounded-full" />
+                <Skeleton className="hidden h-4 w-24 rounded-[3px] sm:block" />
+                <div className="flex w-12 justify-end">
+                  <Skeleton className="size-8 rounded-full" />
+                </div>
               </div>
             )}
           />
-        </div>
-        <div className="flex flex-col gap-3 border-t border-border/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <Skeleton className="h-4 w-52" />
+        </CardContent>
+        <CardFooter className="flex flex-col gap-3 border-t border-border/80 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <Skeleton className="h-4 w-52 rounded-[3px]" />
           <div className="flex gap-2">
-            <Skeleton className="size-8 rounded-lg" />
-            <Skeleton className="size-8 rounded-lg" />
+            <Skeleton className="size-8 rounded-md" />
+            <Skeleton className="size-8 rounded-md" />
           </div>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

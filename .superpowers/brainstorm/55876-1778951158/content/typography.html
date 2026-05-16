@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CraftlyAI — Typography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Geist:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #070b14; color: #e8eaf0; min-height: 100vh; padding: 32px 24px 56px; font-family: -apple-system, sans-serif; }
+
+  .page-label { font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #2c5bff; margin-bottom: 8px; }
+  .page-heading { font-size: 26px; font-weight: 800; color: #f0f2f8; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .page-sub { font-size: 14px; color: #4a5880; margin-bottom: 40px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+  .card {
+    border-radius: 16px; overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.06);
+    cursor: pointer; transition: all 0.2s ease;
+    background: #0d1220; position: relative;
+  }
+  .card:hover { transform: translateY(-3px); border-color: rgba(44,91,255,0.25); }
+  .card.selected { border-color: #2c5bff; box-shadow: 0 0 0 4px rgba(44,91,255,0.15); }
+
+  .selected-badge {
+    display: none; position: absolute; top: 10px; left: 10px;
+    background: #2c5bff; color: white; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px; z-index: 20;
+  }
+  .card.selected .selected-badge { display: block; }
+  .card-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(44,91,255,0.18); color: #6b90ff;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px; z-index: 10;
+  }
+
+  /* ── SHARED MOCKUP SHELL ── */
+  .shell { display: flex; height: 320px; overflow: hidden; background: #f5f6fa; }
+  .nav {
+    width: 160px; background: #0b1220; flex-shrink: 0;
+    padding: 14px 10px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; padding: 0 4px; }
+  .nav-mark { width: 22px; height: 26px; background: #2c5bff; border-radius: 6px; flex-shrink: 0; }
+  .main { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+  .topbar { display: flex; justify-content: space-between; align-items: flex-start; }
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi { background: white; border: 1px solid #e8ecf5; border-radius: 10px; padding: 12px; }
+  .kpi-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .bottom { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; flex: 1; }
+  .panel { background: white; border: 1px solid #e8ecf5; border-radius: 10px; padding: 12px; }
+  .dot-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── A: Inter (current baseline, upgraded) ── */
+  .f-inter { font-family: 'Inter', sans-serif; }
+  .f-inter .nav-wordmark { font-size: 14px; font-weight: 700; color: white; letter-spacing: -0.01em; }
+  .f-inter .nav-item { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.45); padding: 7px 8px; border-radius: 7px; display: flex; align-items: center; gap: 6px; }
+  .f-inter .nav-item.on { color: white; background: rgba(44,91,255,0.2); }
+  .f-inter .nav-dot { width: 13px; height: 13px; border-radius: 4px; background: rgba(255,255,255,0.12); flex-shrink: 0; }
+  .f-inter .nav-dot.on { background: #2c5bff; }
+  .f-inter .page-title { font-size: 18px; font-weight: 700; color: #0b1220; letter-spacing: -0.02em; }
+  .f-inter .page-sub { font-size: 11px; font-weight: 400; color: #8090b0; margin-top: 1px; }
+  .f-inter .cta { font-size: 11px; font-weight: 600; background: #2c5bff; color: white; padding: 6px 12px; border-radius: 7px; }
+  .f-inter .kpi-label { font-size: 10px; font-weight: 500; color: #8090b0; text-transform: uppercase; letter-spacing: 0.05em; }
+  .f-inter .kpi-val { font-size: 22px; font-weight: 700; color: #0b1220; letter-spacing: -0.02em; margin-top: 2px; }
+  .f-inter .kpi-delta { font-size: 10px; font-weight: 600; color: #2c5bff; background: rgba(44,91,255,0.1); padding: 1px 6px; border-radius: 4px; }
+  .f-inter .panel-title { font-size: 11px; font-weight: 600; color: #0b1220; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .f-inter .row-text { font-size: 11px; color: #3a4a70; }
+  .f-inter .row-sub { font-size: 10px; color: #8090b0; }
+
+  /* ── B: Plus Jakarta Sans ── */
+  .f-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .f-jakarta .nav-wordmark { font-size: 14px; font-weight: 800; color: white; letter-spacing: -0.02em; }
+  .f-jakarta .nav-item { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.45); padding: 7px 8px; border-radius: 7px; display: flex; align-items: center; gap: 6px; }
+  .f-jakarta .nav-item.on { color: white; background: rgba(44,91,255,0.2); }
+  .f-jakarta .nav-dot { width: 13px; height: 13px; border-radius: 4px; background: rgba(255,255,255,0.12); flex-shrink: 0; }
+  .f-jakarta .nav-dot.on { background: #2c5bff; }
+  .f-jakarta .page-title { font-size: 19px; font-weight: 800; color: #0b1220; letter-spacing: -0.03em; }
+  .f-jakarta .page-sub { font-size: 11px; font-weight: 400; color: #8090b0; margin-top: 1px; }
+  .f-jakarta .cta { font-size: 11px; font-weight: 700; background: #2c5bff; color: white; padding: 6px 12px; border-radius: 8px; }
+  .f-jakarta .kpi-label { font-size: 10px; font-weight: 600; color: #8090b0; text-transform: uppercase; letter-spacing: 0.06em; }
+  .f-jakarta .kpi-val { font-size: 24px; font-weight: 800; color: #0b1220; letter-spacing: -0.03em; margin-top: 2px; }
+  .f-jakarta .kpi-delta { font-size: 10px; font-weight: 700; color: #2c5bff; background: rgba(44,91,255,0.1); padding: 1px 6px; border-radius: 4px; }
+  .f-jakarta .panel-title { font-size: 11px; font-weight: 700; color: #0b1220; margin-bottom: 8px; }
+  .f-jakarta .row-text { font-size: 11px; font-weight: 500; color: #3a4a70; }
+  .f-jakarta .row-sub { font-size: 10px; color: #8090b0; }
+
+  /* ── C: Geist ── */
+  .f-geist { font-family: 'Geist', 'Inter', sans-serif; }
+  .f-geist .nav-wordmark { font-size: 13px; font-weight: 700; color: white; letter-spacing: 0.01em; }
+  .f-geist .nav-item { font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.4); padding: 7px 8px; border-radius: 6px; display: flex; align-items: center; gap: 6px; }
+  .f-geist .nav-item.on { color: white; background: rgba(44,91,255,0.18); }
+  .f-geist .nav-dot { width: 13px; height: 13px; border-radius: 3px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
+  .f-geist .nav-dot.on { background: #2c5bff; }
+  .f-geist .page-title { font-size: 17px; font-weight: 600; color: #0b1220; letter-spacing: -0.01em; }
+  .f-geist .page-sub { font-size: 11px; font-weight: 400; color: #8090b0; margin-top: 1px; }
+  .f-geist .cta { font-size: 11px; font-weight: 500; background: #2c5bff; color: white; padding: 6px 12px; border-radius: 6px; letter-spacing: 0.01em; }
+  .f-geist .kpi-label { font-size: 10px; font-weight: 500; color: #8090b0; letter-spacing: 0.02em; }
+  .f-geist .kpi-val { font-size: 22px; font-weight: 600; color: #0b1220; letter-spacing: -0.01em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .f-geist .kpi-delta { font-size: 10px; font-weight: 500; color: #2c5bff; background: rgba(44,91,255,0.1); padding: 1px 6px; border-radius: 4px; }
+  .f-geist .panel-title { font-size: 11px; font-weight: 500; color: #0b1220; margin-bottom: 8px; letter-spacing: 0.02em; }
+  .f-geist .row-text { font-size: 11px; color: #3a4a70; }
+  .f-geist .row-sub { font-size: 10px; color: #8090b0; }
+
+  .card-meta { padding: 14px 16px 18px; }
+  .card-meta h3 { font-size: 15px; font-weight: 700; color: #f0f2f8; margin-bottom: 4px; }
+  .card-meta p { font-size: 12.5px; color: #4a5880; line-height: 1.5; }
+  .card-meta .vibe { display: inline-block; margin-top: 8px; font-size: 11px; padding: 3px 8px; border-radius: 5px; background: rgba(44,91,255,0.1); color: #6b90ff; font-weight: 600; }
+
+  .bottom-hint { text-align: center; margin-top: 30px; font-size: 13px; color: #2a3450; }
+</style>
+<script>
+  function selectCard(el) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const choice = el.dataset.choice;
+    const text = el.querySelector('h3').textContent;
+    try { fetch('/event', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ type:'click', choice, text, timestamp: Date.now() }) }).catch(()=>{}); } catch(e) {}
+  }
+</script>
+</head>
+<body>
+
+<div class="page-label">Step 2 · Typography</div>
+<div class="page-heading">Which font feels like CraftlyAI?</div>
+<div class="page-sub">Same layout, same color — only the typeface changes. This is the biggest single upgrade.</div>
+
+<div class="grid">
+
+  <!-- A: INTER -->
+  <div class="card f-inter" data-choice="a" onclick="selectCard(this)">
+    <span class="selected-badge">✓ Selected</span>
+    <div class="card-badge">A</div>
+    <div class="shell f-inter">
+      <div class="nav f-inter">
+        <div class="nav-brand">
+          <div class="nav-mark"></div>
+          <span class="nav-wordmark">Craftly</span>
+        </div>
+        <div class="nav-item on f-inter"><div class="nav-dot on f-inter"></div>Dashboard</div>
+        <div class="nav-item f-inter"><div class="nav-dot f-inter"></div>Clients</div>
+        <div class="nav-item f-inter"><div class="nav-dot f-inter"></div>Projects</div>
+        <div class="nav-item f-inter"><div class="nav-dot f-inter"></div>Finance</div>
+        <div class="nav-item f-inter"><div class="nav-dot f-inter"></div>Documents</div>
+      </div>
+      <div class="main f-inter">
+        <div class="topbar f-inter">
+          <div>
+            <div class="page-title f-inter">Dashboard</div>
+            <div class="page-sub f-inter">Monday, May 16</div>
+          </div>
+          <div class="cta f-inter">+ New invoice</div>
+        </div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-row f-inter">
+              <span class="kpi-label f-inter">Revenue</span>
+              <span class="kpi-delta f-inter">+12%</span>
+            </div>
+            <div class="kpi-val f-inter">$8,400</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-row f-inter">
+              <span class="kpi-label f-inter">Outstanding</span>
+            </div>
+            <div class="kpi-val f-inter">$2,100</div>
+          </div>
+        </div>
+        <div class="bottom">
+          <div class="panel">
+            <div class="panel-title f-inter">Recent invoices</div>
+            <div class="dot-row"><div class="status-dot" style="background:#2c5bff"></div><div><div class="row-text f-inter">Acme Corp — Website redesign</div><div class="row-sub f-inter">Due Jun 1 · $3,200</div></div></div>
+            <div class="dot-row" style="margin-top:6px"><div class="status-dot" style="background:#22c55e"></div><div><div class="row-text f-inter">Studio Bloom — Brand kit</div><div class="row-sub f-inter">Paid · $1,800</div></div></div>
+            <div class="dot-row" style="margin-top:6px"><div class="status-dot" style="background:#f59e0b"></div><div><div class="row-text f-inter">Nexus Labs — SEO audit</div><div class="row-sub f-inter">Overdue · $950</div></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title f-inter">Pipeline</div>
+            <div class="dot-row"><div class="status-dot" style="background:#2c5bff"></div><div class="row-text f-inter">3 active</div></div>
+            <div class="dot-row" style="margin-top:5px"><div class="status-dot" style="background:#8090b0"></div><div class="row-text f-inter">1 on hold</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <h3>Inter</h3>
+      <p>The SaaS standard. Extremely legible, neutral, universally trusted. Feels like Notion, Linear, GitHub.</p>
+      <span class="vibe">Clean · Trusted · Familiar</span>
+    </div>
+  </div>
+
+  <!-- B: PLUS JAKARTA SANS -->
+  <div class="card f-jakarta" data-choice="b" onclick="selectCard(this)">
+    <span class="selected-badge">✓ Selected</span>
+    <div class="card-badge">B</div>
+    <div class="shell f-jakarta">
+      <div class="nav f-jakarta">
+        <div class="nav-brand">
+          <div class="nav-mark"></div>
+          <span class="nav-wordmark">Craftly</span>
+        </div>
+        <div class="nav-item on f-jakarta"><div class="nav-dot on f-jakarta"></div>Dashboard</div>
+        <div class="nav-item f-jakarta"><div class="nav-dot f-jakarta"></div>Clients</div>
+        <div class="nav-item f-jakarta"><div class="nav-dot f-jakarta"></div>Projects</div>
+        <div class="nav-item f-jakarta"><div class="nav-dot f-jakarta"></div>Finance</div>
+        <div class="nav-item f-jakarta"><div class="nav-dot f-jakarta"></div>Documents</div>
+      </div>
+      <div class="main f-jakarta">
+        <div class="topbar f-jakarta">
+          <div>
+            <div class="page-title f-jakarta">Dashboard</div>
+            <div class="page-sub f-jakarta">Monday, May 16</div>
+          </div>
+          <div class="cta f-jakarta">+ New invoice</div>
+        </div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-row f-jakarta">
+              <span class="kpi-label f-jakarta">Revenue</span>
+              <span class="kpi-delta f-jakarta">+12%</span>
+            </div>
+            <div class="kpi-val f-jakarta">$8,400</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-row f-jakarta">
+              <span class="kpi-label f-jakarta">Outstanding</span>
+            </div>
+            <div class="kpi-val f-jakarta">$2,100</div>
+          </div>
+        </div>
+        <div class="bottom">
+          <div class="panel">
+            <div class="panel-title f-jakarta">Recent invoices</div>
+            <div class="dot-row"><div class="status-dot" style="background:#2c5bff"></div><div><div class="row-text f-jakarta">Acme Corp — Website redesign</div><div class="row-sub f-jakarta">Due Jun 1 · $3,200</div></div></div>
+            <div class="dot-row" style="margin-top:6px"><div class="status-dot" style="background:#22c55e"></div><div><div class="row-text f-jakarta">Studio Bloom — Brand kit</div><div class="row-sub f-jakarta">Paid · $1,800</div></div></div>
+            <div class="dot-row" style="margin-top:6px"><div class="status-dot" style="background:#f59e0b"></div><div><div class="row-text f-jakarta">Nexus Labs — SEO audit</div><div class="row-sub f-jakarta">Overdue · $950</div></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title f-jakarta">Pipeline</div>
+            <div class="dot-row"><div class="status-dot" style="background:#2c5bff"></div><div class="row-text f-jakarta">3 active</div></div>
+            <div class="dot-row" style="margin-top:5px"><div class="status-dot" style="background:#8090b0"></div><div class="row-text f-jakarta">1 on hold</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <h3>Plus Jakarta Sans</h3>
+      <p>Warm, expressive, high-personality. Bolder headlines, friendlier curves. Feels premium but approachable — HoneyBook tier.</p>
+      <span class="vibe">Bold · Warm · Distinctive</span>
+    </div>
+  </div>
+
+  <!-- C: GEIST -->
+  <div class="card f-geist" data-choice="c" onclick="selectCard(this)">
+    <span class="selected-badge">✓ Selected</span>
+    <div class="card-badge">C</div>
+    <div class="shell f-geist">
+      <div class="nav f-geist">
+        <div class="nav-brand">
+          <div class="nav-mark"></div>
+          <span class="nav-wordmark">Craftly</span>
+        </div>
+        <div class="nav-item on f-geist"><div class="nav-dot on f-geist"></div>Dashboard</div>
+        <div class="nav-item f-geist"><div class="nav-dot f-geist"></div>Clients</div>
+        <div class="nav-item f-geist"><div class="nav-dot f-geist"></div>Projects</div>
+        <div class="nav-item f-geist"><div class="nav-dot f-geist"></div>Finance</div>
+        <div class="nav-item f-geist"><div class="nav-dot f-geist"></div>Documents</div>
+      </div>
+      <div class="main f-geist">
+        <div class="topbar f-geist">
+          <div>
+            <div class="page-title f-geist">Dashboard</div>
+            <div class="page-sub f-geist">Monday, May 16</div>
+          </div>
+          <div class="cta f-geist">+ New invoice</div>
+        </div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-row f-geist">
+              <span class="kpi-label f-geist">Revenue</span>
+              <span class="kpi-delta f-geist">+12%</span>
+            </div>
+            <div class="kpi-val f-geist">$8,400</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-row f-geist">
+              <span class="kpi-label f-geist">Outstanding</span>
+            </div>
+            <div class="kpi-val f-geist">$2,100</div>
+          </div>
+        </div>
+        <div class="bottom">
+          <div class="panel">
+            <div class="panel-title f-geist">Recent invoices</div>
+            <div class="dot-row"><div class="status-dot" style="background:#2c5bff"></div><div><div class="row-text f-geist">Acme Corp — Website redesign</div><div class="row-sub f-geist">Due Jun 1 · $3,200</div></div></div>
+            <div class="dot-row" style="margin-top:6px"><div class="status-dot" style="background:#22c55e"></div><div><div class="row-text f-geist">Studio Bloom — Brand kit</div><div class="row-sub f-geist">Paid · $1,800</div></div></div>
+            <div class="dot-row" style="margin-top:6px"><div class="status-dot" style="background:#f59e0b"></div><div><div class="row-text f-geist">Nexus Labs — SEO audit</div><div class="row-sub f-geist">Overdue · $950</div></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title f-geist">Pipeline</div>
+            <div class="dot-row"><div class="status-dot" style="background:#2c5bff"></div><div class="row-text f-geist">3 active</div></div>
+            <div class="dot-row" style="margin-top:5px"><div class="status-dot" style="background:#8090b0"></div><div class="row-text f-geist">1 on hold</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <h3>Geist</h3>
+      <p>Vercel's own font. Ultra-clean, technical precision. Best tabular numbers for financial data. Feels engineered and modern.</p>
+      <span class="vibe">Technical · Precise · Modern</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-hint">Same layout, same blue — only the font changes · Click to select</div>
+
+</body>
+</html>

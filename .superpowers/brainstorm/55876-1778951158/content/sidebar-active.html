@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CraftlyAI — Sidebar Active State</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #070b14; color: #e8eaf0; min-height: 100vh; padding: 32px 24px 56px; }
+
+  .page-label { font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #2c5bff; margin-bottom: 8px; }
+  .page-heading { font-size: 26px; font-weight: 800; color: #f0f2f8; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .page-sub { font-size: 14px; color: #4a5880; margin-bottom: 40px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  .outer {
+    border-radius: 16px; overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.06);
+    cursor: pointer; transition: all 0.2s ease;
+    background: #0d1220; position: relative;
+  }
+  .outer:hover { transform: translateY(-3px); border-color: rgba(44,91,255,0.3); }
+  .outer.selected { border-color: #2c5bff; box-shadow: 0 0 0 4px rgba(44,91,255,0.15); }
+  .badge { position: absolute; top: 10px; right: 10px; background: rgba(44,91,255,0.2); color: #6b90ff; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; z-index: 10; }
+  .sel-badge { display: none; position: absolute; top: 10px; left: 10px; background: #2c5bff; color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; z-index: 20; }
+  .outer.selected .sel-badge { display: block; }
+
+  .shell { display: flex; height: 340px; overflow: hidden; }
+
+  /* Shared sidebar base */
+  .nav {
+    width: 176px; background: #0b1220; flex-shrink: 0;
+    padding: 16px 10px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; padding: 0 6px; }
+  .nav-mark { width: 22px; height: 26px; background: #2c5bff; border-radius: 6px; flex-shrink: 0; }
+  .nav-wordmark { font-size: 14px; font-weight: 700; color: white; letter-spacing: -0.01em; }
+  .section-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.1em; padding: 0 6px; margin: 10px 0 4px; }
+
+  /* shared icon placeholder */
+  .icon { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+  /* Shared main area */
+  .main { flex: 1; background: #f5f6fa; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .page-title { font-size: 16px; font-weight: 700; color: #0b1220; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi { background: white; border: 1px solid #dde2ef; border-radius: 8px; padding: 12px; }
+  .kpi-label { font-size: 9px; font-weight: 500; color: #8090b0; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .kpi-val { font-size: 20px; font-weight: 700; color: #0b1220; letter-spacing: -0.02em; }
+  .kpi-delta { font-size: 9px; font-weight: 600; color: #2c5bff; background: rgba(44,91,255,0.1); padding: 1px 5px; border-radius: 3px; display: inline-block; margin-top: 3px; }
+  .big-panel { background: white; border: 1px solid #dde2ef; border-radius: 8px; padding: 12px; flex: 1; }
+  .panel-label { font-size: 9px; font-weight: 600; color: #0b1220; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .inv-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .inv-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .inv-name { font-size: 10px; color: #2a3450; font-weight: 500; }
+  .inv-amt { font-size: 10px; color: #8090b0; }
+
+  /* ── A: PILL FILL — full background pill on active item ── */
+  .pill .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.4); cursor: default; }
+  .pill .nav-item.on { background: #2c5bff; color: white; font-weight: 600; }
+  .pill .nav-item.on .icon { background: rgba(255,255,255,0.5); }
+  .pill .nav-item .icon { background: rgba(255,255,255,0.1); }
+
+  /* ── B: LEFT BORDER — colored left stroke, no fill ── */
+  .border-active .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px 7px 10px; border-radius: 0 6px 6px 0; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.4); border-left: 2px solid transparent; cursor: default; }
+  .border-active .nav-item.on { color: white; font-weight: 600; border-left-color: #2c5bff; background: rgba(44,91,255,0.08); }
+  .border-active .nav-item.on .icon { background: #2c5bff; }
+  .border-active .nav-item .icon { background: rgba(255,255,255,0.1); }
+
+  /* ── C: SUBTLE TINT — low-opacity bg tint + white text, no heavy fill ── */
+  .tint .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.35); cursor: default; }
+  .tint .nav-item.on { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); font-weight: 600; }
+  .tint .nav-item.on .icon { background: #2c5bff; }
+  .tint .nav-item .icon { background: rgba(255,255,255,0.08); }
+
+  .meta { padding: 14px 16px 18px; }
+  .meta h3 { font-size: 14px; font-weight: 700; color: #f0f2f8; margin-bottom: 4px; }
+  .meta p { font-size: 12px; color: #4a5880; line-height: 1.5; }
+  .meta .vibe { display: inline-block; margin-top: 8px; font-size: 11px; padding: 2px 8px; border-radius: 5px; background: rgba(44,91,255,0.1); color: #6b90ff; font-weight: 600; }
+
+  .hint { text-align: center; margin-top: 30px; font-size: 13px; color: #2a3450; }
+</style>
+<script>
+  function sel(el) {
+    document.querySelectorAll('.outer').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const choice = el.dataset.choice, text = el.querySelector('h3').textContent;
+    try { fetch('/event', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({type:'click',choice,text,timestamp:Date.now()}) }).catch(()=>{}); } catch(e) {}
+  }
+</script>
+</head>
+<body>
+
+<div class="page-label">Step 4 · Sidebar Active State</div>
+<div class="page-heading">How does selected feel in the nav?</div>
+<div class="page-sub">The most-seen interaction in the whole app. "Dashboard" is always active. This sets the nav's personality.</div>
+
+<div class="grid">
+
+  <!-- A: PILL FILL -->
+  <div class="outer" data-choice="a" onclick="sel(this)">
+    <span class="sel-badge">✓ Selected</span>
+    <div class="badge">A</div>
+    <div class="shell">
+      <div class="nav pill">
+        <div class="nav-brand"><div class="nav-mark"></div><span class="nav-wordmark">Craftly</span></div>
+        <div class="section-label">Work</div>
+        <div class="nav-item on pill"><div class="icon"></div>Dashboard</div>
+        <div class="nav-item pill"><div class="icon"></div>Clients</div>
+        <div class="nav-item pill"><div class="icon"></div>Projects</div>
+        <div class="nav-item pill"><div class="icon"></div>Tasks</div>
+        <div class="section-label">Business</div>
+        <div class="nav-item pill"><div class="icon"></div>Finance</div>
+        <div class="nav-item pill"><div class="icon"></div>Documents</div>
+        <div class="nav-item pill"><div class="icon"></div>Expenses</div>
+      </div>
+      <div class="main">
+        <div class="page-title">Dashboard</div>
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-label">Revenue</div><div class="kpi-val">$8,400</div><div class="kpi-delta">+12%</div></div>
+          <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-val">$2,100</div></div>
+        </div>
+        <div class="big-panel">
+          <div class="panel-label">Recent invoices</div>
+          <div class="inv-row"><div class="inv-dot" style="background:#2c5bff"></div><div><div class="inv-name">Acme Corp</div><div class="inv-amt">$3,200 · Due Jun 1</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#22c55e"></div><div><div class="inv-name">Studio Bloom</div><div class="inv-amt">$1,800 · Paid</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#f59e0b"></div><div><div class="inv-name">Nexus Labs</div><div class="inv-amt">$950 · Overdue</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="meta">
+      <h3>Pill Fill</h3>
+      <p>Solid brand blue background on active item. Bold, unmissable. ClickUp, Slack, VS Code style.</p>
+      <span class="vibe">Bold · Unmissable · App-like</span>
+    </div>
+  </div>
+
+  <!-- B: LEFT BORDER -->
+  <div class="outer" data-choice="b" onclick="sel(this)">
+    <span class="sel-badge">✓ Selected</span>
+    <div class="badge">B</div>
+    <div class="shell">
+      <div class="nav border-active">
+        <div class="nav-brand"><div class="nav-mark"></div><span class="nav-wordmark">Craftly</span></div>
+        <div class="section-label">Work</div>
+        <div class="nav-item on border-active"><div class="icon"></div>Dashboard</div>
+        <div class="nav-item border-active"><div class="icon"></div>Clients</div>
+        <div class="nav-item border-active"><div class="icon"></div>Projects</div>
+        <div class="nav-item border-active"><div class="icon"></div>Tasks</div>
+        <div class="section-label">Business</div>
+        <div class="nav-item border-active"><div class="icon"></div>Finance</div>
+        <div class="nav-item border-active"><div class="icon"></div>Documents</div>
+        <div class="nav-item border-active"><div class="icon"></div>Expenses</div>
+      </div>
+      <div class="main">
+        <div class="page-title">Dashboard</div>
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-label">Revenue</div><div class="kpi-val">$8,400</div><div class="kpi-delta">+12%</div></div>
+          <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-val">$2,100</div></div>
+        </div>
+        <div class="big-panel">
+          <div class="panel-label">Recent invoices</div>
+          <div class="inv-row"><div class="inv-dot" style="background:#2c5bff"></div><div><div class="inv-name">Acme Corp</div><div class="inv-amt">$3,200 · Due Jun 1</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#22c55e"></div><div><div class="inv-name">Studio Bloom</div><div class="inv-amt">$1,800 · Paid</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#f59e0b"></div><div><div class="inv-name">Nexus Labs</div><div class="inv-amt">$950 · Overdue</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="meta">
+      <h3>Left Border</h3>
+      <p>2px blue left stroke + very faint fill. Subtle, editorial. Draws the eye without shouting. Linear, Figma, Framer style.</p>
+      <span class="vibe">Subtle · Editorial · Refined</span>
+    </div>
+  </div>
+
+  <!-- C: SUBTLE TINT -->
+  <div class="outer" data-choice="c" onclick="sel(this)">
+    <span class="sel-badge">✓ Selected</span>
+    <div class="badge">C</div>
+    <div class="shell">
+      <div class="nav tint">
+        <div class="nav-brand"><div class="nav-mark"></div><span class="nav-wordmark">Craftly</span></div>
+        <div class="section-label">Work</div>
+        <div class="nav-item on tint"><div class="icon"></div>Dashboard</div>
+        <div class="nav-item tint"><div class="icon"></div>Clients</div>
+        <div class="nav-item tint"><div class="icon"></div>Projects</div>
+        <div class="nav-item tint"><div class="icon"></div>Tasks</div>
+        <div class="section-label">Business</div>
+        <div class="nav-item tint"><div class="icon"></div>Finance</div>
+        <div class="nav-item tint"><div class="icon"></div>Documents</div>
+        <div class="nav-item tint"><div class="icon"></div>Expenses</div>
+      </div>
+      <div class="main">
+        <div class="page-title">Dashboard</div>
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-label">Revenue</div><div class="kpi-val">$8,400</div><div class="kpi-delta">+12%</div></div>
+          <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-val">$2,100</div></div>
+        </div>
+        <div class="big-panel">
+          <div class="panel-label">Recent invoices</div>
+          <div class="inv-row"><div class="inv-dot" style="background:#2c5bff"></div><div><div class="inv-name">Acme Corp</div><div class="inv-amt">$3,200 · Due Jun 1</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#22c55e"></div><div><div class="inv-name">Studio Bloom</div><div class="inv-amt">$1,800 · Paid</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#f59e0b"></div><div><div class="inv-name">Nexus Labs</div><div class="inv-amt">$950 · Overdue</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="meta">
+      <h3>Subtle Tint</h3>
+      <p>White text + very faint white background. Most minimal. Icon turns blue. Notion, GitHub sidebar style.</p>
+      <span class="vibe">Minimal · Quiet · Notion-like</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="hint">Same layout — only the active state treatment changes · Click to select</div>
+
+</body>
+</html>

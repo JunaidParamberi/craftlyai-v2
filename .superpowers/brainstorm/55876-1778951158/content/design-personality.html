@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CraftlyAI — Design Direction</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f11; color: #e8e8ec; min-height: 100vh; padding: 32px 24px 48px; }
+
+  .page-title { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+  .page-heading { font-size: 26px; font-weight: 700; color: #f0f0f4; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: #888; margin-bottom: 36px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  .card {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .card:hover { transform: translateY(-3px); }
+  .card.selected { border-color: #7c6ef0; box-shadow: 0 0 0 4px rgba(124,110,240,0.2); }
+
+  .card-label {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px;
+    z-index: 10;
+  }
+
+  .card-meta { padding: 16px; }
+  .card-meta h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .card-meta p { font-size: 13px; color: #888; line-height: 1.5; }
+  .card-meta .tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .card-meta .tag { font-size: 11px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.06); color: #aaa; }
+
+  /* ── DIRECTION A: Midnight Pro ── */
+  .dir-a { background: #13131a; }
+  .dir-a .card-label { background: rgba(124,110,240,0.2); color: #a89cf0; }
+  .dir-a .card-meta h3 { color: #f0f0f8; }
+
+  .dir-a .mockup {
+    background: #0d0d14;
+    height: 280px;
+    display: flex;
+    overflow: hidden;
+  }
+  .dir-a .sidebar {
+    width: 56px;
+    background: #0a0a10;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 0;
+    gap: 20px;
+  }
+  .dir-a .logo-dot { width: 28px; height: 28px; background: linear-gradient(135deg, #7c6ef0, #5b4fe0); border-radius: 8px; margin-bottom: 4px; }
+  .dir-a .nav-dot { width: 20px; height: 20px; border-radius: 6px; background: rgba(255,255,255,0.07); }
+  .dir-a .nav-dot.active { background: rgba(124,110,240,0.35); box-shadow: 0 0 10px rgba(124,110,240,0.25); }
+  .dir-a .main { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .dir-a .top-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+  .dir-a .search-bar { flex: 1; height: 28px; background: rgba(255,255,255,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); }
+  .dir-a .avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #7c6ef0, #5b4fe0); }
+  .dir-a .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .dir-a .kpi {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .dir-a .kpi-label { width: 40px; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; margin-bottom: 6px; }
+  .dir-a .kpi-val { width: 55px; height: 14px; background: rgba(255,255,255,0.35); border-radius: 3px; }
+  .dir-a .kpi-badge { width: 35px; height: 8px; background: rgba(124,110,240,0.4); border-radius: 3px; margin-top: 5px; }
+  .dir-a .content-row { display: grid; grid-template-columns: 3fr 2fr; gap: 8px; flex: 1; }
+  .dir-a .chart-panel {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .dir-a .chart-bar-row { display: flex; align-items: flex-end; gap: 4px; height: 50px; padding-top: 10px; }
+  .dir-a .bar { border-radius: 4px 4px 0 0; flex: 1; }
+  .dir-a .table-panel {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .dir-a .table-row { height: 18px; border-radius: 4px; background: rgba(255,255,255,0.04); }
+  .dir-a .table-row.header { background: rgba(255,255,255,0.08); }
+  .dir-a .mini-label { width: 50px; height: 6px; background: rgba(255,255,255,0.15); border-radius: 2px; margin-bottom: 4px; }
+
+  /* ── DIRECTION B: Warm Editorial ── */
+  .dir-b { background: #1c1814; }
+  .dir-b .card-label { background: rgba(230,180,80,0.15); color: #e6b44e; }
+  .dir-b .card-meta h3 { color: #f5ede0; }
+
+  .dir-b .mockup {
+    background: #f7f2eb;
+    height: 280px;
+    display: flex;
+    overflow: hidden;
+  }
+  .dir-b .sidebar {
+    width: 180px;
+    background: #f0e9de;
+    border-right: 1px solid rgba(0,0,0,0.07);
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .dir-b .logo-text { font-size: 14px; font-weight: 800; color: #1a1510; margin-bottom: 12px; letter-spacing: -0.03em; }
+  .dir-b .nav-item { height: 28px; border-radius: 7px; padding: 0 8px; display: flex; align-items: center; gap: 7px; }
+  .dir-b .nav-item.active { background: rgba(0,0,0,0.07); }
+  .dir-b .nav-icon { width: 14px; height: 14px; background: #a09078; border-radius: 3px; flex-shrink: 0; }
+  .dir-b .nav-icon.active { background: #c8944a; }
+  .dir-b .nav-text { width: 55px; height: 7px; background: #c0b090; border-radius: 2px; }
+  .dir-b .nav-text.dark { background: #6a5c44; }
+  .dir-b .main { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: #f7f2eb; }
+  .dir-b .page-heading-mock { width: 100px; height: 12px; background: #2a2018; border-radius: 3px; margin-bottom: 8px; }
+  .dir-b .kpi-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .dir-b .kpi {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .dir-b .kpi-label { width: 40px; height: 5px; background: #c0b090; border-radius: 2px; margin-bottom: 6px; }
+  .dir-b .kpi-val { width: 55px; height: 14px; background: #2a2018; border-radius: 3px; }
+  .dir-b .kpi-badge { width: 40px; height: 7px; background: rgba(200,148,74,0.35); border-radius: 2px; margin-top: 5px; }
+  .dir-b .bottom { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; flex: 1; }
+  .dir-b .panel {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .dir-b .strip { height: 12px; border-radius: 3px; background: #ede5d8; margin-bottom: 5px; }
+  .dir-b .strip.accent { background: rgba(200,148,74,0.3); }
+
+  /* ── DIRECTION C: Frost Glass ── */
+  .dir-c { background: #0c1220; }
+  .dir-c .card-label { background: rgba(56,189,248,0.12); color: #60c8f0; }
+  .dir-c .card-meta h3 { color: #e8f4ff; }
+
+  .dir-c .mockup {
+    background: linear-gradient(145deg, #0f1f3d 0%, #0a1525 100%);
+    height: 280px;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+  .dir-c .bg-blob {
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.12;
+    pointer-events: none;
+  }
+  .dir-c .blob1 { background: #3b82f6; top: -50px; right: -30px; }
+  .dir-c .blob2 { background: #8b5cf6; bottom: -60px; left: 20px; }
+  .dir-c .sidebar {
+    width: 48px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 16px;
+    position: relative; z-index: 1;
+  }
+  .dir-c .logo-dot { width: 26px; height: 26px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 8px; margin-bottom: 4px; }
+  .dir-c .nav-dot { width: 20px; height: 20px; border-radius: 6px; background: rgba(255,255,255,0.06); }
+  .dir-c .nav-dot.active { background: rgba(59,130,246,0.3); border: 1px solid rgba(59,130,246,0.4); }
+  .dir-c .main { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1; }
+  .dir-c .top-bar { display: flex; gap: 8px; align-items: center; }
+  .dir-c .search-bar { flex: 1; height: 26px; background: rgba(255,255,255,0.06); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px); }
+  .dir-c .avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+  .dir-c .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .dir-c .kpi {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 10px;
+    padding: 8px;
+    backdrop-filter: blur(12px);
+  }
+  .dir-c .kpi-label { width: 36px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 2px; margin-bottom: 5px; }
+  .dir-c .kpi-val { width: 50px; height: 13px; background: rgba(255,255,255,0.6); border-radius: 2px; }
+  .dir-c .kpi-badge { width: 30px; height: 7px; background: rgba(59,130,246,0.5); border-radius: 2px; margin-top: 4px; }
+  .dir-c .content-row { display: grid; grid-template-columns: 3fr 2fr; gap: 6px; flex: 1; }
+  .dir-c .panel {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 8px;
+    backdrop-filter: blur(12px);
+  }
+  .dir-c .strip { height: 10px; border-radius: 3px; background: rgba(255,255,255,0.07); margin-bottom: 5px; }
+  .dir-c .strip.accent { background: rgba(59,130,246,0.25); }
+  .dir-c .chart-row { display: flex; align-items: flex-end; gap: 3px; height: 50px; padding-top: 10px; }
+  .dir-c .bar { border-radius: 3px 3px 0 0; flex: 1; }
+
+  /* selection */
+  .selected-badge {
+    display: none;
+    position: absolute; top: 12px; left: 12px;
+    background: #7c6ef0; color: white;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 9px; border-radius: 20px;
+    z-index: 20;
+  }
+  .card.selected .selected-badge { display: block; }
+
+  .bottom-hint { text-align: center; margin-top: 28px; font-size: 13px; color: #555; }
+</style>
+<script>
+  function selectCard(el) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const choice = el.dataset.choice;
+    const text = el.querySelector('h3').textContent;
+    if (window.parent && window.parent.postMessage) {
+      window.parent.postMessage({ type: 'click', choice, text }, '*');
+    }
+    try {
+      fetch('/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'click', choice, text, timestamp: Date.now() })
+      }).catch(() => {});
+    } catch(e) {}
+  }
+</script>
+</head>
+<body>
+
+<div class="page-title">CraftlyAI · UI Redesign</div>
+<div class="page-heading">Which design direction feels right?</div>
+<div class="page-sub">Each direction is a full system — colors, typography, spacing, components. Click to select.</div>
+
+<div class="grid">
+
+  <!-- A: MIDNIGHT PRO -->
+  <div class="card dir-a" data-choice="a" onclick="selectCard(this)">
+    <span class="selected-badge">✓ Selected</span>
+    <div class="card-label">A</div>
+    <div class="dir-a mockup">
+      <div class="dir-a sidebar">
+        <div class="dir-a logo-dot"></div>
+        <div class="dir-a nav-dot active"></div>
+        <div class="dir-a nav-dot"></div>
+        <div class="dir-a nav-dot"></div>
+        <div class="dir-a nav-dot"></div>
+        <div class="dir-a nav-dot"></div>
+      </div>
+      <div class="dir-a main">
+        <div class="dir-a top-bar">
+          <div class="dir-a search-bar"></div>
+          <div class="dir-a avatar"></div>
+        </div>
+        <div class="dir-a kpi-row">
+          <div class="dir-a kpi"><div class="dir-a kpi-label"></div><div class="dir-a kpi-val"></div><div class="dir-a kpi-badge"></div></div>
+          <div class="dir-a kpi"><div class="dir-a kpi-label"></div><div class="dir-a kpi-val"></div></div>
+          <div class="dir-a kpi"><div class="dir-a kpi-label"></div><div class="dir-a kpi-val"></div></div>
+          <div class="dir-a kpi"><div class="dir-a kpi-label"></div><div class="dir-a kpi-val"></div></div>
+        </div>
+        <div class="dir-a content-row">
+          <div class="dir-a chart-panel">
+            <div class="dir-a mini-label"></div>
+            <div class="dir-a chart-bar-row">
+              <div class="dir-a bar" style="height:40%;background:rgba(124,110,240,0.3)"></div>
+              <div class="dir-a bar" style="height:65%;background:rgba(124,110,240,0.4)"></div>
+              <div class="dir-a bar" style="height:45%;background:rgba(124,110,240,0.3)"></div>
+              <div class="dir-a bar" style="height:80%;background:rgba(124,110,240,0.6)"></div>
+              <div class="dir-a bar" style="height:60%;background:rgba(124,110,240,0.4)"></div>
+              <div class="dir-a bar" style="height:90%;background:#7c6ef0"></div>
+              <div class="dir-a bar" style="height:70%;background:rgba(124,110,240,0.5)"></div>
+            </div>
+          </div>
+          <div class="dir-a table-panel">
+            <div class="dir-a mini-label"></div>
+            <div class="dir-a table-row header"></div>
+            <div class="dir-a table-row"></div>
+            <div class="dir-a table-row"></div>
+            <div class="dir-a table-row"></div>
+            <div class="dir-a table-row"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <h3 style="color:#f0f0f8">Midnight Pro</h3>
+      <p style="color:#777">Dark-first, high contrast. Deep charcoal base, violet-indigo accent. ClickUp meets Linear.</p>
+      <div class="tags">
+        <span class="tag">Dark mode native</span>
+        <span class="tag">Violet accent</span>
+        <span class="tag">Icon-only sidebar</span>
+        <span class="tag">Compact dense</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- B: WARM EDITORIAL -->
+  <div class="card dir-b" data-choice="b" onclick="selectCard(this)">
+    <span class="selected-badge">✓ Selected</span>
+    <div class="card-label" style="background:rgba(230,180,80,0.15);color:#e6b44e">B</div>
+    <div class="dir-b mockup">
+      <div class="dir-b sidebar">
+        <div class="dir-b logo-text">Craftly</div>
+        <div class="dir-b nav-item active">
+          <div class="dir-b nav-icon active"></div>
+          <div class="dir-b nav-text dark"></div>
+        </div>
+        <div class="dir-b nav-item">
+          <div class="dir-b nav-icon"></div>
+          <div class="dir-b nav-text"></div>
+        </div>
+        <div class="dir-b nav-item">
+          <div class="dir-b nav-icon"></div>
+          <div class="dir-b nav-text"></div>
+        </div>
+        <div class="dir-b nav-item">
+          <div class="dir-b nav-icon"></div>
+          <div class="dir-b nav-text"></div>
+        </div>
+        <div class="dir-b nav-item">
+          <div class="dir-b nav-icon"></div>
+          <div class="dir-b nav-text"></div>
+        </div>
+      </div>
+      <div class="dir-b main">
+        <div class="dir-b page-heading-mock"></div>
+        <div class="dir-b kpi-row">
+          <div class="dir-b kpi"><div class="dir-b kpi-label"></div><div class="dir-b kpi-val"></div><div class="dir-b kpi-badge"></div></div>
+          <div class="dir-b kpi"><div class="dir-b kpi-label"></div><div class="dir-b kpi-val"></div></div>
+        </div>
+        <div class="dir-b bottom" style="flex:1">
+          <div class="dir-b panel">
+            <div class="dir-b strip accent"></div>
+            <div class="dir-b strip" style="width:80%"></div>
+            <div class="dir-b strip" style="width:60%"></div>
+            <div class="dir-b strip" style="width:90%"></div>
+            <div class="dir-b strip" style="width:70%"></div>
+          </div>
+          <div class="dir-b panel">
+            <div class="dir-b strip accent"></div>
+            <div class="dir-b strip" style="width:85%"></div>
+            <div class="dir-b strip" style="width:65%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <h3 style="color:#f5ede0">Warm Editorial</h3>
+      <p style="color:#8a7a60">Cream/sand base, amber accent. Readable sidebar, generous whitespace. HoneyBook meets Notion.</p>
+      <div class="tags">
+        <span class="tag">Light mode first</span>
+        <span class="tag">Amber accent</span>
+        <span class="tag">Full sidebar</span>
+        <span class="tag">Editorial type</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- C: FROST / DEEP OCEAN -->
+  <div class="card dir-c" data-choice="c" onclick="selectCard(this)">
+    <span class="selected-badge">✓ Selected</span>
+    <div class="card-label">C</div>
+    <div class="dir-c mockup">
+      <div class="dir-c bg-blob blob1"></div>
+      <div class="dir-c bg-blob blob2"></div>
+      <div class="dir-c sidebar">
+        <div class="dir-c logo-dot"></div>
+        <div class="dir-c nav-dot active"></div>
+        <div class="dir-c nav-dot"></div>
+        <div class="dir-c nav-dot"></div>
+        <div class="dir-c nav-dot"></div>
+        <div class="dir-c nav-dot"></div>
+      </div>
+      <div class="dir-c main">
+        <div class="dir-c top-bar">
+          <div class="dir-c search-bar"></div>
+          <div class="dir-c avatar"></div>
+        </div>
+        <div class="dir-c kpi-row">
+          <div class="dir-c kpi"><div class="dir-c kpi-label"></div><div class="dir-c kpi-val"></div><div class="dir-c kpi-badge"></div></div>
+          <div class="dir-c kpi"><div class="dir-c kpi-label"></div><div class="dir-c kpi-val"></div></div>
+          <div class="dir-c kpi"><div class="dir-c kpi-label"></div><div class="dir-c kpi-val"></div></div>
+          <div class="dir-c kpi"><div class="dir-c kpi-label"></div><div class="dir-c kpi-val"></div></div>
+        </div>
+        <div class="dir-c content-row">
+          <div class="dir-c panel">
+            <div class="dir-c strip accent"></div>
+            <div class="dir-c chart-row">
+              <div class="dir-c bar" style="height:40%;background:rgba(59,130,246,0.25)"></div>
+              <div class="dir-c bar" style="height:65%;background:rgba(59,130,246,0.35)"></div>
+              <div class="dir-c bar" style="height:45%;background:rgba(59,130,246,0.25)"></div>
+              <div class="dir-c bar" style="height:80%;background:rgba(59,130,246,0.5)"></div>
+              <div class="dir-c bar" style="height:60%;background:rgba(59,130,246,0.35)"></div>
+              <div class="dir-c bar" style="height:90%;background:#3b82f6"></div>
+              <div class="dir-c bar" style="height:70%;background:rgba(59,130,246,0.45)"></div>
+            </div>
+          </div>
+          <div class="dir-c panel">
+            <div class="dir-c strip accent"></div>
+            <div class="dir-c strip" style="width:80%"></div>
+            <div class="dir-c strip" style="width:60%"></div>
+            <div class="dir-c strip" style="width:90%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <h3 style="color:#e8f4ff">Frost / Deep Ocean</h3>
+      <p style="color:#607090">Deep navy base, glass-morphism panels, blue-violet gradient. Stripe Atlas meets Vercel.</p>
+      <div class="tags">
+        <span class="tag">Dark mode native</span>
+        <span class="tag">Blue-violet gradient</span>
+        <span class="tag">Glassmorphism</span>
+        <span class="tag">Premium feel</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-hint">Click a card to select · Tell me your pick in the terminal</div>
+
+</body>
+</html>

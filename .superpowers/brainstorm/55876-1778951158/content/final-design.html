@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CraftlyAI — Final Design System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #070b14; color: #e8eaf0; min-height: 100vh; padding: 32px 24px 56px; }
+
+  .page-label { font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #2c5bff; margin-bottom: 8px; }
+  .page-heading { font-size: 26px; font-weight: 800; color: #f0f2f8; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .page-sub { font-size: 14px; color: #4a5880; margin-bottom: 32px; }
+
+  /* ── TOKEN STRIP ── */
+  .tokens { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+  .token { background: #0d1422; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+  .token-swatch { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; }
+  .token-name { font-size: 11px; font-weight: 600; color: #8090b0; }
+  .token-value { font-size: 12px; font-weight: 600; color: #d0d8f0; font-variant-numeric: tabular-nums; }
+
+  /* ── FULL APP MOCKUP ── */
+  .app-frame {
+    border-radius: 16px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+    display: flex; height: 560px;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 200px; background: #0b1220; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    padding: 16px 10px;
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+  .brand { display: flex; align-items: center; gap: 9px; margin-bottom: 24px; padding: 0 6px; }
+  .brand-mark { width: 26px; height: 30px; background: #2c5bff; border-radius: 7px; flex-shrink: 0; }
+  .brand-name { font-size: 15px; font-weight: 700; color: white; letter-spacing: -0.02em; }
+  .section-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.22); text-transform: uppercase; letter-spacing: 0.1em; padding: 0 6px; margin: 12px 0 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,0.35); margin-bottom: 1px; }
+  .nav-item.on { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); font-weight: 600; }
+  .nav-icon { width: 15px; height: 15px; border-radius: 4px; flex-shrink: 0; }
+  .nav-icon.plain { background: rgba(255,255,255,0.08); }
+  .nav-icon.active { background: #2c5bff; }
+  .sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05); }
+  .user-row { display: flex; align-items: center; gap: 9px; padding: 6px 8px; border-radius: 7px; cursor: pointer; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: #2c5bff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; }
+  .user-info { display: flex; flex-direction: column; }
+  .user-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); }
+  .user-plan { font-size: 10px; color: rgba(255,255,255,0.3); }
+
+  /* MAIN */
+  .main { flex: 1; background: #f5f6fa; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* HEADER */
+  .header {
+    height: 52px; background: rgba(245,246,250,0.85); backdrop-filter: blur(8px);
+    border-bottom: 1px solid #dde2ef;
+    display: flex; align-items: center; gap: 12px; padding: 0 20px;
+    flex-shrink: 0;
+  }
+  .search-bar { flex: 1; max-width: 340px; height: 32px; background: white; border: 1px solid #dde2ef; border-radius: 7px; display: flex; align-items: center; gap: 8px; padding: 0 10px; }
+  .search-icon { width: 12px; height: 12px; background: #b0bcd0; border-radius: 2px; }
+  .search-text { font-size: 12px; color: #b0bcd0; }
+  .search-kbd { margin-left: auto; font-size: 10px; color: #c0cce0; background: #f0f2f8; border: 1px solid #dde2ef; padding: 1px 5px; border-radius: 4px; }
+  .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .bell { width: 30px; height: 30px; border-radius: 7px; background: white; border: 1px solid #dde2ef; display: flex; align-items: center; justify-content: center; }
+  .bell-dot { width: 12px; height: 12px; background: #c0cce0; border-radius: 3px; }
+
+  /* CONTENT */
+  .content { flex: 1; padding: 20px; overflow: hidden; display: flex; flex-direction: column; gap: 14px; }
+  .content-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .pg-title { font-size: 20px; font-weight: 700; color: #0b1220; letter-spacing: -0.02em; }
+  .pg-sub { font-size: 12px; color: #8090b0; margin-top: 2px; }
+  .cta-btn { font-size: 12px; font-weight: 600; background: #2c5bff; color: white; padding: 8px 14px; border-radius: 8px; white-space: nowrap; }
+
+  /* ATTENTION BANNER */
+  .attention { background: white; border: 1px solid #fbbf24; border-left: 3px solid #f59e0b; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+  .att-icon { width: 16px; height: 16px; background: #fbbf24; border-radius: 4px; flex-shrink: 0; }
+  .att-text { font-size: 12px; color: #7a5a00; font-weight: 500; }
+  .att-link { font-size: 12px; color: #2c5bff; font-weight: 600; margin-left: auto; white-space: nowrap; }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .kpi-card { background: white; border: 1px solid #dde2ef; border-radius: 8px; padding: 14px; }
+  .kpi-l { font-size: 10px; font-weight: 500; color: #8090b0; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .kpi-v { font-size: 22px; font-weight: 700; color: #0b1220; letter-spacing: -0.02em; }
+  .kpi-d { font-size: 10px; font-weight: 600; color: #2c5bff; background: rgba(44,91,255,0.08); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+  .kpi-warn { font-size: 10px; font-weight: 600; color: #f59e0b; background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+  .kpi-err { font-size: 10px; font-weight: 600; color: #ef4444; background: rgba(239,68,68,0.08); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+  .kpi-ok { font-size: 10px; font-weight: 600; color: #22c55e; background: rgba(34,197,94,0.08); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+
+  /* BOTTOM PANELS */
+  .panels { display: grid; grid-template-columns: 3fr 2fr; gap: 10px; flex: 1; }
+  .panel { background: white; border: 1px solid #dde2ef; border-radius: 8px; padding: 14px; }
+  .panel-title { font-size: 11px; font-weight: 600; color: #0b1220; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+  .inv-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f0f2f8; }
+  .inv-row:last-child { border-bottom: none; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .inv-info { flex: 1; min-width: 0; }
+  .inv-name { font-size: 12px; font-weight: 500; color: #1a2440; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .inv-sub { font-size: 10px; color: #8090b0; margin-top: 1px; }
+  .inv-amt { font-size: 12px; font-weight: 600; color: #0b1220; white-space: nowrap; }
+  .status-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+  .badge-sent { background: rgba(44,91,255,0.08); color: #2c5bff; }
+  .badge-paid { background: rgba(34,197,94,0.08); color: #16a34a; }
+  .badge-overdue { background: rgba(239,68,68,0.08); color: #dc2626; }
+
+  .pip-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f2f8; }
+  .pip-row:last-child { border-bottom: none; }
+  .pip-left { display: flex; align-items: center; gap: 8px; }
+  .pip-icon { width: 24px; height: 24px; border-radius: 6px; background: rgba(44,91,255,0.08); flex-shrink: 0; }
+  .pip-name { font-size: 12px; font-weight: 500; color: #1a2440; }
+  .pip-client { font-size: 10px; color: #8090b0; margin-top: 1px; }
+  .pip-pct { font-size: 10px; font-weight: 600; color: #2c5bff; }
+
+  /* TOKEN SECTION */
+  .spec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 32px; }
+  .spec-section { background: #0d1422; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 18px; }
+  .spec-section h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #4a5880; margin-bottom: 14px; }
+  .spec-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .spec-key { font-size: 12px; color: #6080a0; font-family: 'Courier New', monospace; }
+  .spec-val { font-size: 12px; font-weight: 600; color: #c0d0f0; display: flex; align-items: center; gap: 7px; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="page-label">CraftlyAI · Final Design System</div>
+<div class="page-heading">All four choices combined.</div>
+<div class="page-sub">Ink + White · Inter · Flat Minimal cards · Subtle tint nav · #2c5bff brand blue</div>
+
+<!-- TOKEN STRIP -->
+<div class="tokens">
+  <div class="token"><div class="token-swatch" style="background:#0b1220"></div><div><div class="token-name">Sidebar / Nav</div><div class="token-value">#0b1220</div></div></div>
+  <div class="token"><div class="token-swatch" style="background:#2c5bff"></div><div><div class="token-name">Brand Blue</div><div class="token-value">#2c5bff</div></div></div>
+  <div class="token"><div class="token-swatch" style="background:#f5f6fa; border:1px solid #dde2ef"></div><div><div class="token-name">Background</div><div class="token-value">#f5f6fa</div></div></div>
+  <div class="token"><div class="token-swatch" style="background:white; border:1px solid #dde2ef"></div><div><div class="token-name">Card surface</div><div class="token-value">#ffffff</div></div></div>
+  <div class="token"><div class="token-swatch" style="background:#dde2ef"></div><div><div class="token-name">Border</div><div class="token-value">#dde2ef</div></div></div>
+  <div class="token"><div class="token-swatch" style="background:#0b1220"></div><div><div class="token-name">Heading text</div><div class="token-value">#0b1220</div></div></div>
+  <div class="token"><div class="token-swatch" style="background:#8090b0"></div><div><div class="token-name">Muted text</div><div class="token-value">#8090b0</div></div></div>
+  <div class="token"><div class="token-swatch" style="background:#8px solid transparent; border-radius:4px; outline:2px solid #dde2ef; outline-offset:1px"></div><div><div class="token-name">Radius</div><div class="token-value">8px cards · 7px buttons</div></div></div>
+</div>
+
+<!-- FULL APP MOCKUP -->
+<div class="app-frame">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <span class="brand-name">Craftly</span>
+    </div>
+
+    <div class="section-label">Work</div>
+    <div class="nav-item on">
+      <div class="nav-icon active"></div>
+      Dashboard
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon plain"></div>
+      Clients
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon plain"></div>
+      Projects
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon plain"></div>
+      Tasks
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon plain"></div>
+      Time
+    </div>
+
+    <div class="section-label">Business</div>
+    <div class="nav-item">
+      <div class="nav-icon plain"></div>
+      Finance
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon plain"></div>
+      Documents
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon plain"></div>
+      Expenses
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="avatar">JP</div>
+        <div class="user-info">
+          <span class="user-name">Junaid P.</span>
+          <span class="user-plan">Pro plan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="search-bar">
+        <div class="search-icon"></div>
+        <span class="search-text">Search everything…</span>
+        <span class="search-kbd">⌘K</span>
+      </div>
+      <div class="header-actions">
+        <div class="bell"><div class="bell-dot"></div></div>
+        <div class="avatar" style="width:30px;height:30px;font-size:11px">JP</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <div class="content-top">
+        <div>
+          <div class="pg-title">Dashboard</div>
+          <div class="pg-sub">Monday, 16 May 2026 · 3 items need attention</div>
+        </div>
+        <div class="cta-btn">+ New invoice</div>
+      </div>
+
+      <div class="attention">
+        <div class="att-icon"></div>
+        <span class="att-text">Nexus Labs invoice is 12 days overdue — $950 at risk</span>
+        <span class="att-link">View invoice →</span>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-l">Monthly revenue</div>
+          <div class="kpi-v">$8,400</div>
+          <div class="kpi-d">+12% vs last month</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-l">Active projects</div>
+          <div class="kpi-v">6</div>
+          <div class="kpi-warn">2 nearing deadline</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-l">Outstanding</div>
+          <div class="kpi-v">$5,300</div>
+          <div class="kpi-ok">3 invoices sent</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-l">Overdue</div>
+          <div class="kpi-v">2</div>
+          <div class="kpi-err">$1,750 at risk</div>
+        </div>
+      </div>
+
+      <div class="panels">
+        <div class="panel">
+          <div class="panel-title">Recent invoices</div>
+          <div class="inv-row">
+            <div class="status-dot" style="background:#2c5bff"></div>
+            <div class="inv-info"><div class="inv-name">Acme Corp — Website redesign</div><div class="inv-sub">Due Jun 1, 2026</div></div>
+            <div class="inv-amt">$3,200</div>
+            <div class="status-badge badge-sent">Sent</div>
+          </div>
+          <div class="inv-row">
+            <div class="status-dot" style="background:#22c55e"></div>
+            <div class="inv-info"><div class="inv-name">Studio Bloom — Brand identity kit</div><div class="inv-sub">Paid May 10</div></div>
+            <div class="inv-amt">$1,800</div>
+            <div class="status-badge badge-paid">Paid</div>
+          </div>
+          <div class="inv-row">
+            <div class="status-dot" style="background:#ef4444"></div>
+            <div class="inv-info"><div class="inv-name">Nexus Labs — SEO audit</div><div class="inv-sub">Due May 4 · 12 days overdue</div></div>
+            <div class="inv-amt">$950</div>
+            <div class="status-badge badge-overdue">Overdue</div>
+          </div>
+          <div class="inv-row">
+            <div class="status-dot" style="background:#2c5bff"></div>
+            <div class="inv-info"><div class="inv-name">Meridian Tech — API integration</div><div class="inv-sub">Due Jun 15, 2026</div></div>
+            <div class="inv-amt">$4,500</div>
+            <div class="status-badge badge-sent">Sent</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Active pipeline</div>
+          <div class="pip-row">
+            <div class="pip-left">
+              <div class="pip-icon"></div>
+              <div><div class="pip-name">Website redesign</div><div class="pip-client">Acme Corp</div></div>
+            </div>
+            <div class="pip-pct">68%</div>
+          </div>
+          <div class="pip-row">
+            <div class="pip-left">
+              <div class="pip-icon"></div>
+              <div><div class="pip-name">Mobile app MVP</div><div class="pip-client">Meridian Tech</div></div>
+            </div>
+            <div class="pip-pct">32%</div>
+          </div>
+          <div class="pip-row">
+            <div class="pip-left">
+              <div class="pip-icon"></div>
+              <div><div class="pip-name">Brand refresh</div><div class="pip-client">Volta Studio</div></div>
+            </div>
+            <div class="pip-pct">91%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SPEC GRID -->
+<div class="spec-grid">
+  <div class="spec-section">
+    <h3>Color Tokens</h3>
+    <div class="spec-row"><span class="spec-key">--background</span><span class="spec-val"><div class="swatch" style="background:#f5f6fa;border:1px solid #dde2ef"></div>#f5f6fa</span></div>
+    <div class="spec-row"><span class="spec-key">--card</span><span class="spec-val"><div class="swatch" style="background:white;border:1px solid #dde2ef"></div>#ffffff</span></div>
+    <div class="spec-row"><span class="spec-key">--sidebar</span><span class="spec-val"><div class="swatch" style="background:#0b1220"></div>#0b1220</span></div>
+    <div class="spec-row"><span class="spec-key">--primary</span><span class="spec-val"><div class="swatch" style="background:#2c5bff"></div>#2c5bff</span></div>
+    <div class="spec-row"><span class="spec-key">--border</span><span class="spec-val"><div class="swatch" style="background:#dde2ef"></div>#dde2ef</span></div>
+    <div class="spec-row"><span class="spec-key">--foreground</span><span class="spec-val"><div class="swatch" style="background:#0b1220"></div>#0b1220</span></div>
+    <div class="spec-row"><span class="spec-key">--muted-foreground</span><span class="spec-val"><div class="swatch" style="background:#8090b0"></div>#8090b0</span></div>
+    <div class="spec-row"><span class="spec-key">--destructive</span><span class="spec-val"><div class="swatch" style="background:#ef4444"></div>#ef4444</span></div>
+  </div>
+  <div class="spec-section">
+    <h3>Shape + Type</h3>
+    <div class="spec-row"><span class="spec-key">--radius (cards)</span><span class="spec-val">8px</span></div>
+    <div class="spec-row"><span class="spec-key">--radius (buttons)</span><span class="spec-val">7px</span></div>
+    <div class="spec-row"><span class="spec-key">--radius (badges)</span><span class="spec-val">4px</span></div>
+    <div class="spec-row"><span class="spec-key">--font-sans</span><span class="spec-val">Inter, system-ui</span></div>
+    <div class="spec-row"><span class="spec-key">heading weight</span><span class="spec-val">700</span></div>
+    <div class="spec-row"><span class="spec-key">heading tracking</span><span class="spec-val">-0.02em</span></div>
+    <div class="spec-row"><span class="spec-key">card shadow</span><span class="spec-val">none (flat)</span></div>
+    <div class="spec-row"><span class="spec-key">nav active</span><span class="spec-val">rgba(255,255,255,0.07) bg</span></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CraftlyAI — Card Surfaces</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #070b14; color: #e8eaf0; min-height: 100vh; padding: 32px 24px 56px; }
+
+  .page-label { font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #2c5bff; margin-bottom: 8px; }
+  .page-heading { font-size: 26px; font-weight: 800; color: #f0f2f8; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .page-sub { font-size: 14px; color: #4a5880; margin-bottom: 40px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  .outer-card {
+    border-radius: 18px; overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.06);
+    cursor: pointer; transition: all 0.2s ease;
+    background: #0d1220; position: relative;
+  }
+  .outer-card:hover { transform: translateY(-3px); border-color: rgba(44,91,255,0.3); }
+  .outer-card.selected { border-color: #2c5bff; box-shadow: 0 0 0 4px rgba(44,91,255,0.15); }
+  .badge { position: absolute; top: 10px; right: 10px; background: rgba(44,91,255,0.2); color: #6b90ff; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; z-index: 10; }
+  .sel-badge { display: none; position: absolute; top: 10px; left: 10px; background: #2c5bff; color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; z-index: 20; }
+  .outer-card.selected .sel-badge { display: block; }
+
+  /* shared mock shell */
+  .shell { background: #eef0f6; padding: 18px; display: flex; flex-direction: column; gap: 10px; height: 340px; overflow: hidden; }
+  .shell-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+  .sh-title { font-size: 16px; font-weight: 700; color: #0b1220; letter-spacing: -0.02em; }
+  .sh-sub { font-size: 10px; color: #8090b0; margin-top: 1px; }
+  .sh-btn { font-size: 11px; font-weight: 600; background: #2c5bff; color: white; padding: 6px 12px; border-radius: 7px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .bottom-row { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; flex: 1; }
+
+  /* KPI content */
+  .kpi-label { font-size: 9px; font-weight: 500; color: #8090b0; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .kpi-val { font-size: 20px; font-weight: 700; color: #0b1220; letter-spacing: -0.02em; }
+  .kpi-delta { font-size: 9px; font-weight: 600; color: #2c5bff; background: rgba(44,91,255,0.1); padding: 1px 5px; border-radius: 3px; display: inline-block; margin-top: 3px; }
+  .kpi-warn { font-size: 9px; font-weight: 600; color: #f59e0b; background: rgba(245,158,11,0.1); padding: 1px 5px; border-radius: 3px; display: inline-block; margin-top: 3px; }
+
+  .panel-label { font-size: 9px; font-weight: 600; color: #0b1220; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .inv-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .inv-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .inv-name { font-size: 10px; color: #2a3450; font-weight: 500; }
+  .inv-amt { font-size: 10px; color: #8090b0; }
+  .pip-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .pip-dot { width: 5px; height: 5px; border-radius: 50%; background: #2c5bff; flex-shrink: 0; }
+  .pip-text { font-size: 10px; color: #3a4a70; }
+
+  /* ── A: FLAT MINIMAL — no shadow, subtle border, small radius ── */
+  .flat .kpi-card {
+    background: white;
+    border: 1px solid #dde2ef;
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .flat .panel-card {
+    background: white;
+    border: 1px solid #dde2ef;
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  /* ── B: ELEVATED — layered shadows, medium radius, crisp border ── */
+  .elevated .kpi-card {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .elevated .panel-card {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .elevated.shell { background: #e8ecf6; }
+
+  /* ── C: GLASS PREMIUM — white bg w/ blue tinted border, inset highlight, large radius ── */
+  .glass .kpi-card {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(44,91,255,0.12);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 8px 32px rgba(44,91,255,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  .glass .panel-card {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(44,91,255,0.12);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 8px 32px rgba(44,91,255,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  .glass.shell { background: linear-gradient(160deg, #dde8ff 0%, #e8ecf8 50%, #dfe8ff 100%); }
+
+  .meta { padding: 14px 16px 18px; }
+  .meta h3 { font-size: 14px; font-weight: 700; color: #f0f2f8; margin-bottom: 4px; }
+  .meta p { font-size: 12px; color: #4a5880; line-height: 1.5; }
+  .meta .vibe { display: inline-block; margin-top: 8px; font-size: 11px; padding: 2px 8px; border-radius: 5px; background: rgba(44,91,255,0.1); color: #6b90ff; font-weight: 600; }
+
+  .hint { text-align: center; margin-top: 30px; font-size: 13px; color: #2a3450; }
+</style>
+<script>
+  function sel(el) {
+    document.querySelectorAll('.outer-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const choice = el.dataset.choice, text = el.querySelector('h3').textContent;
+    try { fetch('/event', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({type:'click',choice,text,timestamp:Date.now()}) }).catch(()=>{}); } catch(e) {}
+  }
+</script>
+</head>
+<body>
+
+<div class="page-label">Step 3 · Card Surface</div>
+<div class="page-heading">How should cards feel?</div>
+<div class="page-sub">Border radius + shadow + border — together they define the visual weight of every panel in the app.</div>
+
+<div class="grid">
+
+  <!-- A: FLAT MINIMAL -->
+  <div class="outer-card" data-choice="a" onclick="sel(this)">
+    <span class="sel-badge">✓ Selected</span>
+    <div class="badge">A</div>
+    <div class="shell flat">
+      <div class="shell-top">
+        <div><div class="sh-title">Dashboard</div><div class="sh-sub">Monday, May 16</div></div>
+        <div class="sh-btn">+ Invoice</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card flat">
+          <div class="kpi-label">Revenue</div>
+          <div class="kpi-val">$8,400</div>
+          <div class="kpi-delta">+12%</div>
+        </div>
+        <div class="kpi-card flat">
+          <div class="kpi-label">Outstanding</div>
+          <div class="kpi-val">$2,100</div>
+        </div>
+        <div class="kpi-card flat">
+          <div class="kpi-label">Overdue</div>
+          <div class="kpi-val">2</div>
+          <div class="kpi-warn">$950 at risk</div>
+        </div>
+      </div>
+      <div class="bottom-row" style="flex:1">
+        <div class="panel-card flat">
+          <div class="panel-label">Recent invoices</div>
+          <div class="inv-row"><div class="inv-dot" style="background:#2c5bff"></div><div><div class="inv-name">Acme Corp</div><div class="inv-amt">$3,200 · Due Jun 1</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#22c55e"></div><div><div class="inv-name">Studio Bloom</div><div class="inv-amt">$1,800 · Paid</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#f59e0b"></div><div><div class="inv-name">Nexus Labs</div><div class="inv-amt">$950 · Overdue</div></div></div>
+        </div>
+        <div class="panel-card flat">
+          <div class="panel-label">Pipeline</div>
+          <div class="pip-row"><div class="pip-dot"></div><div class="pip-text">3 active projects</div></div>
+          <div class="pip-row"><div class="pip-dot" style="background:#8090b0"></div><div class="pip-text">1 on hold</div></div>
+          <div class="pip-row"><div class="pip-dot" style="background:#22c55e"></div><div class="pip-text">2 completed</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="meta">
+      <h3>Flat Minimal</h3>
+      <p>1px border, 8px radius, zero shadow. Maximum content density. Notion, Linear, GitHub. Very intentional.</p>
+      <span class="vibe">Sharp · Dense · Editorial</span>
+    </div>
+  </div>
+
+  <!-- B: ELEVATED -->
+  <div class="outer-card" data-choice="b" onclick="sel(this)">
+    <span class="sel-badge">✓ Selected</span>
+    <div class="badge">B</div>
+    <div class="shell elevated">
+      <div class="shell-top">
+        <div><div class="sh-title">Dashboard</div><div class="sh-sub">Monday, May 16</div></div>
+        <div class="sh-btn">+ Invoice</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card elevated">
+          <div class="kpi-label">Revenue</div>
+          <div class="kpi-val">$8,400</div>
+          <div class="kpi-delta">+12%</div>
+        </div>
+        <div class="kpi-card elevated">
+          <div class="kpi-label">Outstanding</div>
+          <div class="kpi-val">$2,100</div>
+        </div>
+        <div class="kpi-card elevated">
+          <div class="kpi-label">Overdue</div>
+          <div class="kpi-val">2</div>
+          <div class="kpi-warn">$950 at risk</div>
+        </div>
+      </div>
+      <div class="bottom-row" style="flex:1">
+        <div class="panel-card elevated">
+          <div class="panel-label">Recent invoices</div>
+          <div class="inv-row"><div class="inv-dot" style="background:#2c5bff"></div><div><div class="inv-name">Acme Corp</div><div class="inv-amt">$3,200 · Due Jun 1</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#22c55e"></div><div><div class="inv-name">Studio Bloom</div><div class="inv-amt">$1,800 · Paid</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#f59e0b"></div><div><div class="inv-name">Nexus Labs</div><div class="inv-amt">$950 · Overdue</div></div></div>
+        </div>
+        <div class="panel-card elevated">
+          <div class="panel-label">Pipeline</div>
+          <div class="pip-row"><div class="pip-dot"></div><div class="pip-text">3 active projects</div></div>
+          <div class="pip-row"><div class="pip-dot" style="background:#8090b0"></div><div class="pip-text">1 on hold</div></div>
+          <div class="pip-row"><div class="pip-dot" style="background:#22c55e"></div><div class="pip-text">2 completed</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="meta">
+      <h3>Elevated</h3>
+      <p>Layered drop shadow, 12px radius, thin border. Cards feel lifted off the page. Stripe, HoneyBook, Vercel dashboard.</p>
+      <span class="vibe">Polished · Airy · Confident</span>
+    </div>
+  </div>
+
+  <!-- C: GLASS PREMIUM -->
+  <div class="outer-card" data-choice="c" onclick="sel(this)">
+    <span class="sel-badge">✓ Selected</span>
+    <div class="badge">C</div>
+    <div class="shell glass">
+      <div class="shell-top">
+        <div><div class="sh-title">Dashboard</div><div class="sh-sub">Monday, May 16</div></div>
+        <div class="sh-btn">+ Invoice</div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card glass">
+          <div class="kpi-label">Revenue</div>
+          <div class="kpi-val">$8,400</div>
+          <div class="kpi-delta">+12%</div>
+        </div>
+        <div class="kpi-card glass">
+          <div class="kpi-label">Outstanding</div>
+          <div class="kpi-val">$2,100</div>
+        </div>
+        <div class="kpi-card glass">
+          <div class="kpi-label">Overdue</div>
+          <div class="kpi-val">2</div>
+          <div class="kpi-warn">$950 at risk</div>
+        </div>
+      </div>
+      <div class="bottom-row" style="flex:1">
+        <div class="panel-card glass">
+          <div class="panel-label">Recent invoices</div>
+          <div class="inv-row"><div class="inv-dot" style="background:#2c5bff"></div><div><div class="inv-name">Acme Corp</div><div class="inv-amt">$3,200 · Due Jun 1</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#22c55e"></div><div><div class="inv-name">Studio Bloom</div><div class="inv-amt">$1,800 · Paid</div></div></div>
+          <div class="inv-row"><div class="inv-dot" style="background:#f59e0b"></div><div><div class="inv-name">Nexus Labs</div><div class="inv-amt">$950 · Overdue</div></div></div>
+        </div>
+        <div class="panel-card glass">
+          <div class="panel-label">Pipeline</div>
+          <div class="pip-row"><div class="pip-dot"></div><div class="pip-text">3 active projects</div></div>
+          <div class="pip-row"><div class="pip-dot" style="background:#8090b0"></div><div class="pip-text">1 on hold</div></div>
+          <div class="pip-row"><div class="pip-dot" style="background:#22c55e"></div><div class="pip-text">2 completed</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="meta">
+      <h3>Glass Premium</h3>
+      <p>16px radius, blue-tinted border, inset highlight, blue-tinted background wash. Feels tactile and premium. ClickUp Pro tier.</p>
+      <span class="vibe">Tactile · Distinctive · Premium</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="hint">Same content, same font — only the card treatment changes · Click to select</div>
+
+</body>
+</html>

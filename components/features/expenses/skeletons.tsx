@@ -8,9 +8,9 @@ import {
 export function ExpensesPageSkeleton() {
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <Skeleton className="h-[10px] w-16 rounded-[3px]" />
-        <Skeleton className="h-7 w-40 rounded-[4px] md:h-8" />
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-8 w-40 rounded-[4px] md:h-9" />
+        <Skeleton className="h-4 w-full max-w-lg" />
       </div>
       <Card>
         <CardHeader>

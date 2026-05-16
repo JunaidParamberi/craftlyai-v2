@@ -23,8 +23,7 @@ export function ClientsPageSkeleton({ rowCount = 0 }: ClientsPageSkeletonProps) 
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <Skeleton className="h-[10px] w-14 rounded-[3px]" />
-          <Skeleton className="h-7 w-32 rounded-[4px] md:h-8 md:w-36" />
+          <Skeleton className="h-8 w-32 rounded-[4px] md:h-9 md:w-36" />
           <Skeleton className="h-4 w-full max-w-lg" />
         </div>
         <Skeleton className="h-9 w-[9.5rem] shrink-0" />
@@ -36,11 +35,11 @@ export function ClientsPageSkeleton({ rowCount = 0 }: ClientsPageSkeletonProps) 
         </div>
         <div className="px-4 py-3 sm:px-6">
           <div className="flex gap-4 border-b border-border py-3">
-            <Skeleton className="h-4 w-16" />
-            <Skeleton className="hidden h-4 w-20 md:block" />
-            <Skeleton className="hidden h-4 w-14 lg:block" />
-            <Skeleton className="h-4 w-14" />
-            <Skeleton className="ms-auto h-4 w-8" />
+            <Skeleton className="h-4 w-16 rounded-[3px]" />
+            <Skeleton className="hidden h-4 w-20 rounded-[3px] md:block" />
+            <Skeleton className="hidden h-4 w-14 rounded-[3px] lg:block" />
+            <Skeleton className="h-4 w-14 rounded-[3px]" />
+            <Skeleton className="ms-auto h-4 w-8 rounded-[3px]" />
           </div>
           <SkeletonRepeat
             count={rowCount}
@@ -51,21 +50,21 @@ export function ClientsPageSkeleton({ rowCount = 0 }: ClientsPageSkeletonProps) 
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <Skeleton className="size-9 shrink-0 rounded-full" />
-                  <Skeleton className="h-5 max-w-[200px]" />
+                  <Skeleton className="h-4 max-w-[200px] rounded-[3px]" />
                 </div>
-                <Skeleton className="hidden h-4 w-24 md:block" />
-                <Skeleton className="hidden h-4 w-32 lg:block" />
+                <Skeleton className="hidden h-4 w-24 rounded-[3px] md:block" />
+                <Skeleton className="hidden h-4 w-32 rounded-[3px] lg:block" />
                 <Skeleton className="h-6 w-16 rounded-full" />
-                <Skeleton className="size-8 shrink-0 rounded-full" />
+                <Skeleton className="size-8 shrink-0 rounded-md" />
               </div>
             )}
           />
         </div>
         <div className="flex flex-col gap-3 border-t border-border/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-4 w-48 rounded-[3px]" />
           <div className="flex gap-2">
-            <Skeleton className="size-8 rounded-lg" />
-            <Skeleton className="size-8 rounded-lg" />
+            <Skeleton className="size-8 rounded-md" />
+            <Skeleton className="size-8 rounded-md" />
           </div>
         </div>
       </div>

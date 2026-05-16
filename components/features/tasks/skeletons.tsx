@@ -5,9 +5,9 @@ export function TasksPageSkeleton() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <Skeleton className="h-[10px] w-12 rounded-[3px]" />
-          <Skeleton className="h-7 w-32 rounded-[4px] md:h-8" />
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-8 w-32 rounded-[4px] md:h-9" />
+          <Skeleton className="h-4 w-full max-w-lg" />
         </div>
         <Skeleton className="h-8 w-28 rounded-md" />
       </div>

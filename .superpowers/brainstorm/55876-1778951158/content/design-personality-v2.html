@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CraftlyAI — Design Direction (Brand Colors)</title>
+<style>
+  :root { --brand: #2c5bff; --brand-dark: #0b1220; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #080c14;
+    color: #e8e8ec;
+    min-height: 100vh;
+    padding: 32px 24px 56px;
+  }
+
+  .page-title { font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #2c5bff; margin-bottom: 8px; }
+  .page-heading { font-size: 28px; font-weight: 800; color: #f0f0f8; margin-bottom: 6px; letter-spacing: -0.02em; }
+  .page-sub { font-size: 14px; color: #6070a0; margin-bottom: 40px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  .card {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: all 0.22s ease;
+    position: relative;
+    background: #0e1422;
+  }
+  .card:hover { transform: translateY(-4px); border-color: rgba(44,91,255,0.3); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+  .card.selected { border-color: #2c5bff; box-shadow: 0 0 0 4px rgba(44,91,255,0.18), 0 16px 48px rgba(0,0,0,0.4); }
+
+  .card-label {
+    position: absolute; top: 12px; right: 12px;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px;
+    background: rgba(44,91,255,0.2); color: #6b90ff;
+    z-index: 10;
+  }
+
+  .selected-badge {
+    display: none;
+    position: absolute; top: 12px; left: 12px;
+    background: #2c5bff; color: white;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px;
+    z-index: 20;
+  }
+  .card.selected .selected-badge { display: block; }
+
+  .card-meta { padding: 16px 18px 20px; }
+  .card-meta h3 { font-size: 16px; font-weight: 700; margin-bottom: 5px; color: #f0f0f8; }
+  .card-meta p { font-size: 13px; color: #6070a0; line-height: 1.55; }
+  .card-meta .tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .card-meta .tag { font-size: 11px; padding: 3px 8px; border-radius: 5px; background: rgba(44,91,255,0.1); color: #5575cc; }
+
+  /* ─────────────────────────────────────────
+     A: MIDNIGHT — dark sidebar, icon-only, ultra-compact
+  ───────────────────────────────────────── */
+  .m { height: 280px; display: flex; overflow: hidden; background: #05080f; }
+  .m-sidebar {
+    width: 52px; background: #080d18;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 14px 0; gap: 18px;
+  }
+  .m-logo { width: 30px; height: 30px; background: #2c5bff; border-radius: 9px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; }
+  .m-logo-inner { width: 16px; height: 16px; background: white; border-radius: 3px; opacity: 0.9; clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 80% 100%, 20% 100%, 0% 80%); }
+  .m-dot { width: 22px; height: 22px; border-radius: 7px; background: rgba(255,255,255,0.05); }
+  .m-dot.on { background: rgba(44,91,255,0.25); border: 1px solid rgba(44,91,255,0.4); }
+  .m-main { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
+  .m-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 2px; }
+  .m-search { flex: 1; height: 26px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; }
+  .m-av { width: 26px; height: 26px; border-radius: 50%; background: #2c5bff; }
+  .m-kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; }
+  .m-kpi { background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 9px; }
+  .m-kpi-l { width: 38px; height: 5px; background: rgba(255,255,255,0.12); border-radius: 2px; margin-bottom: 5px; }
+  .m-kpi-v { width: 52px; height: 13px; background: rgba(255,255,255,0.45); border-radius: 2px; }
+  .m-kpi-b { width: 32px; height: 7px; background: rgba(44,91,255,0.5); border-radius: 2px; margin-top: 4px; }
+  .m-row { display: grid; grid-template-columns: 3fr 2fr; gap: 7px; flex: 1; }
+  .m-panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 9px; }
+  .m-label { width: 48px; height: 5px; background: rgba(255,255,255,0.12); border-radius: 2px; margin-bottom: 6px; }
+  .m-chart { display: flex; align-items: flex-end; gap: 3px; height: 52px; }
+  .m-bar2 { border-radius: 3px 3px 0 0; flex: 1; }
+  .m-line { height: 10px; border-radius: 3px; background: rgba(255,255,255,0.05); margin-bottom: 4px; }
+  .m-line.hi { background: rgba(44,91,255,0.18); }
+
+  /* ─────────────────────────────────────────
+     B: SLATE LIGHT — full sidebar, white main, classic SaaS premium
+  ───────────────────────────────────────── */
+  .sl { height: 280px; display: flex; overflow: hidden; background: #f5f6fa; }
+  .sl-sidebar {
+    width: 172px; background: #0b1220;
+    display: flex; flex-direction: column;
+    padding: 14px 10px; gap: 3px;
+  }
+  .sl-logo { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; padding: 0 4px; }
+  .sl-logo-mark { width: 24px; height: 28px; background: #2c5bff; border-radius: 6px; }
+  .sl-logo-text { width: 60px; height: 10px; background: rgba(255,255,255,0.7); border-radius: 3px; }
+  .sl-nav { height: 30px; border-radius: 8px; display: flex; align-items: center; gap: 7px; padding: 0 8px; }
+  .sl-nav.on { background: rgba(44,91,255,0.2); }
+  .sl-nav-icon { width: 14px; height: 14px; border-radius: 4px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+  .sl-nav-icon.on { background: #2c5bff; }
+  .sl-nav-text { width: 60px; height: 7px; background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .sl-nav-text.on { background: rgba(255,255,255,0.7); }
+  .sl-main { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 9px; }
+  .sl-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+  .sl-heading { width: 80px; height: 12px; background: #0b1220; border-radius: 3px; }
+  .sl-btn { height: 26px; width: 70px; background: #2c5bff; border-radius: 7px; }
+  .sl-kpis { display: grid; grid-template-columns: repeat(2,1fr); gap: 7px; }
+  .sl-kpi { background: white; border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .sl-kpi-l { width: 40px; height: 5px; background: #d0d5e0; border-radius: 2px; margin-bottom: 6px; }
+  .sl-kpi-v { width: 55px; height: 14px; background: #0b1220; border-radius: 2px; }
+  .sl-kpi-b { width: 40px; height: 7px; background: rgba(44,91,255,0.3); border-radius: 2px; margin-top: 5px; }
+  .sl-bottom { display: grid; grid-template-columns: 2fr 1fr; gap: 7px; flex: 1; }
+  .sl-panel { background: white; border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .sl-strip { height: 10px; border-radius: 3px; background: #e8ecf5; margin-bottom: 5px; }
+  .sl-strip.on { background: rgba(44,91,255,0.2); }
+
+  /* ─────────────────────────────────────────
+     C: AURORA — gradient mesh bg, glass cards, hero brand feel
+  ───────────────────────────────────────── */
+  .au { height: 280px; display: flex; overflow: hidden; position: relative;
+        background: linear-gradient(145deg, #08102a 0%, #060d1f 60%, #030810 100%); }
+  .au-blob1 { position: absolute; width: 220px; height: 220px; border-radius: 50%;
+              background: radial-gradient(circle, #2c5bff 0%, transparent 70%);
+              top: -80px; right: -40px; opacity: 0.12; filter: blur(30px); pointer-events: none; }
+  .au-blob2 { position: absolute; width: 180px; height: 180px; border-radius: 50%;
+              background: radial-gradient(circle, #0038cc 0%, transparent 70%);
+              bottom: -60px; left: 30px; opacity: 0.1; filter: blur(30px); pointer-events: none; }
+  .au-sidebar {
+    width: 52px; position: relative; z-index: 1;
+    background: rgba(11,18,32,0.7);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(44,91,255,0.12);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 14px 0; gap: 18px;
+  }
+  .au-logo { width: 30px; height: 30px; border-radius: 9px; background: #2c5bff; }
+  .au-dot { width: 22px; height: 22px; border-radius: 7px; background: rgba(255,255,255,0.04); }
+  .au-dot.on { background: rgba(44,91,255,0.3); border: 1px solid rgba(44,91,255,0.5); box-shadow: 0 0 10px rgba(44,91,255,0.2); }
+  .au-main { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 9px; position: relative; z-index: 1; }
+  .au-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 2px; }
+  .au-search { flex: 1; height: 26px; background: rgba(44,91,255,0.08); border: 1px solid rgba(44,91,255,0.2); border-radius: 8px; backdrop-filter: blur(8px); }
+  .au-av { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, #2c5bff, #0038cc); }
+  .au-kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+  .au-kpi {
+    background: rgba(44,91,255,0.06);
+    border: 1px solid rgba(44,91,255,0.18);
+    border-radius: 10px; padding: 8px;
+    backdrop-filter: blur(12px);
+  }
+  .au-kpi-l { width: 36px; height: 5px; background: rgba(255,255,255,0.15); border-radius: 2px; margin-bottom: 5px; }
+  .au-kpi-v { width: 50px; height: 13px; background: rgba(255,255,255,0.7); border-radius: 2px; }
+  .au-kpi-b { width: 28px; height: 7px; background: rgba(44,91,255,0.7); border-radius: 2px; margin-top: 4px; }
+  .au-row { display: grid; grid-template-columns: 3fr 2fr; gap: 6px; flex: 1; }
+  .au-panel {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(44,91,255,0.12);
+    border-radius: 10px; padding: 9px;
+    backdrop-filter: blur(12px);
+  }
+  .au-label { width: 46px; height: 5px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-bottom: 6px; }
+  .au-chart { display: flex; align-items: flex-end; gap: 3px; height: 52px; }
+  .au-b { border-radius: 3px 3px 0 0; flex: 1; }
+  .au-line { height: 10px; border-radius: 3px; background: rgba(255,255,255,0.04); margin-bottom: 4px; }
+  .au-line.hi { background: rgba(44,91,255,0.2); }
+
+  .bottom-hint { text-align: center; margin-top: 32px; font-size: 13px; color: #3a4a70; }
+</style>
+<script>
+  function selectCard(el) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const choice = el.dataset.choice;
+    const text = el.querySelector('h3').textContent;
+    try {
+      fetch('/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'click', choice, text, timestamp: Date.now() })
+      }).catch(() => {});
+    } catch(e) {}
+  }
+</script>
+</head>
+<body>
+
+<div class="page-title">CraftlyAI · Brand Blue #2c5bff</div>
+<div class="page-heading">Three design systems, your color.</div>
+<div class="page-sub">Same electric blue — different personality. Pick the one that feels like CraftlyAI.</div>
+
+<div class="grid">
+
+  <!-- A: MIDNIGHT -->
+  <div class="card" data-choice="a" onclick="selectCard(this)">
+    <span class="selected-badge">✓ Selected</span>
+    <div class="card-label">A</div>
+    <div class="m">
+      <div class="m-sidebar">
+        <div class="m-logo"></div>
+        <div class="m-dot on"></div>
+        <div class="m-dot"></div>
+        <div class="m-dot"></div>
+        <div class="m-dot"></div>
+        <div class="m-dot"></div>
+      </div>
+      <div class="m-main">
+        <div class="m-bar">
+          <div class="m-search"></div>
+          <div class="m-av"></div>
+        </div>
+        <div class="m-kpis">
+          <div class="m-kpi"><div class="m-kpi-l"></div><div class="m-kpi-v"></div><div class="m-kpi-b"></div></div>
+          <div class="m-kpi"><div class="m-kpi-l"></div><div class="m-kpi-v"></div></div>
+          <div class="m-kpi"><div class="m-kpi-l"></div><div class="m-kpi-v"></div></div>
+          <div class="m-kpi"><div class="m-kpi-l"></div><div class="m-kpi-v"></div></div>
+        </div>
+        <div class="m-row">
+          <div class="m-panel">
+            <div class="m-label"></div>
+            <div class="m-chart">
+              <div class="m-bar2" style="height:38%;background:rgba(44,91,255,0.25)"></div>
+              <div class="m-bar2" style="height:60%;background:rgba(44,91,255,0.35)"></div>
+              <div class="m-bar2" style="height:42%;background:rgba(44,91,255,0.25)"></div>
+              <div class="m-bar2" style="height:78%;background:rgba(44,91,255,0.5)"></div>
+              <div class="m-bar2" style="height:55%;background:rgba(44,91,255,0.35)"></div>
+              <div class="m-bar2" style="height:92%;background:#2c5bff"></div>
+              <div class="m-bar2" style="height:68%;background:rgba(44,91,255,0.45)"></div>
+            </div>
+          </div>
+          <div class="m-panel">
+            <div class="m-label"></div>
+            <div class="m-line hi"></div>
+            <div class="m-line" style="width:85%"></div>
+            <div class="m-line" style="width:65%"></div>
+            <div class="m-line" style="width:90%"></div>
+            <div class="m-line" style="width:70%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <h3>Midnight</h3>
+      <p>All-dark. Near-black base, electric blue pops on every interactive element. Dense, focused, power-user energy.</p>
+      <div class="tags">
+        <span class="tag">Dark-first</span>
+        <span class="tag">Icon sidebar</span>
+        <span class="tag">ClickUp / Linear feel</span>
+        <span class="tag">High contrast</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- B: SLATE LIGHT -->
+  <div class="card" data-choice="b" onclick="selectCard(this)">
+    <span class="selected-badge">✓ Selected</span>
+    <div class="card-label">B</div>
+    <div class="sl">
+      <div class="sl-sidebar">
+        <div class="sl-logo">
+          <div class="sl-logo-mark"></div>
+          <div class="sl-logo-text"></div>
+        </div>
+        <div class="sl-nav on"><div class="sl-nav-icon on"></div><div class="sl-nav-text on"></div></div>
+        <div class="sl-nav"><div class="sl-nav-icon"></div><div class="sl-nav-text"></div></div>
+        <div class="sl-nav"><div class="sl-nav-icon"></div><div class="sl-nav-text"></div></div>
+        <div class="sl-nav"><div class="sl-nav-icon"></div><div class="sl-nav-text"></div></div>
+        <div class="sl-nav"><div class="sl-nav-icon"></div><div class="sl-nav-text"></div></div>
+        <div class="sl-nav"><div class="sl-nav-icon"></div><div class="sl-nav-text"></div></div>
+      </div>
+      <div class="sl-main">
+        <div class="sl-topbar">
+          <div class="sl-heading"></div>
+          <div class="sl-btn"></div>
+        </div>
+        <div class="sl-kpis">
+          <div class="sl-kpi"><div class="sl-kpi-l"></div><div class="sl-kpi-v"></div><div class="sl-kpi-b"></div></div>
+          <div class="sl-kpi"><div class="sl-kpi-l"></div><div class="sl-kpi-v"></div></div>
+        </div>
+        <div class="sl-bottom">
+          <div class="sl-panel">
+            <div class="sl-strip on"></div>
+            <div class="sl-strip" style="width:90%"></div>
+            <div class="sl-strip" style="width:70%"></div>
+            <div class="sl-strip" style="width:85%"></div>
+            <div class="sl-strip" style="width:60%"></div>
+          </div>
+          <div class="sl-panel">
+            <div class="sl-strip on"></div>
+            <div class="sl-strip" style="width:80%"></div>
+            <div class="sl-strip" style="width:65%"></div>
+            <div class="sl-strip" style="width:90%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <h3>Ink + White</h3>
+      <p>Dark navy sidebar, crisp white main area. Blue accents on active states and CTAs. Classic premium SaaS — HoneyBook meets Stripe.</p>
+      <div class="tags">
+        <span class="tag">Light main area</span>
+        <span class="tag">Dark nav sidebar</span>
+        <span class="tag">Full labels</span>
+        <span class="tag">Professional</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- C: AURORA -->
+  <div class="card" data-choice="c" onclick="selectCard(this)">
+    <span class="selected-badge">✓ Selected</span>
+    <div class="card-label">C</div>
+    <div class="au">
+      <div class="au-blob1"></div>
+      <div class="au-blob2"></div>
+      <div class="au-sidebar">
+        <div class="au-logo"></div>
+        <div class="au-dot on"></div>
+        <div class="au-dot"></div>
+        <div class="au-dot"></div>
+        <div class="au-dot"></div>
+        <div class="au-dot"></div>
+      </div>
+      <div class="au-main">
+        <div class="au-bar">
+          <div class="au-search"></div>
+          <div class="au-av"></div>
+        </div>
+        <div class="au-kpis">
+          <div class="au-kpi"><div class="au-kpi-l"></div><div class="au-kpi-v"></div><div class="au-kpi-b"></div></div>
+          <div class="au-kpi"><div class="au-kpi-l"></div><div class="au-kpi-v"></div></div>
+          <div class="au-kpi"><div class="au-kpi-l"></div><div class="au-kpi-v"></div></div>
+          <div class="au-kpi"><div class="au-kpi-l"></div><div class="au-kpi-v"></div></div>
+        </div>
+        <div class="au-row">
+          <div class="au-panel">
+            <div class="au-label"></div>
+            <div class="au-chart">
+              <div class="au-b" style="height:38%;background:rgba(44,91,255,0.2)"></div>
+              <div class="au-b" style="height:60%;background:rgba(44,91,255,0.3)"></div>
+              <div class="au-b" style="height:42%;background:rgba(44,91,255,0.2)"></div>
+              <div class="au-b" style="height:78%;background:rgba(44,91,255,0.45)"></div>
+              <div class="au-b" style="height:55%;background:rgba(44,91,255,0.3)"></div>
+              <div class="au-b" style="height:92%;background:#2c5bff;box-shadow:0 0 8px rgba(44,91,255,0.5)"></div>
+              <div class="au-b" style="height:68%;background:rgba(44,91,255,0.4)"></div>
+            </div>
+          </div>
+          <div class="au-panel">
+            <div class="au-label"></div>
+            <div class="au-line hi"></div>
+            <div class="au-line" style="width:85%"></div>
+            <div class="au-line" style="width:65%"></div>
+            <div class="au-line" style="width:90%"></div>
+            <div class="au-line" style="width:72%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <h3>Aurora</h3>
+      <p>Deep navy with glowing blue mesh backdrop. Glass-morphism cards, brand blue glows on key elements. Vercel / Stripe Atlas tier.</p>
+      <div class="tags">
+        <span class="tag">Dark-first</span>
+        <span class="tag">Glass panels</span>
+        <span class="tag">Gradient mesh</span>
+        <span class="tag">Brand-forward</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-hint">Click to select · Your brand blue #2c5bff powers all three</div>
+
+</body>
+</html>
