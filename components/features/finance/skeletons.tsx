@@ -50,7 +50,7 @@ export function FinancePageSkeleton({
           render={(i) => (
             <div
               key={i}
-              className="relative overflow-hidden rounded-lg border border-border border-l-[3px] border-l-border bg-card px-5 py-4"
+              className="relative overflow-hidden rounded-[14px] border border-border border-l-[3px] border-l-border bg-card px-5 py-4"
             >
               <div className="mb-3 flex items-center justify-between">
                 <Skeleton className="h-2.5 w-20" />
@@ -68,7 +68,7 @@ export function FinancePageSkeleton({
           <Skeleton className="h-4 w-40" />
         </CardHeader>
         <CardContent className="pt-0">
-          <Skeleton className="h-[200px] w-full rounded-lg" />
+          <Skeleton className="h-[200px] w-full rounded-[14px]" />
         </CardContent>
       </Card>
 
