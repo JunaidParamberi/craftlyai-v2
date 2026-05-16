@@ -8,10 +8,25 @@ export const paymentMethodSchema = z.enum([
   "other",
 ]);
 
-export const markPaidInputSchema = z.object({
-  method: paymentMethodSchema,
-  reference: z.string().max(200).optional(),
-  notes: z.string().max(500).optional(),
-});
+export const remainingActionSchema = z.enum(["keep_due", "write_off"]);
+
+export const markPaidInputSchema = z
+  .object({
+    amount: z.coerce.number().positive(),
+    method: paymentMethodSchema,
+    reference: z.string().max(200).optional(),
+    notes: z.string().max(500).optional(),
+    remainingAction: remainingActionSchema.optional(),
+    writeOffReason: z.string().trim().max(500).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.remainingAction === "write_off" && !value.writeOffReason) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Write-off reason is required.",
+        path: ["writeOffReason"],
+      });
+    }
+  });
 
 export type MarkPaidInput = z.infer<typeof markPaidInputSchema>;

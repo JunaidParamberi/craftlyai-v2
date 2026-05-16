@@ -27,6 +27,8 @@ export const DOCUMENT_STATUSES = [
   "viewed",
   "signed",
   "paid",
+  "partially_paid",
+  "written_off",
   "archived",
   "approved",
   "declined",

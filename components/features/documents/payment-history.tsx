@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { PaymentMethod, PaymentRow } from "@/types";
 
 const METHOD_LABELS: Record<PaymentMethod, string> = {
@@ -11,9 +12,14 @@ const METHOD_LABELS: Record<PaymentMethod, string> = {
 interface PaymentHistoryProps {
   payments: PaymentRow[];
   currency: string;
+  voucherByPaymentId?: Record<string, { id: string; voucher_number: string | null }>;
 }
 
-export function PaymentHistory({ payments, currency }: PaymentHistoryProps) {
+export function PaymentHistory({
+  payments,
+  currency,
+  voucherByPaymentId = {},
+}: PaymentHistoryProps) {
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -34,6 +40,7 @@ export function PaymentHistory({ payments, currency }: PaymentHistoryProps) {
               <th className="pb-2 pr-4 font-medium">Date</th>
               <th className="pb-2 pr-4 font-medium">Method</th>
               <th className="pb-2 pr-4 font-medium">Reference</th>
+              <th className="pb-2 pr-4 font-medium">Voucher</th>
               <th className="pb-2 font-medium text-right">Amount</th>
             </tr>
           </thead>
@@ -52,6 +59,18 @@ export function PaymentHistory({ payments, currency }: PaymentHistoryProps) {
                 </td>
                 <td className="py-2 pr-4 text-muted-foreground">
                   {p.reference ?? "—"}
+                </td>
+                <td className="py-2 pr-4">
+                  {voucherByPaymentId[p.id] ? (
+                    <Link
+                      href={`/documents/${voucherByPaymentId[p.id].id}`}
+                      className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                    >
+                      {voucherByPaymentId[p.id].voucher_number ?? "View voucher"}
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </td>
                 <td className="py-2 text-right font-medium text-emerald-600">
                   {fmt(Number(p.amount))}

@@ -5,10 +5,15 @@ import { ChevronLeft, Download, Pencil } from "lucide-react";
 
 import { getClientById } from "@/lib/clients/client-queries";
 import { getDocumentById } from "@/lib/documents/document-queries";
-import { getInvoiceWithLineItems, getPaymentsForDocument } from "@/lib/documents/invoice-queries";
+import {
+  getInvoiceAdjustmentsForDocument,
+  getInvoiceWithLineItems,
+  getPaymentsForDocument,
+} from "@/lib/documents/invoice-queries";
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
-import { getVoucherForInvoice, getPaymentVoucherData } from "@/lib/documents/payment-voucher-queries";
+import { getVouchersForInvoice, getPaymentVoucherData } from "@/lib/documents/payment-voucher-queries";
+import { calculateInvoiceBalance } from "@/lib/documents/payment-balance";
 import { buildVariableContext } from "@/lib/documents/variables-server";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 
@@ -39,7 +44,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const [client, projectTitle, variableContext, invoiceData, quoteData, proposalData, payments, voucherDoc, voucherData] = await Promise.all([
+  const [client, projectTitle, variableContext, invoiceData, quoteData, proposalData, payments, adjustments, voucherDocs, voucherData] = await Promise.all([
     document.client_id ? getClientById(document.client_id) : Promise.resolve(null),
     document.project_id ? fetchProjectTitle(document.project_id) : Promise.resolve(null),
     buildVariableContext({
@@ -50,9 +55,32 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     document.type === "quote" ? getQuoteWithLineItems(id) : Promise.resolve(null),
     document.type === "proposal" ? getProposalWithLineItems(id) : Promise.resolve(null),
     document.type === "invoice" ? getPaymentsForDocument(id) : Promise.resolve([]),
-    document.type === "invoice" ? getVoucherForInvoice(id) : Promise.resolve(null),
+    document.type === "invoice" ? getInvoiceAdjustmentsForDocument(id) : Promise.resolve([]),
+    document.type === "invoice" ? getVouchersForInvoice(id) : Promise.resolve([]),
     document.type === "payment_voucher" ? getPaymentVoucherData(id) : Promise.resolve(null),
   ]);
+  const invoiceTotal = invoiceData
+    ? calculateInvoiceTotal(
+        invoiceData.line_items,
+        Number(invoiceData.discount_value ?? 0),
+        (invoiceData.discount_type ?? "percent") as "percent" | "flat",
+      )
+    : 0;
+  const invoiceBalance = invoiceData
+    ? calculateInvoiceBalance({
+        invoiceTotal,
+        payments: payments.map((payment) => Number(payment.amount)),
+        writeOffs: adjustments.map((adjustment) => Number(adjustment.amount)),
+      })
+    : null;
+  const voucherByPaymentId = Object.fromEntries(
+    voucherDocs
+      .filter((voucher) => voucher.payment_id)
+      .map((voucher) => [
+        voucher.payment_id as string,
+        { id: voucher.id, voucher_number: voucher.voucher_number },
+      ]),
+  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -96,7 +124,16 @@ export default async function DocumentDetailPage({ params }: PageProps) {
               />
               <MarkPaidButton
                 documentId={document.id}
-                isPaid={document.status === "paid"}
+                invoiceTotal={invoiceBalance?.invoiceTotal ?? 0}
+                totalPaid={invoiceBalance?.totalPaid ?? 0}
+                totalWrittenOff={invoiceBalance?.totalWrittenOff ?? 0}
+                remainingBalance={invoiceBalance?.balanceDue ?? 0}
+                currency={client?.currency ?? "USD"}
+                isPaid={
+                  document.status === "paid" ||
+                  document.status === "written_off" ||
+                  (invoiceBalance ? invoiceBalance.balanceDue <= 0 : false)
+                }
               />
             </>
           ) : null}
@@ -143,6 +180,30 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                 <span className="text-emerald-600 font-medium">{new Date(invoiceData.paid_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}</span>
               </div>
             ) : null}
+            {invoiceBalance ? (
+              <>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Paid</span>
+                  <span className="text-emerald-600 font-medium">
+                    {new Intl.NumberFormat("en-US", { style: "currency", currency: client?.currency ?? "USD" }).format(invoiceBalance.totalPaid)}
+                  </span>
+                </div>
+                {invoiceBalance.totalWrittenOff > 0 ? (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Written off</span>
+                    <span>
+                      {new Intl.NumberFormat("en-US", { style: "currency", currency: client?.currency ?? "USD" }).format(invoiceBalance.totalWrittenOff)}
+                    </span>
+                  </div>
+                ) : null}
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Balance due</span>
+                  <span className={invoiceBalance.balanceDue > 0 ? "font-semibold text-amber-600" : "font-semibold text-emerald-600"}>
+                    {new Intl.NumberFormat("en-US", { style: "currency", currency: client?.currency ?? "USD" }).format(invoiceBalance.balanceDue)}
+                  </span>
+                </div>
+              </>
+            ) : null}
           </div>
 
           {/* Pay link */}
@@ -168,16 +229,20 @@ export default async function DocumentDetailPage({ params }: PageProps) {
       ) : null}
 
       {document.type === "invoice" ? (
-        <PaymentHistory payments={payments} currency={client?.currency ?? "USD"} />
+        <PaymentHistory
+          payments={payments}
+          currency={client?.currency ?? "USD"}
+          voucherByPaymentId={voucherByPaymentId}
+        />
       ) : null}
 
-      {document.type === "invoice" && document.status === "paid" && voucherDoc ? (
+      {document.type === "invoice" && voucherDocs.length > 0 ? (
         <div className="flex items-center gap-2">
           <Link
-            href={`/documents/${voucherDoc.id}`}
+            href={`/documents/${voucherDocs[0].id}`}
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
-            View Payment Voucher{voucherDoc.voucher_number ? ` (${voucherDoc.voucher_number})` : ""} →
+            View latest Payment Voucher{voucherDocs[0].voucher_number ? ` (${voucherDocs[0].voucher_number})` : ""} →
           </Link>
         </div>
       ) : null}
@@ -359,6 +424,27 @@ async function fetchProjectTitle(projectId: string): Promise<string | null> {
     .eq("user_id", user.id)
     .maybeSingle();
   return data?.title ?? null;
+}
+
+function calculateInvoiceTotal(
+  lineItems: LineItemRow[],
+  discountValue: number,
+  discountType: "percent" | "flat",
+): number {
+  const subtotal = lineItems.reduce(
+    (sum, li) => sum + Number(li.quantity) * Number(li.unit_price),
+    0,
+  );
+  const taxTotal = lineItems.reduce(
+    (sum, li) =>
+      sum + Number(li.quantity) * Number(li.unit_price) * (Number(li.tax_rate) / 100),
+    0,
+  );
+  const discount =
+    discountType === "flat"
+      ? Math.min(discountValue, subtotal)
+      : subtotal * (discountValue / 100);
+  return subtotal - discount + taxTotal;
 }
 
 function InvoiceLineItemsReadOnly({
