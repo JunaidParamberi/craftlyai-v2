@@ -1,20 +1,22 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
-import { lpoMetaSchema, type LPOMetaInput } from "@/lib/validations/document";
-
-type LPOFormValues = {
-  lpo_number: string;
-  lpo_validity_date?: string | null;
-  lpo_amount?: string | number | null;
-};
+import { z } from "zod";
 import { updateLPOMeta, uploadLPOPdf } from "@/lib/documents/lpo-mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+
+const formSchema = z.object({
+  lpo_number: z.string().trim().min(1, "LPO number is required.").max(100),
+  lpo_validity_date: z.string().nullable().optional(),
+  lpo_amount: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface Props {
   documentId: string;
@@ -34,22 +36,36 @@ export function LPOMetaFields({ documentId, initialValues }: Props) {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LPOFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(lpoMetaSchema) as any,
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       lpo_number: initialValues.lpo_number ?? "",
       lpo_validity_date: initialValues.lpo_validity_date ?? "",
-      lpo_amount: initialValues.lpo_amount ?? undefined,
+      lpo_amount:
+        initialValues.lpo_amount != null
+          ? String(initialValues.lpo_amount)
+          : "",
     },
   });
 
-  function onSubmit(data: LPOFormValues) {
-    const parsed = lpoMetaSchema.safeParse(data);
-    if (!parsed.success) return;
-    const validData: LPOMetaInput = parsed.data;
+  function onSubmit(data: FormValues) {
+    const lpo_amount =
+      data.lpo_amount && data.lpo_amount !== ""
+        ? Number(data.lpo_amount)
+        : undefined;
+
+    if (lpo_amount !== undefined && lpo_amount <= 0) {
+      toast.error("Amount must be positive.");
+      return;
+    }
+
     startTransition(async () => {
-      const metaResult = await updateLPOMeta(documentId, validData);
+      const metaResult = await updateLPOMeta(documentId, {
+        lpo_number: data.lpo_number,
+        lpo_validity_date: data.lpo_validity_date ?? null,
+        lpo_amount: lpo_amount ?? null,
+      });
+
       if (!metaResult.ok) {
         toast.error(metaResult.error ?? "Failed to save LPO details.");
         return;
@@ -97,9 +113,6 @@ export function LPOMetaFields({ documentId, initialValues }: Props) {
             placeholder="e.g. 5000.00"
             {...register("lpo_amount")}
           />
-          {errors.lpo_amount && (
-            <p className="text-xs text-destructive">{errors.lpo_amount.message}</p>
-          )}
         </div>
 
         <div className="space-y-1.5">
