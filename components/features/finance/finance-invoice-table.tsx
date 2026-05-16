@@ -54,23 +54,23 @@ export function FinanceInvoiceTable({ invoices, currency }: Props) {
   return (
     <Table>
       <TableHeader>
-        <TableRow className="hover:bg-transparent">
-          <TableHead className="text-[11px] font-semibold uppercase tracking-[0.08em]">
+        <TableRow className="hover:bg-transparent border-border/60">
+          <TableHead className="w-[220px] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Invoice
           </TableHead>
-          <TableHead className="text-[11px] font-semibold uppercase tracking-[0.08em]">
+          <TableHead className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Client
           </TableHead>
-          <TableHead className="text-[11px] font-semibold uppercase tracking-[0.08em]">
+          <TableHead className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Due
           </TableHead>
-          <TableHead className="text-[11px] font-semibold uppercase tracking-[0.08em]">
+          <TableHead className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Status
           </TableHead>
-          <TableHead className="text-right text-[11px] font-semibold uppercase tracking-[0.08em]">
+          <TableHead className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
             Amount
           </TableHead>
-          <TableHead />
+          <TableHead className="w-16 px-4 py-3" />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -83,47 +83,60 @@ export function FinanceInvoiceTable({ invoices, currency }: Props) {
           return (
             <TableRow
               key={invoice.id}
-              className="group transition-colors hover:bg-muted/40"
+              className="group border-border/40 transition-colors hover:bg-muted/30"
             >
-              <TableCell className="text-sm font-medium">
-                {invoice.invoice_number ?? invoice.title}
+              <TableCell className="px-6 py-4">
+                <span className="text-sm font-semibold text-foreground">
+                  {invoice.invoice_number ?? invoice.title}
+                </span>
               </TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {invoice.client?.name ?? "—"}
+              <TableCell className="px-4 py-4">
+                <span className="text-sm text-muted-foreground">
+                  {invoice.client?.name ?? (
+                    <span className="text-border">—</span>
+                  )}
+                </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="px-4 py-4">
                 <span
                   className={cn(
-                    "text-xs",
+                    "text-sm",
                     isOverdue
-                      ? "font-medium text-amber-600"
+                      ? "font-medium text-amber-500"
                       : "text-muted-foreground"
                   )}
                 >
                   {invoice.due_date
                     ? format(parseISO(invoice.due_date), "MMM d, yyyy")
-                    : "—"}
+                    : <span className="text-border">—</span>}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="px-4 py-4">
                 <Badge
                   variant={documentStatusVariant(invoice.status)}
-                  className="text-[11px]"
+                  className="text-[11px] font-medium"
                 >
                   {documentStatusLabel(invoice.status)}
                 </Badge>
               </TableCell>
-              <TableCell className="text-right">
-                <span className="font-mono text-sm font-semibold tabular-nums text-foreground">
+              <TableCell className="px-6 py-4 text-right">
+                <span
+                  className={cn(
+                    "font-mono text-sm tabular-nums",
+                    invoice.computedTotal === 0
+                      ? "text-muted-foreground"
+                      : "font-semibold text-foreground"
+                  )}
+                >
                   {formatMoney(invoice.computedTotal, currency)}
                 </span>
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="px-4 py-4 text-right">
                 <Link href={`/documents/${invoice.id}`}>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-xs opacity-0 transition-opacity group-hover:opacity-100"
+                    className="h-7 px-2 text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
                   >
                     View →
                   </Button>

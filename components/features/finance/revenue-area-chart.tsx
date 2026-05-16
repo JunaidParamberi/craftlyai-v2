@@ -52,6 +52,16 @@ function makeTooltip(currency: string) {
   };
 }
 
+function getPrevMonthLabel(monthLabel: string): string {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const [mon, year] = monthLabel.split(" ");
+  const idx = months.indexOf(mon);
+  if (idx === -1 || !year) return `Prev ${year ?? ""}`.trim();
+  const prevIdx = (idx - 1 + 12) % 12;
+  const prevYear = idx === 0 ? String(Number(year) - 1) : year;
+  return `${months[prevIdx]} ${prevYear}`;
+}
+
 export function RevenueAreaChart({ data, currency }: Props) {
   if (data.length === 0) {
     return (
@@ -61,18 +71,25 @@ export function RevenueAreaChart({ data, currency }: Props) {
     );
   }
 
+  // Recharts needs ≥2 points to draw line/area; pad with a leading zero when needed
+  const chartData: MonthlyRevenuePoint[] =
+    data.length === 1
+      ? [{ month: getPrevMonthLabel(data[0].month), revenue: 0, isCurrent: false }, ...data]
+      : data;
+
+  const fewPoints = chartData.length <= 3;
   const ChartTooltip = makeTooltip(currency);
 
   return (
     <ResponsiveContainer width="100%" height={200}>
       <AreaChart
-        data={data}
+        data={chartData}
         margin={{ top: 8, right: 4, left: 0, bottom: 0 }}
       >
         <defs>
           <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.18} />
-            <stop offset="85%" stopColor="#3b82f6" stopOpacity={0.02} />
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
+            <stop offset="80%" stopColor="#3b82f6" stopOpacity={0.08} />
             <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
           </linearGradient>
         </defs>
@@ -107,7 +124,7 @@ export function RevenueAreaChart({ data, currency }: Props) {
           stroke="#3b82f6"
           strokeWidth={2.5}
           fill="url(#revenueGradient)"
-          dot={false}
+          dot={fewPoints ? { r: 4, fill: "#3b82f6", stroke: "white", strokeWidth: 2 } : false}
           activeDot={{
             r: 4,
             fill: "#3b82f6",
