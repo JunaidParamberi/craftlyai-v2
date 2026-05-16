@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { z } from "zod";
 
-import { createClient as createSupabaseClient } from "@/lib/supabase/server";
+import { getServerContext } from "@/lib/supabase/get-server-context";
 import type { ClientRow } from "@/types";
 
 import { normalizeClientRow } from "@/lib/clients/normalize-client-row";
@@ -18,13 +18,8 @@ export const getClientById = cache(async (id: string): Promise<ClientRow | null>
     return null;
   }
 
-  const supabase = await createSupabaseClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  const { supabase, user } = await getServerContext();
+  if (!user) {
     return null;
   }
 
@@ -43,13 +38,8 @@ export const getClientById = cache(async (id: string): Promise<ClientRow | null>
 });
 
 export async function listClients(): Promise<ListClientsResult> {
-  const supabase = await createSupabaseClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  const { supabase, user } = await getServerContext();
+  if (!user) {
     return { ok: false, message: "Not authenticated." };
   }
 

@@ -2,7 +2,8 @@
 
 import { format, parseISO } from "date-fns";
 
-import { createClient } from "@/lib/supabase/server";
+import { type createClient } from "@/lib/supabase/server";
+import { getServerContext } from "@/lib/supabase/get-server-context";
 import { normalizeDocumentListRow } from "@/lib/documents/normalize-document-row";
 import type { DocumentListRow } from "@/types";
 import type { DateRange, FinancialSummary, MonthlyRevenuePoint } from "./types";
@@ -92,10 +93,7 @@ async function computeRangeRevenue(
 export async function getFinancialSummary(
   range: DateRange
 ): Promise<FinancialSummary> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
   if (!user) {
     return {
       totalRevenue: 0,
@@ -189,10 +187,7 @@ export async function getFinancialSummary(
 export async function getMonthlyRevenue(
   range: DateRange
 ): Promise<MonthlyRevenuePoint[]> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
   if (!user) return [];
 
   const { docs, lineItemsByDoc } = await fetchPaidInvoicesWithLineItems(
@@ -231,10 +226,7 @@ export async function getMonthlyRevenue(
 export async function listFinanceInvoices(
   range: DateRange
 ): Promise<(DocumentListRow & { computedTotal: number })[]> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
   if (!user) return [];
 
   const { data: docs } = await supabase

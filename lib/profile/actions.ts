@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getServerContext } from "@/lib/supabase/get-server-context";
 import { mergeAndValidateProfile } from "@/lib/validations/profile";
 import type { ProfileRow } from "@/types";
 
@@ -44,13 +44,8 @@ export type GetProfileResult =
  * Loads the authenticated user's profile row (server components & server actions).
  */
 export async function getProfile(): Promise<GetProfileResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  const { supabase, user } = await getServerContext();
+  if (!user) {
     return { ok: true, profile: null, reason: "no_session" };
   }
 
@@ -84,13 +79,8 @@ export type UpdateProfileResult =
  * Validates and upserts profile fields for the current user.
  */
 export async function updateProfile(patchInput: unknown): Promise<UpdateProfileResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  const { supabase, user } = await getServerContext();
+  if (!user) {
     return { ok: false, message: "Not authenticated." };
   }
 

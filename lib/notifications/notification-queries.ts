@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getServerContext } from "@/lib/supabase/get-server-context";
 import type { NotificationRow, NotificationType } from "@/types";
 
 import { normalizeNotificationPayload } from "./notification-utils";
@@ -43,10 +43,7 @@ function mapRow(row: {
 export async function listNotificationsForUser(
   limit = 50
 ): Promise<NotificationRow[]> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -70,10 +67,7 @@ export async function listNotificationsForUser(
 }
 
 export async function getUnreadNotificationCount(): Promise<number> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
   if (!user) return 0;
 
   const { count, error } = await supabase

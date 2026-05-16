@@ -1,4 +1,4 @@
-import { createClient as createSupabaseClient } from "@/lib/supabase/server";
+import { getServerContext } from "@/lib/supabase/get-server-context";
 import { pickEmbed } from "@/lib/supabase/pick-embed";
 import type { TaskListRow, TaskPriority, TaskRow, TaskStatus } from "@/types";
 
@@ -69,13 +69,8 @@ export type ListAllTasksResult =
   | { ok: false; message: string };
 
 export async function listAllTasksForUser(): Promise<ListAllTasksResult> {
-  const supabase = await createSupabaseClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  const { supabase, user } = await getServerContext();
+  if (!user) {
     return { ok: false, message: "Not authenticated." };
   }
 

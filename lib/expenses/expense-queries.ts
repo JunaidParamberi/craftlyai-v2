@@ -5,7 +5,7 @@ import {
   normalizeExpenseListRow,
   normalizeExpenseRow,
 } from "@/lib/expenses/normalize-expense-row";
-import { createClient as createSupabaseClient } from "@/lib/supabase/server";
+import { getServerContext } from "@/lib/supabase/get-server-context";
 import type { ExpenseListRow, ExpenseRow } from "@/types";
 
 const uuidSchema = z.string().uuid();
@@ -30,13 +30,8 @@ export const getExpenseById = cache(
       return null;
     }
 
-    const supabase = await createSupabaseClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const { supabase, user } = await getServerContext();
+    if (!user) {
       return null;
     }
 
@@ -58,13 +53,8 @@ export const getExpenseById = cache(
 export async function listExpenses(
   options: ListExpensesOptions = {},
 ): Promise<ListExpensesResult> {
-  const supabase = await createSupabaseClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  const { supabase, user } = await getServerContext();
+  if (!user) {
     return { ok: false, message: "Not authenticated." };
   }
 

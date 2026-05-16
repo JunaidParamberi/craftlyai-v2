@@ -13,7 +13,8 @@ import {
   calcLineItemsTotal,
   calcTaxTotal,
 } from "@/lib/finance/revenue-calc";
-import { createClient } from "@/lib/supabase/server";
+import { type createClient } from "@/lib/supabase/server";
+import { getServerContext } from "@/lib/supabase/get-server-context";
 import { formatCurrency } from "@/lib/utils/format";
 import { projectStatusLabel } from "@/lib/projects/display";
 import type { ProjectStatus } from "@/types";
@@ -98,10 +99,7 @@ function clientNameFromJoin(
 // getDashboardCounts
 // ---------------------------------------------------------------------------
 export async function getDashboardCounts(): Promise<DashboardCounts> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
   if (!user) return { activeProjectsCount: 0, nearingDeadlineCount: 0 };
 
   const now = new Date();
@@ -130,10 +128,7 @@ export async function getDashboardCounts(): Promise<DashboardCounts> {
 // getAttentionItems
 // ---------------------------------------------------------------------------
 export async function getAttentionItems(): Promise<AttentionItem[]> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
   if (!user) return [];
 
   const now = new Date();
@@ -262,10 +257,7 @@ export async function getAttentionItems(): Promise<AttentionItem[]> {
 // getRecentActivity
 // ---------------------------------------------------------------------------
 export async function getRecentActivity(): Promise<ActivityEvent[]> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
   if (!user) return [];
 
   const since = subDays(new Date(), 30).toISOString();
@@ -332,10 +324,7 @@ export async function getRecentActivity(): Promise<ActivityEvent[]> {
 // getActivePipeline
 // ---------------------------------------------------------------------------
 export async function getActivePipeline(): Promise<ActivePipelineResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
   if (!user) return { projects: [], totalCount: 0 };
 
   const { data, count } = await supabase

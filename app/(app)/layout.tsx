@@ -10,7 +10,7 @@ import {
   listNotificationsForUser,
 } from "@/lib/notifications/notification-queries";
 import { getProfile } from "@/lib/profile/actions";
-import { createClient } from "@/lib/supabase/server";
+import { getServerContext } from "@/lib/supabase/get-server-context";
 import { startOfCurrentMonth } from "@/lib/plan-usage/helpers";
 import type { PlanUsage } from "@/lib/plan-usage/helpers";
 import type { PlanTier } from "@/config/plans";
@@ -46,10 +46,7 @@ export default async function AppShellLayout({
     redirect(nextOnboarding);
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getServerContext();
 
   const userEmail = user?.email ?? null;
   const userInitials = getUserInitials(result.profile.full_name, userEmail);
