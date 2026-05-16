@@ -208,23 +208,23 @@
 
 :root {
   /* Atmosphere v2 — cool-grey palette, eye-comfort tuned */
-  --background:        oklch(0.918 0.008 72);    /* warm stone canvas */
-  --foreground:        oklch(0.155 0.005 60);    /* warm near-black */
-  --card:              oklch(0.982 0.005 72);    /* warm cream card, lifts off bg */
-  --card-foreground:   oklch(0.155 0.005 60);
-  --popover:           oklch(0.982 0.005 72);
-  --popover-foreground:oklch(0.155 0.005 60);
+  --background:        oklch(0.918 0.006 254);   /* #E2E6EC — canvas, never pure white */
+  --foreground:        oklch(0.155 0.005 264);   /* #16191F — lifted cool near-black */
+  --card:              oklch(0.985 0.003 254);   /* #F7F8FA — near-white, clearly lifts off bg */
+  --card-foreground:   oklch(0.155 0.005 264);
+  --popover:           oklch(0.985 0.003 254);
+  --popover-foreground:oklch(0.155 0.005 264);
   --primary:           oklch(0.555 0.245 264);   /* #2C5BFF — brand blue, unchanged */
   --primary-foreground:oklch(1 0 0);
-  --secondary:         oklch(0.89 0.010 72);     /* warm hover surface */
-  --secondary-foreground: oklch(0.155 0.005 60);
-  --muted:             oklch(0.89 0.010 72);
-  --muted-foreground:  oklch(0.51 0.010 60);
-  --accent:            oklch(0.89 0.010 72);
-  --accent-foreground: oklch(0.155 0.005 60);
+  --secondary:         oklch(0.89 0.008 254);    /* hover surface, badge bg */
+  --secondary-foreground: oklch(0.155 0.005 264);
+  --muted:             oklch(0.89 0.008 254);
+  --muted-foreground:  oklch(0.51 0.008 264);    /* Smoked Pearl */
+  --accent:            oklch(0.89 0.008 254);
+  --accent-foreground: oklch(0.155 0.005 264);
   --destructive:       oklch(0.577 0.232 27);
-  --border:            oklch(0.855 0.012 72);
-  --input:             oklch(0.855 0.012 72);
+  --border:            oklch(0.85 0.01 254);     /* Shy Blunt */
+  --input:             oklch(0.85 0.01 254);
   --ring:              oklch(0.555 0.245 264);
   --chart-1:           oklch(0.555 0.245 264);   /* brand blue leads */
   --chart-2:           oklch(0.65 0.04 264);
