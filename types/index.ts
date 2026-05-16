@@ -176,7 +176,7 @@ export type ExpenseListRow = ExpenseRow & {
 };
 
 /** Matches `document_type` enum in `*_documents.sql`. */
-export type DocumentType = "proposal" | "quote" | "invoice" | "other";
+export type DocumentType = "proposal" | "quote" | "invoice" | "payment_voucher" | "other";
 
 /** Matches `document_status` enum in `*_documents.sql`. */
 export type DocumentStatus =
@@ -239,6 +239,8 @@ export type DocumentRow = {
   approved_at: string | null;
   declined_at: string | null;
   approval_message: string | null;
+  voucher_number: string | null;
+  source_document_id: string | null;
   created_at: string;
   updated_at: string;
 };

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { parseLineItemInput } from "@/lib/validations/line-item";
 import { invoiceMetaSchema } from "@/lib/validations/document";
 import { markPaidInputSchema } from "@/lib/validations/payment";
+import { createPaymentVoucher } from "@/lib/documents/payment-voucher-mutations";
 import type { LineItemRow } from "@/types";
 
 // Generate next invoice number for user: INV-0001, INV-0002, etc.
@@ -206,6 +207,16 @@ export async function markInvoicePaid(
     paid_at: paidAt,
   });
   if (paymentError) return { ok: false, error: paymentError.message };
+
+  // Auto-generate payment voucher document
+  await createPaymentVoucher(supabase, user.id, documentId, {
+    amount: total,
+    currency,
+    method: parsed.data.method,
+    reference: parsed.data.reference ?? null,
+    notes: parsed.data.notes ?? null,
+    paidAt,
+  });
 
   const { notifyDocumentEvent } = await import(
     "@/lib/notifications/document-notification"

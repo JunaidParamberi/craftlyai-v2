@@ -4,6 +4,7 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   proposal: "Proposal",
   quote: "Quote",
   invoice: "Invoice",
+  payment_voucher: "Payment Voucher",
   other: "Document",
 };
 

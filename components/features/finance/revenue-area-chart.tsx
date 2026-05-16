@@ -74,7 +74,7 @@ export function RevenueAreaChart({ data, currency }: Props) {
   // Recharts needs ≥2 points to draw line/area; pad with a leading zero when needed
   const chartData: MonthlyRevenuePoint[] =
     data.length === 1
-      ? [{ month: getPrevMonthLabel(data[0].month), revenue: 0, isCurrent: false }, ...data]
+      ? [{ month: getPrevMonthLabel(data[0].month), monthKey: "", revenue: 0, isCurrent: false }, ...data]
       : data;
 
   const fewPoints = chartData.length <= 3;

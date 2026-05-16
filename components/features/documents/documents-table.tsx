@@ -67,6 +67,7 @@ const TYPE_ACCENTS: Record<DocumentType, string> = {
   proposal: "bg-indigo-500",
   quote: "bg-amber-500",
   invoice: "bg-emerald-500",
+  payment_voucher: "bg-emerald-400",
   other: "bg-zinc-400",
 };
 
@@ -77,6 +78,7 @@ const TYPE_FILTER_LABELS: Record<TypeFilter, string> = {
   proposal: "Proposals",
   quote: "Quotes",
   invoice: "Invoices",
+  payment_voucher: "Payment Vouchers",
   other: "Other",
 };
 

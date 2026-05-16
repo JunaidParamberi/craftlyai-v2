@@ -17,6 +17,7 @@ export const DOCUMENT_TYPES = [
   "proposal",
   "quote",
   "invoice",
+  "payment_voucher",
   "other",
 ] as const satisfies readonly DocumentType[];
 

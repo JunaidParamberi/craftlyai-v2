@@ -8,6 +8,7 @@ import { getDocumentById } from "@/lib/documents/document-queries";
 import { getInvoiceWithLineItems, getPaymentsForDocument } from "@/lib/documents/invoice-queries";
 import { getQuoteWithLineItems } from "@/lib/documents/quote-queries";
 import { getProposalWithLineItems } from "@/lib/documents/proposal-queries";
+import { getVoucherForInvoice, getPaymentVoucherData } from "@/lib/documents/payment-voucher-queries";
 import { buildVariableContext } from "@/lib/documents/variables-server";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 
@@ -38,7 +39,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const [client, projectTitle, variableContext, invoiceData, quoteData, proposalData, payments] = await Promise.all([
+  const [client, projectTitle, variableContext, invoiceData, quoteData, proposalData, payments, voucherDoc, voucherData] = await Promise.all([
     document.client_id ? getClientById(document.client_id) : Promise.resolve(null),
     document.project_id ? fetchProjectTitle(document.project_id) : Promise.resolve(null),
     buildVariableContext({
@@ -49,6 +50,8 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     document.type === "quote" ? getQuoteWithLineItems(id) : Promise.resolve(null),
     document.type === "proposal" ? getProposalWithLineItems(id) : Promise.resolve(null),
     document.type === "invoice" ? getPaymentsForDocument(id) : Promise.resolve([]),
+    document.type === "invoice" ? getVoucherForInvoice(id) : Promise.resolve(null),
+    document.type === "payment_voucher" ? getPaymentVoucherData(id) : Promise.resolve(null),
   ]);
 
   return (
@@ -75,14 +78,16 @@ export default async function DocumentDetailPage({ params }: PageProps) {
             <Download className="size-4" />
             Download PDF
           </Button>
-          <Button
-            variant="outline"
-            nativeButton={false}
-            render={<Link href={`/documents/${document.id}/edit`} />}
-          >
-            <Pencil className="size-4" />
-            Edit document
-          </Button>
+          {document.type !== "payment_voucher" ? (
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href={`/documents/${document.id}/edit`} />}
+            >
+              <Pencil className="size-4" />
+              Edit document
+            </Button>
+          ) : null}
           {document.type === "invoice" ? (
             <>
               <SendInvoiceButton
@@ -164,6 +169,17 @@ export default async function DocumentDetailPage({ params }: PageProps) {
 
       {document.type === "invoice" ? (
         <PaymentHistory payments={payments} currency={client?.currency ?? "USD"} />
+      ) : null}
+
+      {document.type === "invoice" && document.status === "paid" && voucherDoc ? (
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/documents/${voucherDoc.id}`}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            View Payment Voucher{voucherDoc.voucher_number ? ` (${voucherDoc.voucher_number})` : ""} →
+          </Link>
+        </div>
       ) : null}
 
       {document.type === "quote" && quoteData ? (
@@ -261,6 +277,61 @@ export default async function DocumentDetailPage({ params }: PageProps) {
               />
             </div>
           ) : null}
+        </div>
+      ) : null}
+
+      {document.type === "payment_voucher" && voucherData ? (
+        <div className="rounded-xl border border-border/60 bg-card p-5 flex flex-col gap-4">
+          <div className="flex flex-wrap gap-6 text-sm">
+            {voucherData.voucherNumber ? (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Voucher #</span>
+                <span className="font-mono font-medium">{voucherData.voucherNumber}</span>
+              </div>
+            ) : null}
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Date Paid</span>
+              <span className="text-emerald-600 font-medium">
+                {new Date(voucherData.paidAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+              </span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Amount</span>
+              <span className="font-semibold">
+                {new Intl.NumberFormat("en-US", { style: "currency", currency: voucherData.currency }).format(voucherData.amount)}
+              </span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Method</span>
+              <span className="capitalize">{voucherData.method.replace(/_/g, " ")}</span>
+            </div>
+            {voucherData.reference ? (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[0.7rem] uppercase tracking-widest text-muted-foreground">Reference</span>
+                <span className="font-mono text-xs">{voucherData.reference}</span>
+              </div>
+            ) : null}
+          </div>
+          <div className="border-t border-border/50 pt-3 flex flex-col gap-2">
+            <div className="text-sm text-muted-foreground">
+              Re:{" "}
+              <span className="text-foreground">{voucherData.invoiceTitle}</span>
+              {voucherData.invoiceNumber ? (
+                <span className="ml-1 font-mono text-xs">({voucherData.invoiceNumber})</span>
+              ) : null}
+            </div>
+            {voucherData.notes ? (
+              <p className="text-sm text-muted-foreground">{voucherData.notes}</p>
+            ) : null}
+            {document.source_document_id ? (
+              <Link
+                href={`/documents/${document.source_document_id}`}
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground w-fit"
+              >
+                ← Back to Invoice
+              </Link>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
