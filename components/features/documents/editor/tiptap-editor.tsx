@@ -95,7 +95,7 @@ export const TiptapEditor = forwardRef<TiptapEditorHandle, TiptapEditorProps>(
       )}
     >
       <EditorToolbar editor={editor} />
-      <div className="bg-[oklch(0.995_0_0)] dark:bg-card border-t border-border/60">
+      <div className="bg-card border-t border-border/60">
         <EditorContent editor={editor} className="mx-auto max-w-[68ch]" />
       </div>
     </div>

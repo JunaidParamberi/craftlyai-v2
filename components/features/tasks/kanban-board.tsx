@@ -40,22 +40,22 @@ const COLUMNS = [
     status: "in_progress" as TaskStatus,
     label: "In Progress",
     icon: RotateCcw,
-    accent: "border-t-blue-400",
-    bg: "bg-blue-50/60 dark:bg-blue-950/20",
+    accent: "[border-top-color:var(--border-focus)]",
+    bg: "[background:color-mix(in_srgb,var(--border-focus)_5%,transparent)]",
   },
   {
     status: "done" as TaskStatus,
     label: "Done",
     icon: CheckCircle2,
-    accent: "border-t-emerald-400",
-    bg: "bg-emerald-50/60 dark:bg-emerald-950/20",
+    accent: "[border-top-color:var(--success,#1F8A52)]",
+    bg: "[background:color-mix(in_srgb,var(--success,#1F8A52)_5%,transparent)]",
   },
   {
     status: "cancelled" as TaskStatus,
     label: "Cancelled",
     icon: XCircle,
-    accent: "border-t-red-400",
-    bg: "bg-red-50/40 dark:bg-red-950/20",
+    accent: "[border-top-color:var(--danger,#C13838)]",
+    bg: "[background:color-mix(in_srgb,var(--danger,#C13838)_5%,transparent)]",
   },
 ] as const;
 

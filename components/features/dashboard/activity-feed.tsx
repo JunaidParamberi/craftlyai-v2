@@ -31,18 +31,18 @@ const EVENT_STYLES: Record<
 > = {
   invoice_paid: {
     icon: CheckCircle2,
-    container: "bg-emerald-500/10",
-    iconClass: "text-emerald-600 dark:text-emerald-500",
+    container: "bg-[color-mix(in_srgb,var(--success,#1F8A52)_10%,transparent)]",
+    iconClass: "text-[var(--success,#1F8A52)]",
   },
   doc_sent: {
     icon: Send,
-    container: "bg-blue-500/10",
-    iconClass: "text-blue-600 dark:text-blue-500",
+    container: "bg-[color-mix(in_srgb,var(--border-focus)_10%,transparent)]",
+    iconClass: "text-[var(--border-focus)]",
   },
   quote_approved: {
     icon: ThumbsUp,
-    container: "bg-emerald-500/10",
-    iconClass: "text-emerald-600 dark:text-emerald-500",
+    container: "bg-[color-mix(in_srgb,var(--success,#1F8A52)_10%,transparent)]",
+    iconClass: "text-[var(--success,#1F8A52)]",
   },
   quote_declined: {
     icon: ThumbsDown,
@@ -51,8 +51,8 @@ const EVENT_STYLES: Record<
   },
   project_status_changed: {
     icon: FolderOpen,
-    container: "bg-purple-500/10",
-    iconClass: "text-purple-600 dark:text-purple-500",
+    container: "bg-[color-mix(in_srgb,var(--border-focus)_8%,transparent)]",
+    iconClass: "text-[var(--border-focus)]",
   },
 };
 
