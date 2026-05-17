@@ -86,7 +86,7 @@ export function LPOMetaFields({ documentId, initialValues }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 rounded-lg border p-4">
+    <div className="space-y-4 rounded-lg border p-4">
       <h3 className="text-sm font-semibold">LPO Details</h3>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -145,9 +145,9 @@ export function LPOMetaFields({ documentId, initialValues }: Props) {
         </div>
       </div>
 
-      <Button type="submit" disabled={isPending} size="sm">
+      <Button type="button" onClick={handleSubmit(onSubmit)} disabled={isPending} size="sm">
         {isPending ? "Saving…" : "Save LPO Details"}
       </Button>
-    </form>
+    </div>
   );
 }

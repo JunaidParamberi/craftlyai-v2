@@ -255,7 +255,9 @@ export function DocumentForm(props: DocumentFormProps) {
                     }
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue />
+                      <SelectValue placeholder="Select type">
+                        {watchedType ? documentTypeLabel(watchedType) : undefined}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {DOCUMENT_TYPES.map((t) => (
