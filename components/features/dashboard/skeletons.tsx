@@ -1,11 +1,8 @@
-import { FormPageShell } from "@/components/shared/form-page-shell";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+  SkeletonKPI,
+  SkeletonListRow,
+  Skeleton,
+} from "@/components/shared/skeletons";
 import { SkeletonRepeat } from "@/components/shared/skeleton-repeat";
 
 export type DashboardPageSkeletonProps = {
@@ -14,7 +11,6 @@ export type DashboardPageSkeletonProps = {
   showAttentionBanner?: boolean;
 };
 
-/** Mirrors dashboard home exactly — flat page header, KPI grid, attention slot, activity + pipeline. */
 export function DashboardPageSkeleton({
   statCardCount = 4,
   activityRowCount = 3,
@@ -27,98 +23,67 @@ export function DashboardPageSkeleton({
       aria-label="Loading dashboard"
       className="flex flex-col gap-6"
     >
-      {/* Flat page header */}
-      <div className="flex flex-col gap-1">
-        <Skeleton className="h-[10px] w-16 rounded-[3px]" />
-        <Skeleton className="h-7 w-48 rounded-[4px] md:h-8" />
+      {/* Page header */}
+      <div className="flex flex-col gap-1.5">
+        <Skeleton w={64} h={10} r={3} />
+        <Skeleton w={192} h={28} r={4} />
       </div>
 
-      {/* KPI cards — same grid as DashboardKpiCards */}
+      {/* KPI grid — mirrors DashboardKpiCards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SkeletonRepeat
-          count={statCardCount}
-          render={(i) => (
-            <Card key={i} size="sm">
-              <CardHeader className="pb-2">
-                <Skeleton className="h-[10px] w-24 rounded-[3px]" />
-              </CardHeader>
-              <CardContent className="flex flex-col gap-2 pt-0">
-                <Skeleton className="h-7 w-28 rounded-[4px]" />
-                <Skeleton className="h-5 w-20 rounded-[4px]" />
-              </CardContent>
-            </Card>
-          )}
-        />
+        <SkeletonRepeat count={statCardCount} render={(i) => <SkeletonKPI key={i} />} />
       </div>
 
-      {showAttentionBanner ? (
-        <Skeleton className="h-14 w-full rounded-[6px]" />
-      ) : null}
+      {showAttentionBanner && <Skeleton h={56} r={6} />}
 
+      {/* Activity + Pipeline */}
       <div className="grid gap-4 lg:grid-cols-5">
-        <Card className="lg:col-span-3" size="sm">
-          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-[14px] w-32 rounded-[3px]" />
-              <Skeleton className="h-[11px] w-52 rounded-[3px]" />
+        {/* Activity feed */}
+        <div className="lg:col-span-3 rounded-xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3">
+            <div className="flex flex-col gap-1.5">
+              <Skeleton w={128} h={13} r={3} />
+              <Skeleton w={200} h={10} r={3} />
             </div>
-            <Skeleton className="h-8 w-20 shrink-0 rounded-md" />
-          </CardHeader>
-          <CardContent className="flex flex-col gap-0 pt-6">
+            <Skeleton w={72} h={28} r={6} />
+          </div>
+          <div className="flex flex-col divide-y divide-border/50 px-4 py-2">
             <SkeletonRepeat
               count={activityRowCount}
-              render={(row) => (
-                <div key={row}>
-                  {row > 0 ? <Separator className="my-0" /> : null}
-                  <div className="flex gap-3 py-3">
-                    <Skeleton className="size-9 shrink-0 rounded-full" />
-                    <div className="flex min-w-0 flex-1 flex-col gap-2">
-                      <Skeleton className="h-[14px] w-full max-w-xs rounded-[3px]" />
-                      <Skeleton className="h-[10px] w-20 rounded-[3px]" />
-                    </div>
-                  </div>
-                </div>
-              )}
+              render={(i) => <SkeletonListRow key={i} withAvatar withMeta />}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="lg:col-span-2" size="sm">
-          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-[14px] w-28 rounded-[3px]" />
-              <Skeleton className="h-[11px] w-44 rounded-[3px]" />
+        {/* Pipeline */}
+        <div className="lg:col-span-2 rounded-xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3">
+            <div className="flex flex-col gap-1.5">
+              <Skeleton w={112} h={13} r={3} />
+              <Skeleton w={160} h={10} r={3} />
             </div>
-            <Skeleton className="h-8 w-20 shrink-0 rounded-md" />
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 pt-6">
-            <SkeletonRepeat
-              count={3}
-              render={(i) => (
-                <Skeleton key={i} className="h-[4.5rem] w-full rounded-[6px]" />
-              )}
-            />
-          </CardContent>
-        </Card>
+            <Skeleton w={72} h={28} r={6} />
+          </div>
+          <div className="flex flex-col gap-3 p-4">
+            <SkeletonRepeat count={3} render={(i) => <Skeleton key={i} h={72} r={6} />} />
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-/** Matches generic placeholder pages (Projects, Settings, …); full-width, left-aligned like SectionPlaceholder. */
 export function ProtectedPlaceholderSkeleton() {
   return (
-    <FormPageShell maxWidth="full">
-      <div
-        role="status"
-        aria-busy="true"
-        aria-label="Loading"
-        className="flex flex-col gap-3"
-      >
-        <Skeleton className="h-8 w-44 max-w-[85%] rounded-lg md:h-9 md:w-52" />
-        <Skeleton className="h-4 w-full max-w-lg" />
-        <Skeleton className="h-4 w-full max-w-md" />
-      </div>
-    </FormPageShell>
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label="Loading"
+      className="flex flex-col gap-3 max-w-xl"
+    >
+      <Skeleton w={176} h={32} r={6} />
+      <Skeleton w="100%" h={16} r={4} />
+      <Skeleton w="80%" h={16} r={4} />
+    </div>
   );
 }
