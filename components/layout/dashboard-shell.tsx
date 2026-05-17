@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { AppHeader } from "@/components/layout/app-header";
-import { AppSidebar } from "@/components/layout/app-sidebar";
 import { CommandPalette } from "@/components/layout/command-palette";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Pane } from "@/components/layout/pane";
+import { Rail } from "@/components/layout/rail";
 import { PlanUsageProvider } from "@/lib/plan-usage/context";
+import { getRouteSection } from "@/config/nav";
 import type { PlanUsage } from "@/lib/plan-usage/helpers";
 import type { NotificationRow } from "@/types";
 
@@ -28,10 +29,22 @@ export function DashboardShell({
   notifications,
   unreadCount,
 }: DashboardShellProps) {
-  const [commandOpen, setCommandOpen] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [section, setSection] = useState(() => getRouteSection(pathname));
+  const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Keep section in sync with navigation
+  useEffect(() => {
+    setSection(getRouteSection(pathname));
+  }, [pathname]);
+
+  // Reset scroll on route change
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [pathname]);
+
+  // Global ⌘K handler
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -43,34 +56,59 @@ export function DashboardShell({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0, left: 0 });
-  }, [pathname]);
-
   return (
     <PlanUsageProvider value={planUsage}>
-      <SidebarProvider className="flex h-dvh min-h-0 w-full overflow-hidden">
-        <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
-        <AppSidebar />
-        <SidebarInset className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden">
+      {/* 3-col grid: rail | pane | main */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "var(--rail-w) var(--pane-w) 1fr",
+          height: "100dvh",
+          overflow: "hidden",
+          background: "var(--bg-canvas)",
+        }}
+      >
+        <Rail
+          section={section}
+          onSectionChange={setSection}
+          onOpenSearch={() => setCommandOpen(true)}
+        />
+
+        <Pane
+          section={section}
+          userEmail={userEmail}
+          userInitials={userInitials}
+          planUsage={planUsage}
+          onOpenSearch={() => setCommandOpen(true)}
+        />
+
+        {/* Main column: topbar + scrollable content */}
+        <div style={{ display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+          <AppHeader
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onOpenSearch={() => setCommandOpen(true)}
+          />
           <div
             ref={scrollRef}
-            className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
+            style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}
           >
-            <AppHeader
-              userEmail={userEmail}
-              userInitials={userInitials}
-              planUsage={planUsage}
-              notifications={notifications}
-              unreadCount={unreadCount}
-              onOpenSearch={() => setCommandOpen(true)}
-            />
-            <div className="flex min-w-0 flex-col gap-6 p-4 md:p-6">
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 24,
+                padding: "28px 32px 80px",
+                minHeight: "100%",
+              }}
+            >
               {children}
             </div>
           </div>
-        </SidebarInset>
-      </SidebarProvider>
+        </div>
+      </div>
+
+      <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
     </PlanUsageProvider>
   );
 }
