@@ -10,9 +10,8 @@ type Props = {
 export function ThemeProvider({ children }: Props) {
   return (
     <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
+      attribute="data-theme"
+      defaultTheme="light"
       storageKey="craftly-theme"
       disableTransitionOnChange
     >

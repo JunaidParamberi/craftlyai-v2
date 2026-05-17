@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Inter } from "next/font/google";
+import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { branding } from "@/config/branding";
@@ -12,11 +12,24 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
-
-const geist = Geist({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-heading",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const interTight = Inter_Tight({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -60,14 +73,20 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("font-sans", inter.variable, geist.variable)}
+      className={cn(
+        "font-sans",
+        inter.variable,
+        interTight.variable,
+        jetbrainsMono.variable,
+      )}
     >
       <body
         suppressHydrationWarning
         className={cn(
           "min-h-dvh font-sans antialiased",
           inter.variable,
-          geist.variable,
+          interTight.variable,
+          jetbrainsMono.variable,
         )}
       >
         <ThemeProvider>

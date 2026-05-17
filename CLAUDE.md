@@ -450,3 +450,11 @@ git branch -d feat/short-task-name
 - **Cursor:** all file editing, component building, debugging, installing packages, wiring Supabase to UI, Tailwind fixes. Open the full project folder, never paste files into Claude.ai when Cursor can read them directly.
 - **Cowork:** updating this file, organizing /docs and /assets, drafting marketing copy, writing feature specs to /docs/specs/, weekly reviews, scheduled reminders. Never touches code files.
 
+
+---
+
+## Design system
+
+CraftlyAI uses the CraftlyAI Design System — soft, calm, Linear-light aesthetic with muted blue accent. All tokens (colors, type, spacing, radius, motion, shadows) live in `styles/tokens.css` and are mapped onto shadcn/ui variables in `styles/globals.css`. Two themes (light + dark) toggle via `data-theme="light|dark"` on `<html>`, persisted in `localStorage`. Typography: Inter Tight (display), Inter (body), JetBrains Mono (code). Every async surface ships in loading · empty · loaded states per `docs/design/design_handoff_craftlyai_ui/SKELETONS_AND_LOADERS.md`. AI work uses `<AIThinking>`, never a plain spinner.
+
+Every UI change MUST follow docs/design/design_handoff_craftlyai_ui/DESIGN_SYSTEM.md. Read it before touching any UI file.
