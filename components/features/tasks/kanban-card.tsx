@@ -16,9 +16,9 @@ import type { TaskRow } from "@/types";
 import { Badge } from "@/components/ui/badge";
 
 const PRIORITY_BORDER: Record<string, string> = {
-  high: "border-l-red-400",
-  medium: "border-l-amber-400",
-  low: "border-l-slate-300",
+  high: "border-l-[var(--danger,#C13838)]",
+  medium: "border-l-[var(--warning,#B36A12)]",
+  low: "border-l-border",
 };
 
 type KanbanCardProps = {
@@ -78,7 +78,7 @@ export function KanbanCard({
         <div
           className={cn(
             "mt-2 flex items-center gap-1 text-xs",
-            overdue ? "text-red-500" : "text-muted-foreground",
+            overdue ? "text-destructive" : "text-muted-foreground",
           )}
         >
           <Calendar className="h-3 w-3" />
