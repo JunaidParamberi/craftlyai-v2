@@ -248,21 +248,6 @@
   position: relative;
 }
 
-[data-slot="card"]::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 1px;
-  border-radius: 8px 8px 0 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    color-mix(in oklch, var(--primary) 25%, transparent) 50%,
-    transparent 100%
-  );
-  pointer-events: none;
-  opacity: 0.45;
-}
 
 /* Interactive table rows — subtle tint on hover (opt-in via data-interactive) */
 tr[data-interactive="true"] {
@@ -291,7 +276,7 @@ tr[data-interactive="true"]:hover {
 
 [data-slot="skeleton"] {
   border-radius: 5px;
-  animation: shimmer 0.9s linear infinite;
+  animation: shimmer 1.4s linear infinite;
   background: linear-gradient(
     90deg,
     var(--muted)       0%,
