@@ -1,7 +1,5 @@
-import { AlertTriangle, Clock, DollarSign, Timer } from "lucide-react";
-
 import type { FinancialSummary } from "@/lib/finance/types";
-import { KpiCard } from "./kpi-card";
+import { KpiCard } from "@/components/shared/kpi-card";
 
 type Props = {
   summary: FinancialSummary;
@@ -30,88 +28,58 @@ export function FinanceSummaryCards({ summary, currency, dateParams, activeStatu
     outstandingCount,
   } = summary;
 
-  const changeLabel =
+  const revDelta =
     revenueChangePct === null
-      ? "No prior period data"
-      : revenueChangePct >= 0
-        ? `↑ ${revenueChangePct}% vs prev period`
-        : `↓ ${Math.abs(revenueChangePct)}% vs prev period`;
+      ? null
+      : `${revenueChangePct >= 0 ? "+" : ""}${revenueChangePct}%`;
+  const revTrend =
+    revenueChangePct === null ? "flat" : revenueChangePct >= 0 ? "up" : "down";
 
-  const changeColor =
-    revenueChangePct === null
-      ? undefined
-      : revenueChangePct >= 0
-        ? "text-emerald-600"
-        : "text-destructive";
-
-  const avgLabel =
+  const avgSub =
     avgPayDays === null
       ? "No paid invoices yet"
       : avgPayDays <= 30
         ? `${avgPayDays}d — on track`
         : `${avgPayDays}d — above avg`;
 
-  const avgColor =
-    avgPayDays === null
-      ? undefined
-      : avgPayDays <= 30
-        ? "text-emerald-600"
-        : "text-amber-600";
-
   const sep = dateParams ? `${dateParams}&` : "";
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <KpiCard
-        index={0}
+        delay={0}
         label="Total Revenue"
         value={formatMoney(totalRevenue, currency)}
-        subLabel={changeLabel}
-        icon={DollarSign}
-        accentColor="border-l-blue-500"
-        iconBg="bg-blue-50"
-        iconColor="text-blue-600"
-        subLabelColor={changeColor}
+        delta={revDelta}
+        trend={revTrend}
+        sub="vs prev period"
       />
       <KpiCard
-        index={1}
+        delay={80}
         label="Outstanding"
         value={formatMoney(outstanding, currency)}
-        subLabel={`${outstandingCount} invoice${outstandingCount !== 1 ? "s" : ""} pending`}
-        icon={Clock}
-        accentColor="border-l-emerald-500"
-        iconBg="bg-emerald-50"
-        iconColor="text-emerald-600"
+        sub={`${outstandingCount} invoice${outstandingCount !== 1 ? "s" : ""} pending`}
         href={`/finance?${sep}status=outstanding`}
-        isActive={activeStatus === "outstanding"}
+        variant={activeStatus === "outstanding" ? "default" : "default"}
       />
       <KpiCard
-        index={2}
+        delay={160}
         label="Overdue"
         value={formatMoney(overdue, currency)}
-        subLabel={
+        sub={
           overdueCount === 0
             ? "None overdue"
             : `${overdueCount} invoice${overdueCount !== 1 ? "s" : ""} overdue`
         }
-        icon={AlertTriangle}
-        accentColor="border-l-amber-500"
-        iconBg="bg-amber-50"
-        iconColor="text-amber-600"
-        subLabelColor={overdueCount > 0 ? "text-amber-600" : undefined}
+        variant={overdueCount > 0 ? "warning" : "default"}
         href={`/finance?${sep}status=overdue`}
-        isActive={activeStatus === "overdue"}
       />
       <KpiCard
-        index={3}
+        delay={240}
         label="Avg Pay Time"
         value={avgPayDays === null ? "—" : `${avgPayDays}d`}
-        subLabel={avgLabel}
-        icon={Timer}
-        accentColor="border-l-violet-500"
-        iconBg="bg-violet-50"
-        iconColor="text-violet-600"
-        subLabelColor={avgColor}
+        sub={avgSub}
+        trend={avgPayDays !== null && avgPayDays > 30 ? "down" : "flat"}
       />
     </div>
   );
