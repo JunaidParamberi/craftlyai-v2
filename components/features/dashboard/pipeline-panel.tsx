@@ -76,7 +76,7 @@ export function PipelinePanel({ pipeline }: Props) {
   const moreCount = Math.max(0, totalCount - projects.length);
 
   return (
-    <Card className="lg:col-span-2" size="sm">
+    <Card size="sm">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
         <div className="flex flex-col gap-1">
           <CardTitle>Active pipeline</CardTitle>

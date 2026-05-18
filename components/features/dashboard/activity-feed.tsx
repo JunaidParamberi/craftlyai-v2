@@ -58,7 +58,7 @@ const EVENT_STYLES: Record<
 
 export function ActivityFeed({ events }: Props) {
   return (
-    <Card className="lg:col-span-3" size="sm">
+    <Card size="sm">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
         <div className="flex flex-col gap-1">
           <CardTitle>Recent activity</CardTitle>

@@ -327,7 +327,7 @@ const _cachedGetActivePipeline = unstable_cache(
 
     const { data, count } = await supabase
       .from("projects")
-      .select("id, title, deadline, status, clients:client_id(name)", {
+      .select("id, title, deadline, status, budget, spent, clients:client_id(name)", {
         count: "exact",
       })
       .eq("user_id", userId)
@@ -343,6 +343,9 @@ const _cachedGetActivePipeline = unstable_cache(
     const projects = ordered.map((row) => {
       const deadline = parseDeadlineDate(row.deadline);
       const risk = classifyProjectRisk(deadline, now);
+      const budget = row.budget ?? null;
+      const spent = row.spent ?? null;
+      const progress = budget && budget > 0 ? Math.min(1, (spent ?? 0) / budget) : null;
       return {
         id: row.id,
         title: row.title,
@@ -351,6 +354,10 @@ const _cachedGetActivePipeline = unstable_cache(
         risk,
         daysLabel: formatPipelineDaysLabel(deadline, now),
         statusLabel: projectStatusLabel(row.status as ProjectStatus),
+        status: row.status as string,
+        budget,
+        spent,
+        progress,
       };
     });
 

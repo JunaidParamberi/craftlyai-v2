@@ -40,6 +40,10 @@ export type PipelineProject = {
   risk: "overdue" | "at_risk" | "watch" | "on_track";
   daysLabel: string;
   statusLabel: string;
+  status: string;
+  budget: number | null;
+  spent: number | null;
+  progress: number | null;
 };
 
 export type ActivePipelineResult = {
