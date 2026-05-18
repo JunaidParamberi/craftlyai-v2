@@ -1,23 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Calendar, ChevronRight, Plus } from "lucide-react";
+import { Calendar, Plus } from "lucide-react";
 
 import { ActivityFeed } from "@/components/features/dashboard/activity-feed";
 import { AISidekickStrip } from "@/components/features/dashboard/ai-sidekick-strip";
 import { AttentionCards } from "@/components/features/dashboard/attention-cards";
 import { DashboardKpiCards } from "@/components/features/dashboard/kpi-cards";
 import { PipelinePanel } from "@/components/features/dashboard/pipeline-panel";
+import { RevenueCard } from "@/components/features/dashboard/revenue-card";
 import { PlanLimitBanner } from "@/components/features/billing/plan-limit-banner";
-import { RevenueAreaChart } from "@/components/features/finance/revenue-area-chart";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { formatCurrency } from "@/lib/utils/format";
 import {
   getActivePipeline,
   getAttentionItems,
@@ -33,7 +27,6 @@ import {
   getMonthlyRevenue,
 } from "@/lib/finance/finance-queries";
 import { getProfile } from "@/lib/profile/actions";
-import { formatCurrency } from "@/lib/utils/format";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -131,27 +124,7 @@ export default async function DashboardPage() {
 
       {/* Revenue chart + Activity */}
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <Card size="sm">
-          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
-            <div className="flex flex-col gap-1">
-              <CardTitle>Revenue</CardTitle>
-              <CardDescription>Last 6 months</CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              nativeButton={false}
-              render={<Link href="/finance" />}
-            >
-              View finance
-              <ChevronRight />
-            </Button>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <RevenueAreaChart data={monthlyRevenue} currency={currency} />
-          </CardContent>
-        </Card>
-
+        <RevenueCard data={monthlyRevenue} currency={currency} />
         <ActivityFeed events={activity} />
       </div>
 
