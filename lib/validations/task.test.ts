@@ -8,6 +8,7 @@ function validCreate() {
     status: "todo" as const,
     priority: "high" as const,
     due_date: "",
+    labels: [] as string[],
   };
 }
 
@@ -65,6 +66,25 @@ describe("parseTaskCreateInput", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts labels array", () => {
+    const result = parseTaskCreateInput({
+      ...validCreate(),
+      labels: ["design", "copy"],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.labels).toEqual(["design", "copy"]);
+    }
+  });
+
+  it("rejects too many labels", () => {
+    const result = parseTaskCreateInput({
+      ...validCreate(),
+      labels: Array.from({ length: TASK_LIMITS.labelsMax + 1 }, (_, i) => `l${i}`),
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe("parseTaskUpdateInput", () => {
@@ -79,5 +99,13 @@ describe("parseTaskUpdateInput", () => {
   it("rejects empty update object", () => {
     const result = parseTaskUpdateInput({});
     expect(result.success).toBe(false);
+  });
+
+  it("accepts labels update", () => {
+    const result = parseTaskUpdateInput({ labels: ["finance"] });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.labels).toEqual(["finance"]);
+    }
   });
 });

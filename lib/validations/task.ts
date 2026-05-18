@@ -5,7 +5,19 @@ import type { TaskPriority, TaskStatus } from "@/types";
 /** Align with DB `title` text and app limits. */
 export const TASK_LIMITS = {
   title: 500,
+  label: 24,
+  labelsMax: 6,
 } as const;
+
+const taskLabelsSchema = z
+  .array(
+    z
+      .string()
+      .trim()
+      .min(1, "Label cannot be empty.")
+      .max(TASK_LIMITS.label, `Label must be at most ${TASK_LIMITS.label} characters.`),
+  )
+  .max(TASK_LIMITS.labelsMax, `At most ${TASK_LIMITS.labelsMax} labels.`);
 
 const TASK_STATUSES = [
   "todo",
@@ -45,7 +57,15 @@ export const taskCreateSchema = z.object({
   status: taskStatusSchema,
   priority: taskPrioritySchema,
   due_date: z.string(),
+  labels: taskLabelsSchema.optional(),
 });
+
+/** Form schema for task edit sheet — labels always present in UI state. */
+export const taskEditFormSchema = taskCreateSchema.extend({
+  labels: taskLabelsSchema,
+});
+
+export type TaskEditFormValues = z.infer<typeof taskEditFormSchema>;
 
 export type TaskCreateFormInput = z.input<typeof taskCreateSchema>;
 
@@ -54,6 +74,7 @@ export type TaskCreatePayload = {
   status: TaskStatus;
   priority: TaskPriority;
   due_date: string | null;
+  labels: string[];
 };
 
 export function parseTaskCreateInput(
@@ -84,6 +105,7 @@ export function parseTaskCreateInput(
       status: d.status,
       priority: d.priority,
       due_date: due,
+      labels: (d.labels ?? []).map((l) => l.trim()),
     },
   };
 }
@@ -98,6 +120,7 @@ export const taskUpdateSchema = z.object({
   status: taskStatusSchema.optional(),
   priority: taskPrioritySchema.optional(),
   due_date: z.string().optional(),
+  labels: taskLabelsSchema.optional(),
 });
 
 export type TaskUpdateFormInput = z.input<typeof taskUpdateSchema>;
@@ -107,6 +130,7 @@ export type TaskUpdatePayload = Partial<{
   status: TaskStatus;
   priority: TaskPriority;
   due_date: string | null;
+  labels: string[];
 }>;
 
 export function parseTaskUpdateInput(
@@ -159,6 +183,10 @@ export function parseTaskUpdateInput(
       };
     }
     out.due_date = due;
+  }
+
+  if (d.labels !== undefined) {
+    out.labels = d.labels.map((l) => l.trim());
   }
 
   return { success: true, data: out };

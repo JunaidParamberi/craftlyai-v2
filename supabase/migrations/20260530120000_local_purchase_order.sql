@@ -28,6 +28,7 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- 6. Storage RLS: users can only access their own LPO files
+DROP POLICY IF EXISTS "Users manage own lpo files" ON storage.objects;
 CREATE POLICY "Users manage own lpo files"
 ON storage.objects
 FOR ALL

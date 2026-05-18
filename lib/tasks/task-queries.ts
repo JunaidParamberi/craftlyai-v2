@@ -13,6 +13,7 @@ type TaskRowRaw = {
   status: string;
   due_date: string | null;
   priority: string;
+  labels?: string[] | null;
   created_at: string;
   updated_at: string;
 };
@@ -40,6 +41,7 @@ function normalizeTaskRow(row: TaskRowRaw): TaskRow {
     status: row.status as TaskStatus,
     due_date: row.due_date,
     priority: row.priority as TaskPriority,
+    labels: Array.isArray(row.labels) ? row.labels : [],
     created_at: row.created_at,
     updated_at: row.updated_at,
   };

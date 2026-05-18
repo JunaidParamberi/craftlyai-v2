@@ -20,6 +20,7 @@ function task(overrides: Partial<TaskListRow> = {}): TaskListRow {
     status: "todo",
     due_date: null,
     priority: "medium",
+    labels: [],
     created_at: "2026-05-01T00:00:00.000Z",
     updated_at: "2026-05-01T00:00:00.000Z",
     project: {

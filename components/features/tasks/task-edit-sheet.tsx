@@ -9,15 +9,17 @@ import {
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
 import { deleteTask, updateTask } from "@/lib/tasks/actions";
 import { taskPriorityLabel } from "@/lib/tasks/display";
 import { cn } from "@/lib/utils";
-import { TASK_LIMITS, taskCreateSchema } from "@/lib/validations/task";
+import {
+  TASK_LIMITS,
+  taskEditFormSchema,
+  type TaskEditFormValues,
+} from "@/lib/validations/task";
 import type { TaskPriority, TaskRow, TaskStatus } from "@/types";
 
 import { Button } from "@/components/ui/button";
@@ -55,10 +57,10 @@ const STATUS_CONFIG: StatusConfig[] = [
     status: "todo",
     label: "To Do",
     icon: Circle,
-    activeBg: "bg-slate-100 dark:bg-slate-800",
-    activeBorder: "border-slate-300 dark:border-slate-600",
-    activeText: "text-slate-700 dark:text-slate-200",
-    dot: "bg-slate-400 dark:bg-slate-500",
+    activeBg: "bg-[color-mix(in_srgb,var(--fg-3)_12%,transparent)]",
+    activeBorder: "border-[color-mix(in_srgb,var(--fg-3)_35%,transparent)]",
+    activeText: "text-[var(--fg-2)]",
+    dot: "bg-[var(--fg-3)]",
   },
   {
     status: "in_progress",
@@ -89,8 +91,6 @@ const STATUS_CONFIG: StatusConfig[] = [
   },
 ];
 
-type TaskEditFormValues = z.infer<typeof taskCreateSchema>;
-
 type TaskEditSheetProps = {
   task: TaskRow | null;
   projectId: string;
@@ -110,18 +110,42 @@ export function TaskEditSheet({
 }: TaskEditSheetProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [labelInput, setLabelInput] = useState("");
 
   const form = useForm<TaskEditFormValues>({
-    resolver: zodResolver(taskCreateSchema),
+    resolver: zodResolver(taskEditFormSchema),
     values: task
       ? {
           title: task.title,
           status: task.status,
           priority: task.priority,
           due_date: task.due_date ?? "",
+          labels: task.labels ?? [],
         }
       : undefined,
   });
+
+  const labels = form.watch("labels") ?? [];
+
+  function addLabel() {
+    const next = labelInput.trim();
+    if (!next || labels.length >= TASK_LIMITS.labelsMax) {
+      return;
+    }
+    if (labels.includes(next)) {
+      setLabelInput("");
+      return;
+    }
+    form.setValue("labels", [...labels, next]);
+    setLabelInput("");
+  }
+
+  function removeLabel(label: string) {
+    form.setValue(
+      "labels",
+      labels.filter((l) => l !== label),
+    );
+  }
 
   function onSubmit(data: TaskEditFormValues) {
     if (!task) return;
@@ -272,6 +296,46 @@ export function TaskEditSheet({
                 className="h-9 text-sm"
                 {...form.register("due_date")}
               />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="kanban-task-labels" className="text-xs font-medium text-muted-foreground">
+                Labels
+              </Label>
+              {labels.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {labels.map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      className="task-label-badge inline-flex items-center gap-1"
+                      onClick={() => removeLabel(l)}
+                      aria-label={`Remove label ${l}`}
+                    >
+                      {l}
+                      <span aria-hidden>×</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <Input
+                id="kanban-task-labels"
+                value={labelInput}
+                onChange={(e) => setLabelInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addLabel();
+                  }
+                }}
+                placeholder="Type and press Enter"
+                className="h-9 text-sm"
+                maxLength={TASK_LIMITS.label}
+                disabled={labels.length >= TASK_LIMITS.labelsMax}
+              />
+              <p className="text-xs text-muted-foreground">
+                Up to {TASK_LIMITS.labelsMax} labels, {TASK_LIMITS.label} characters each.
+              </p>
             </div>
 
             <SheetFooter className="mt-2 flex-row gap-2 pt-2 border-t border-border">

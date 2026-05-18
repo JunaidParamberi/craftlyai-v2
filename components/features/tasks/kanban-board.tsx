@@ -11,51 +11,37 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import {
-  CheckCircle2,
-  Circle,
-  RotateCcw,
-  XCircle,
-} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { updateTask } from "@/lib/tasks/actions";
 import type { TaskRow, TaskStatus } from "@/types";
 
 import { KanbanCard } from "./kanban-card";
-import { KanbanColumn } from "./kanban-column";
+import { KanbanColumn, KanbanColumnStatic } from "./kanban-column";
 import { TaskEditSheet } from "./task-edit-sheet";
 
 const COLUMNS = [
   {
     status: "todo" as TaskStatus,
-    label: "To Do",
-    icon: Circle,
-    accent: "border-t-border",
-    bg: "bg-muted/40",
+    label: "To do",
+    dotClass: "status-dot--muted",
   },
   {
     status: "in_progress" as TaskStatus,
-    label: "In Progress",
-    icon: RotateCcw,
-    accent: "[border-top-color:var(--border-focus)]",
-    bg: "[background:color-mix(in_srgb,var(--border-focus)_5%,transparent)]",
+    label: "In progress",
+    dotClass: "status-dot--info",
   },
   {
     status: "done" as TaskStatus,
     label: "Done",
-    icon: CheckCircle2,
-    accent: "[border-top-color:var(--success)]",
-    bg: "[background:color-mix(in_srgb,var(--success)_5%,transparent)]",
+    dotClass: "status-dot--success",
   },
   {
     status: "cancelled" as TaskStatus,
     label: "Cancelled",
-    icon: XCircle,
-    accent: "[border-top-color:var(--danger)]",
-    bg: "[background:color-mix(in_srgb,var(--danger)_5%,transparent)]",
+    dotClass: "status-dot--muted",
   },
 ] as const;
 
@@ -81,62 +67,15 @@ export function KanbanBoard({
   const [selectedTask, setSelectedTask] = useState<TaskRow | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [, startTransition] = useTransition();
-  const boardScrollRef = useRef<HTMLDivElement>(null);
-  const lastPointerXRef = useRef<number | null>(null);
+  const [dndReady, setDndReady] = useState(false);
 
   useEffect(() => {
     setTasks(initialTasks);
   }, [initialTasks]);
 
   useEffect(() => {
-    if (!activeId || !boardScrollRef.current) return;
-
-    function applyEdgeScroll(clientX: number) {
-      const scrollEl = boardScrollRef.current;
-      if (!scrollEl) return;
-
-      const rect = scrollEl.getBoundingClientRect();
-      const maxScroll = scrollEl.scrollWidth - scrollEl.clientWidth;
-      if (maxScroll <= 0) return;
-
-      const margin = Math.min(96, Math.max(44, rect.width * 0.22));
-      const leftEdge = rect.left + margin;
-      const rightEdge = rect.right - margin;
-
-      if (clientX < leftEdge) {
-        const depth = Math.min(1, (leftEdge - clientX) / margin);
-        scrollEl.scrollLeft = Math.max(
-          0,
-          scrollEl.scrollLeft - (8 + depth * 28),
-        );
-      } else if (clientX > rightEdge) {
-        const depth = Math.min(1, (clientX - rightEdge) / margin);
-        scrollEl.scrollLeft = Math.min(
-          maxScroll,
-          scrollEl.scrollLeft + (8 + depth * 28),
-        );
-      }
-    }
-
-    function onPointerMove(e: PointerEvent) {
-      lastPointerXRef.current = e.clientX;
-      applyEdgeScroll(e.clientX);
-    }
-
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-
-    const tick = () => {
-      const x = lastPointerXRef.current;
-      if (x != null) applyEdgeScroll(x);
-    };
-    const intervalId = window.setInterval(tick, 45);
-
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.clearInterval(intervalId);
-      lastPointerXRef.current = null;
-    };
-  }, [activeId]);
+    setDndReady(true);
+  }, []);
 
   const activeTask = activeId
     ? (tasks.find((t) => t.id === activeId) ?? null)
@@ -198,30 +137,27 @@ export function KanbanBoard({
     router.refresh();
   }
 
+  const columnProps = (col: (typeof COLUMNS)[number]) => ({
+    status: col.status,
+    label: col.label,
+    dotClass: col.dotClass,
+    tasks: tasks.filter((t) => t.status === col.status),
+    onCardClick: handleCardClick,
+    onAddTask,
+  });
+
   return (
     <>
+      {dndReady ? (
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div
-          ref={boardScrollRef}
-          className="flex min-h-0 min-w-0 w-full gap-4 overflow-x-auto overscroll-x-contain pb-4 [-webkit-overflow-scrolling:touch]"
-        >
+        <div className="grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
           {COLUMNS.map((col) => (
-            <KanbanColumn
-              key={col.status}
-              status={col.status}
-              label={col.label}
-              icon={col.icon}
-              accent={col.accent}
-              bg={col.bg}
-              tasks={tasks.filter((t) => t.status === col.status)}
-              onCardClick={handleCardClick}
-              onAddTask={onAddTask}
-            />
+            <KanbanColumn key={col.status} {...columnProps(col)} />
           ))}
         </div>
 
@@ -233,6 +169,17 @@ export function KanbanBoard({
           ) : null}
         </DragOverlay>
       </DndContext>
+      ) : (
+        <div
+          className="grid min-w-0 grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4"
+          aria-busy="true"
+          aria-label="Loading board interactions"
+        >
+          {COLUMNS.map((col) => (
+            <KanbanColumnStatic key={col.status} {...columnProps(col)} />
+          ))}
+        </div>
+      )}
 
       <TaskEditSheet
         task={selectedTask}

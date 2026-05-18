@@ -3,7 +3,6 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { format, parseISO } from "date-fns";
-import { Calendar } from "lucide-react";
 
 import {
   taskPriorityBadgeVariant,
@@ -15,11 +14,57 @@ import type { TaskRow } from "@/types";
 
 import { Badge } from "@/components/ui/badge";
 
-const PRIORITY_BORDER: Record<string, string> = {
-  high: "border-l-[var(--danger)]",
-  medium: "border-l-[var(--warning)]",
-  low: "border-l-border",
+type KanbanCardContentProps = {
+  task: TaskRow;
 };
+
+export function KanbanCardContent({ task }: KanbanCardContentProps) {
+  const overdue = isTaskOverdue(task);
+  const isDimmed = task.status === "done" || task.status === "cancelled";
+  const labels = task.labels ?? [];
+
+  return (
+    <>
+      {labels.length > 0 ? (
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {labels.map((l) => (
+            <span key={l} className="task-label-badge">
+              {l}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      <p
+        className={cn(
+          "mb-3 text-[13.5px] font-medium leading-snug",
+          isDimmed && "text-[var(--fg-2)] line-through",
+        )}
+      >
+        {task.title}
+      </p>
+
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge
+          variant={taskPriorityBadgeVariant(task.priority)}
+          className="text-[10px]"
+        >
+          {taskPriorityLabel(task.priority)}
+        </Badge>
+        {task.due_date ? (
+          <span
+            className={cn(
+              "text-[11px] tabular-nums",
+              overdue ? "text-destructive" : "text-[var(--fg-3)]",
+            )}
+          >
+            · {format(parseISO(task.due_date), "MMM d")}
+          </span>
+        ) : null}
+      </div>
+    </>
+  );
+}
 
 type KanbanCardProps = {
   task: TaskRow;
@@ -39,8 +84,6 @@ export function KanbanCard({
     transform: CSS.Translate.toString(transform),
   };
 
-  const overdue = isTaskOverdue(task);
-
   return (
     <div
       ref={setNodeRef}
@@ -54,37 +97,35 @@ export function KanbanCard({
         }
       }}
       className={cn(
-        "cursor-grab select-none touch-none rounded-lg border border-border border-l-4 bg-card p-3 shadow-sm",
-        PRIORITY_BORDER[task.priority],
-        "transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md",
+        "cursor-grab select-none touch-none rounded-[10px] border border-border bg-card p-3 shadow-xs",
+        "transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-sm",
+        (task.status === "done" || task.status === "cancelled") && "opacity-70",
         isDragging && !isDragOverlay && "opacity-50 shadow-none",
       )}
     >
-      <div className="mb-2 flex items-start justify-between gap-2">
-        <span aria-hidden className="shrink-0" />
-        <Badge
-          variant={taskPriorityBadgeVariant(task.priority)}
-          className="shrink-0 text-[10px]"
-        >
-          {taskPriorityLabel(task.priority)}
-        </Badge>
-      </div>
-
-      <p className="line-clamp-2 text-sm font-medium leading-snug">
-        {task.title}
-      </p>
-
-      {task.due_date ? (
-        <div
-          className={cn(
-            "mt-2 flex items-center gap-1 text-xs",
-            overdue ? "text-destructive" : "text-muted-foreground",
-          )}
-        >
-          <Calendar className="h-3 w-3" />
-          <span>{format(parseISO(task.due_date), "MMM d")}</span>
-        </div>
-      ) : null}
+      <KanbanCardContent task={task} />
     </div>
+  );
+}
+
+type KanbanCardStaticProps = {
+  task: TaskRow;
+  onClick: () => void;
+};
+
+/** SSR-safe card without dnd-kit attributes (avoids hydration mismatch). */
+export function KanbanCardStatic({ task, onClick }: KanbanCardStaticProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "w-full rounded-[10px] border border-border bg-card p-3 text-left shadow-xs",
+        "transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-sm",
+        (task.status === "done" || task.status === "cancelled") && "opacity-70",
+      )}
+    >
+      <KanbanCardContent task={task} />
+    </button>
   );
 }

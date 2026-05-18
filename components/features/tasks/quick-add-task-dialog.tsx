@@ -110,6 +110,7 @@ export function QuickAddTaskDialog({
         priority: values.priority,
         due_date: values.due_date,
         status: "todo",
+        labels: [],
       });
       if (!res.ok) {
         setFormError(res.message);

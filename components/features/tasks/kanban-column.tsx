@@ -1,94 +1,111 @@
 "use client";
 
+import type { ComponentType } from "react";
 import { useDroppable } from "@dnd-kit/core";
-import type { LucideIcon } from "lucide-react";
 import { Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { TaskRow, TaskStatus } from "@/types";
 
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { KanbanCard } from "./kanban-card";
+import { KanbanCard, KanbanCardStatic } from "./kanban-card";
 
-type KanbanColumnProps = {
+type KanbanColumnBaseProps = {
   status: TaskStatus;
   label: string;
-  icon: LucideIcon;
-  accent: string;
-  bg: string;
+  dotClass: string;
   tasks: TaskRow[];
   onCardClick: (task: TaskRow) => void;
   onAddTask: (status: TaskStatus) => void;
 };
 
-export function KanbanColumn({
+function KanbanColumnShell({
   status,
   label,
-  icon: Icon,
-  accent,
-  bg,
+  dotClass,
   tasks,
   onCardClick,
   onAddTask,
-}: KanbanColumnProps) {
-  const { setNodeRef, isOver } = useDroppable({ id: status });
-
+  columnRef,
+  isOver,
+  CardComponent,
+}: KanbanColumnBaseProps & {
+  columnRef?: (node: HTMLElement | null) => void;
+  isOver?: boolean;
+  CardComponent: ComponentType<{
+    task: TaskRow;
+    onClick: () => void;
+  }>;
+}) {
   return (
     <div
-      ref={setNodeRef}
+      ref={columnRef}
       className={cn(
-        "flex max-w-[272px] min-w-[272px] flex-col rounded-xl border border-border border-t-4",
-        accent,
-        bg,
-        isOver && "ring-2 ring-primary/40 ring-inset",
+        "flex min-h-[400px] min-w-0 flex-col rounded-xl bg-[var(--bg-canvas)]",
+        isOver && "ring-2 ring-primary/30 ring-inset",
       )}
     >
-      <div className="flex items-center gap-2 border-b border-border px-3 py-3">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-semibold">{label}</span>
-        <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
-          {tasks.length}
-        </span>
+      <div className="flex items-center gap-2 px-1 pb-3">
+        <span className={cn("status-dot", dotClass)} aria-hidden />
+        <span className="text-sm font-medium">{label}</span>
+        <span className="tabs__count">{tasks.length}</span>
+        <div className="flex-1" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-7 shrink-0"
+          onClick={() => onAddTask(status)}
+          aria-label={`Add task to ${label}`}
+        >
+          <Plus className="size-3" />
+        </Button>
       </div>
 
-      <ScrollArea className="max-h-[calc(100vh-320px)] flex-1 p-2">
-        <div className="flex flex-col gap-2">
-          {tasks.length === 0 ? (
-            <div
-              className="mx-1 flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border/50 py-10 text-center"
-            >
-              <Icon className="h-6 w-6 text-muted-foreground/40" />
-              <p className="text-xs text-muted-foreground">No tasks here</p>
-              <p className="text-xs text-muted-foreground/60">
-                Drop one here
-              </p>
-            </div>
-          ) : (
-            tasks.map((task) => (
-              <KanbanCard
-                key={task.id}
-                task={task}
-                onClick={() => onCardClick(task)}
-              />
-            ))
-          )}
-        </div>
-      </ScrollArea>
-
-      <div className="border-t border-border p-2">
+      <div className="flex min-h-[60px] flex-col gap-2">
+        {tasks.length === 0 ? (
+          <p className="px-2 py-6 text-center text-xs text-[var(--fg-3)]">
+            No tasks here
+          </p>
+        ) : (
+          tasks.map((task) => (
+            <CardComponent
+              key={task.id}
+              task={task}
+              onClick={() => onCardClick(task)}
+            />
+          ))
+        )}
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 text-sm text-muted-foreground"
+          className="h-auto justify-start px-2.5 py-1.5 text-[var(--fg-3)]"
           onClick={() => onAddTask(status)}
         >
-          <Plus className="h-3.5 w-3.5" />
+          <Plus className="size-3" />
           Add task
         </Button>
       </div>
     </div>
   );
+}
+
+export function KanbanColumn(props: KanbanColumnBaseProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: props.status });
+
+  return (
+    <KanbanColumnShell
+      {...props}
+      columnRef={setNodeRef}
+      isOver={isOver}
+      CardComponent={KanbanCard}
+    />
+  );
+}
+
+/** SSR-safe column without dnd-kit droppable hooks. */
+export function KanbanColumnStatic(props: KanbanColumnBaseProps) {
+  return <KanbanColumnShell {...props} CardComponent={KanbanCardStatic} />;
 }

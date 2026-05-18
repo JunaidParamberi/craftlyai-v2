@@ -103,6 +103,7 @@ export type TaskRow = {
   status: TaskStatus;
   due_date: string | null;
   priority: TaskPriority;
+  labels: string[];
   created_at: string;
   updated_at: string;
 };

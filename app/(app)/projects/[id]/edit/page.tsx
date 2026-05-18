@@ -40,7 +40,7 @@ export default async function EditProjectPage({ params }: PageProps) {
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           <Link
-            href={`/projects/${project.id}`}
+            href={`/projects?project=${project.id}&tab=tasks`}
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
               "w-fit gap-2 px-2 -ms-2",
