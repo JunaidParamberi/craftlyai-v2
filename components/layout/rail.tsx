@@ -1,9 +1,11 @@
 "use client";
 
 import { Command, Settings } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { branding } from "@/config/branding";
 import { RAIL_SECTIONS } from "@/config/nav";
 
 type RailProps = {
@@ -42,24 +44,27 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
       }}
     >
       {/* Logo */}
-      <Link href="/dashboard" style={{ marginBottom: 12, display: "block" }}>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 9,
-            background: "var(--fg)",
-            color: "var(--bg-canvas)",
-            display: "grid",
-            placeItems: "center",
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: 15,
-            letterSpacing: "-0.04em",
-          }}
-        >
-          C
-        </div>
+      <Link
+        href="/dashboard"
+        aria-label="CraftlyAI home"
+        style={{
+          marginBottom: 12,
+          display: "grid",
+          placeItems: "center",
+          width: 32,
+          height: 32,
+          borderRadius: 9,
+          overflow: "hidden",
+        }}
+      >
+        <Image
+          src={branding.mark}
+          alt="CraftlyAI"
+          width={32}
+          height={32}
+          priority
+          style={{ width: 32, height: 32, objectFit: "contain" }}
+        />
       </Link>
 
       {/* Section icons — fill remaining space */}
