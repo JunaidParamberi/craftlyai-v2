@@ -128,6 +128,7 @@ export const ROUTE_LABELS: Record<string, [string, string]> = {
   "/settings":         ["Settings", "General"],
   "/settings/brand":   ["Settings", "Brand kit"],
   "/settings/billing": ["Settings", "Billing"],
+  "/settings/profile": ["Settings", "Profile"],
   "/support":          ["Help",     "Support"],
   "/design-system":    ["Design system", "Overview"],
 };

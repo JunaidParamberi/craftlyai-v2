@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRightIcon, CreditCardIcon, PaletteIcon } from "lucide-react";
+import { ChevronRightIcon, CreditCardIcon, PaletteIcon, UserIcon } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 
 import {
@@ -10,6 +10,12 @@ import {
 } from "@/components/ui/card";
 
 const SETTINGS_SECTIONS = [
+  {
+    href: "/settings/profile",
+    icon: UserIcon,
+    title: "Profile",
+    description: "Your name, company, default currency, and address.",
+  },
   {
     href: "/settings/brand",
     icon: PaletteIcon,
