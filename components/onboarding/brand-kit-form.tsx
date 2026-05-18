@@ -143,7 +143,6 @@ export function BrandKitForm({
         return;
       }
       if (logoInputRef.current) logoInputRef.current.value = "";
-      router.refresh();
       const next =
         redirectAfterSave === false
           ? null
@@ -151,8 +150,9 @@ export function BrandKitForm({
             ? redirectAfterSave
             : "/onboarding/client";
       if (next) {
-        router.push(next);
+        router.replace(next);
       } else {
+        router.refresh();
         setSavedOk(true);
         toast.success("Brand kit saved");
       }
@@ -167,18 +167,17 @@ export function BrandKitForm({
         setLastError(result.message);
         return;
       }
-      router.refresh();
-      router.push("/onboarding/client");
+      router.replace("/onboarding/client");
     });
   }
 
   const logoDropzone = (
     <div className="flex flex-col gap-2">
-      <Label htmlFor="logo">Workspace logo</Label>
-      <button
-        type="button"
+      <span className="text-sm font-medium">Workspace logo</span>
+      <label
+        htmlFor="logo"
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-6 py-10 transition-colors hover:bg-muted/50",
+          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--border-strong)] bg-[var(--bg-subtle)]/40 px-6 py-10 transition-colors hover:bg-[var(--bg-subtle)]",
           variant === "onboarding" && "py-12",
         )}
         onDragOver={(e) => {
@@ -198,13 +197,12 @@ export function BrandKitForm({
             } as React.ChangeEvent<HTMLInputElement>);
           }
         }}
-        onClick={() => logoInputRef.current?.click()}
       >
-        <ImageIcon className="size-8 text-muted-foreground" aria-hidden />
-        <span className="text-sm font-medium text-foreground">
+        <ImageIcon className="size-8 text-[var(--fg-3)]" aria-hidden />
+        <span className="text-sm font-medium text-[var(--fg)]">
           Click to upload or drag and drop
         </span>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-[var(--fg-3)]">
           SVG, PNG, or JPG (max. 5MB)
         </span>
         <input
@@ -216,11 +214,76 @@ export function BrandKitForm({
           className="sr-only"
           onChange={handleLogoChange}
         />
-      </button>
+      </label>
       {initialBrandKit?.logo_url && !logoPreviewUrl ? (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[var(--fg-3)]">
           Saving without a new file keeps your current logo.
         </p>
+      ) : null}
+    </div>
+  );
+
+  const ACCENT_SWATCHES = [
+    "#3550E0",
+    "#1F8A52",
+    "#B36A12",
+    "#C13838",
+    "#7C4DBC",
+    "#0F7A8F",
+  ] as const;
+
+  const colorPalette = (
+    <div className="flex flex-col gap-3">
+      <Label>Accent color</Label>
+      <div className="flex flex-wrap gap-2">
+        {ACCENT_SWATCHES.map((hex) => {
+          const isSelected = primaryColor.toUpperCase() === hex.toUpperCase();
+          return (
+            <button
+              key={hex}
+              type="button"
+              aria-label={`Pick accent ${hex}`}
+              onClick={() =>
+                setValue("primary_color", hex, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                })
+              }
+              className={cn(
+                "size-9 rounded-lg transition-transform hover:scale-105",
+                isSelected
+                  ? "ring-2 ring-[var(--fg)] ring-offset-2 ring-offset-[var(--bg-canvas)]"
+                  : "ring-1 ring-[var(--border-strong)]",
+              )}
+              style={{ background: hex }}
+            />
+          );
+        })}
+        <label
+          className={cn(
+            "relative grid size-9 cursor-pointer place-items-center rounded-lg ring-1 ring-[var(--border-strong)] transition-transform hover:scale-105",
+          )}
+          style={{
+            background:
+              "conic-gradient(from 0deg, #ef4444, #f59e0b, #84cc16, #06b6d4, #6366f1, #ec4899, #ef4444)",
+          }}
+          aria-label="Pick custom color"
+        >
+          <input
+            type="color"
+            value={primaryColor}
+            onChange={(e) =>
+              setValue("primary_color", e.target.value, {
+                shouldValidate: true,
+                shouldDirty: true,
+              })
+            }
+            className="absolute inset-0 cursor-pointer opacity-0"
+          />
+        </label>
+      </div>
+      {errors.primary_color ? (
+        <p className="text-xs text-destructive">{errors.primary_color.message}</p>
       ) : null}
     </div>
   );
@@ -450,37 +513,34 @@ export function BrandKitForm({
     ) : null;
 
   const onboardingFooter = (
-    <CardFooter className={FORM_CARD_FOOTER_ONBOARDING_SPLIT}>
+    <div className="flex items-center justify-between gap-3 pt-2">
       <Link
         href={backHref}
-        className={cn(
-          buttonVariants({ variant: "ghost" }),
-          "text-muted-foreground inline-flex",
-        )}
+        className="text-sm font-medium text-[var(--fg-2)] transition-colors hover:text-[var(--fg)]"
       >
         {backLabel}
       </Link>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
+      <div className="flex items-center gap-3">
+        <button
           type="button"
-          variant="outline"
           disabled={isPending}
           onClick={handleSkip}
+          className="text-sm font-medium text-[var(--fg-3)] transition-colors hover:text-[var(--fg-2)] disabled:opacity-50"
         >
           Skip
-        </Button>
-        <Button type="submit" disabled={isPending}>
+        </button>
+        <Button type="submit" disabled={isPending} className="h-11 rounded-xl px-6">
           {isPending ? (
             "Saving…"
           ) : (
             <>
               {submitLabel}
-              <ArrowRightIcon data-icon="inline-end" />
+              <ArrowRightIcon className="size-4" />
             </>
           )}
         </Button>
       </div>
-    </CardFooter>
+    </div>
   );
 
   const defaultFooter = (
@@ -508,56 +568,45 @@ export function BrandKitForm({
   if (variant === "onboarding") {
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-8">
-        <div className="flex shrink-0 flex-col gap-2 text-center">
-          <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground">
-            Brand identity
+        <div className="flex shrink-0 flex-col gap-2">
+          <h1 className="font-display text-[1.625rem] font-semibold leading-[1.15] tracking-[-0.022em] text-[var(--fg)]">
+            Make it yours
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Upload your logo and select your brand colors. We&apos;ll use these to
-            customize your client portals and invoices.
+          <p className="text-[13.5px] leading-[1.55] text-[var(--fg-2)]">
+            Drop a logo and pick your colors. We&apos;ll use it on every PDF you send.
           </p>
         </div>
 
-        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden shadow-sm">
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            noValidate
-            className="flex min-h-0 flex-1 flex-col overflow-hidden"
-          >
-            <CardContent
-              className={cn(
-                "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 pt-2",
-                FORM_CARD_CONTENT_BEFORE_FOOTER,
-              )}
-            >
-              <CardTitle className="sr-only">Brand kit</CardTitle>
-              <div className="flex flex-col gap-6">
-                {initialBrandKit?.logo_url ? (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Current logo on file
-                    </span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={initialBrandKit.logo_url}
-                      alt="Current brand logo"
-                      className="h-16 w-16 rounded-md border border-border bg-muted object-contain p-1"
-                    />
-                  </div>
-                ) : null}
-
-                {logoDropzone}
-                <Separator />
-                {colorFields}
-                {fontField}
-                {previewSection}
-                {emailSignatureField}
-                {errorBlock}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="flex flex-col gap-7"
+        >
+          <CardTitle className="sr-only">Brand kit</CardTitle>
+          <div className="flex flex-col gap-6">
+            {initialBrandKit?.logo_url ? (
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-medium text-[var(--fg-2)]">
+                  Current logo on file
+                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={initialBrandKit.logo_url}
+                  alt="Current brand logo"
+                  className="h-16 w-16 rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] object-contain p-1"
+                />
               </div>
-            </CardContent>
-            {onboardingFooter}
-          </form>
-        </Card>
+            ) : null}
+
+            {logoDropzone}
+            {colorPalette}
+            {fontField}
+            {previewSection}
+            {emailSignatureField}
+            {errorBlock}
+          </div>
+          {onboardingFooter}
+        </form>
       </div>
     );
   }

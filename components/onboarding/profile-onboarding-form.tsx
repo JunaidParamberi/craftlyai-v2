@@ -34,6 +34,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import { CountryCombobox } from "@/components/onboarding/country-combobox";
+import { RegionSelect } from "@/components/onboarding/region-select";
+import { getRegionLabel } from "@/lib/data/regions";
 
 function toInput(val: string | null): string {
   return val ?? "";
@@ -85,7 +87,9 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
 
   const vatRegistered = watch("vat_registered");
   const addressCountry = watch("address_country");
+  const addressRegion = watch("address_region");
   const defaultCurrency = watch("default_currency");
+  const regionLabel = getRegionLabel(addressCountry);
 
   function onSubmit(values: OnboardingProfileFormValues) {
     setServerResult(null);
@@ -109,36 +113,26 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
       const result = await updateProfile(patch);
       setServerResult(result);
       if (result.ok) {
-        router.refresh();
-        router.push("/onboarding/brand");
+        router.replace("/onboarding/brand");
       }
     });
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-8">
-      <div className="flex shrink-0 flex-col gap-2 text-center">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground">
-          Tell us about you
+      <div className="flex shrink-0 flex-col gap-2">
+        <h1 className="font-display text-[1.625rem] font-semibold leading-[1.15] tracking-[-0.022em] text-[var(--fg)]">
+          Tell us about your studio
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Let&apos;s set up your workspace to match how you work.
+        <p className="text-[13.5px] leading-[1.55] text-[var(--fg-2)]">
+          This is what clients will see on documents and your portal.
         </p>
       </div>
 
-      <Card className="flex min-h-0 flex-1 flex-col overflow-hidden shadow-sm">
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex min-h-0 flex-1 flex-col overflow-hidden"
-        >
-          <CardContent
-            className={cn(
-              "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-6 pt-2",
-              FORM_CARD_CONTENT_BEFORE_FOOTER,
-            )}
-          >
-            <CardTitle className="sr-only">Profile basics</CardTitle>
-            <div className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-7">
+        <div>
+          <CardTitle className="sr-only">Profile basics</CardTitle>
+          <div className="flex flex-col gap-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="full_name">Full name</Label>
@@ -239,11 +233,18 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="address_region">Region / state</Label>
-                <Input
+                <Label htmlFor="address_region">{regionLabel}</Label>
+                <RegionSelect
                   id="address_region"
-                  autoComplete="address-level1"
-                  {...register("address_region")}
+                  countryCode={addressCountry}
+                  value={addressRegion}
+                  onChange={(v) =>
+                    setValue("address_region", v, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    })
+                  }
+                  aria-invalid={Boolean(errors.address_region)}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -259,12 +260,16 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
                 <CountryCombobox
                   id="address_country"
                   value={addressCountry}
-                  onChange={(code) =>
+                  onChange={(code) => {
                     setValue("address_country", code, {
                       shouldValidate: true,
                       shouldDirty: true,
-                    })
-                  }
+                    });
+                    setValue("address_region", "", {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                  }}
                   aria-invalid={Boolean(errors.address_country)}
                 />
                 {errors.address_country ? (
@@ -290,7 +295,7 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
                   }
                 }}
               >
-                <SelectTrigger id="default_currency">
+                <SelectTrigger id="default_currency" className="w-full">
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
@@ -328,32 +333,32 @@ export function ProfileOnboardingForm({ initialProfile }: Props) {
                 <AlertDescription>{serverResult.message}</AlertDescription>
               </Alert>
             ) : null}
-            </div>
-          </CardContent>
+          </div>
+        </div>
 
-          <CardFooter className={FORM_CARD_FOOTER_ONBOARDING_SPLIT}>
-            <Link
-              href="/"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "text-muted-foreground inline-flex",
-              )}
-            >
-              ← Back
-            </Link>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? (
-                "Saving…"
-              ) : (
-                <>
-                  Continue
-                  <ArrowRightIcon data-icon="inline-end" />
-                </>
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+        <div className="flex items-center justify-end gap-3 pt-2">
+          <Link
+            href="/"
+            className="text-sm font-medium text-[var(--fg-3)] transition-colors hover:text-[var(--fg-2)]"
+          >
+            Skip
+          </Link>
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="h-11 rounded-xl px-6"
+          >
+            {isPending ? (
+              "Saving…"
+            ) : (
+              <>
+                Continue
+                <ArrowRightIcon className="size-4" />
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }

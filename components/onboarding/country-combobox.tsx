@@ -3,7 +3,7 @@
 import * as React from "react";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 
-import { COUNTRIES } from "@/lib/data/countries";
+import { TARGET_COUNTRIES as COUNTRIES } from "@/lib/data/target-countries";
 import { cn } from "@/lib/utils";
 
 import { buttonVariants } from "@/components/ui/button";

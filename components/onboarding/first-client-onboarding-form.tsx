@@ -89,8 +89,7 @@ export function FirstClientOnboardingForm() {
         setServerError(result.message);
         return;
       }
-      router.refresh();
-      router.push("/dashboard");
+      router.replace("/dashboard");
     });
   }
 
@@ -124,45 +123,29 @@ export function FirstClientOnboardingForm() {
       }
 
       reset(defaults);
-      router.refresh();
-      router.push("/dashboard");
+      router.replace("/dashboard");
     });
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-8">
-      <div className="flex shrink-0 flex-col gap-2 text-center">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground">
+      <div className="flex shrink-0 flex-col gap-2">
+        <h1 className="font-display text-[1.625rem] font-semibold leading-[1.15] tracking-[-0.022em] text-[var(--fg)]">
           Add your first client
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Add someone you bill or work with—everything here stays private to your
-          workspace. You can skip and add clients later from the dashboard.
+        <p className="text-[13.5px] leading-[1.55] text-[var(--fg-2)]">
+          Add someone real — we&apos;ll pre-fill their info on your first invoice.
+          Skip and add clients later from the dashboard.
         </p>
       </div>
 
-      <Card
-        className={cn(
-          "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
-          /* Cap height so the body becomes a real scroll region (flex alone often won’t). */
-          "max-h-[min(78vh,calc(100dvh-13rem))] sm:max-h-[calc(100svh-15rem)]",
-          /* Light mode: default ring is too faint on bg-card; explicit border + ring. */
-          "border border-border shadow-sm ring-1 ring-border dark:ring-border",
-        )}
-      >
         <form
-          className="grid h-full min-h-0 min-w-0 flex-1 grid-rows-[minmax(0,1fr)_auto] overflow-hidden"
+          className="flex flex-col gap-7"
           onSubmit={handleSubmit(onSaveAndFinish)}
           noValidate
         >
-          <CardContent
-            className={cn(
-              "relative z-0 min-h-0 overflow-y-auto overscroll-y-contain px-6 pt-2 touch-pan-y [-webkit-overflow-scrolling:touch] [scrollbar-gutter:stable]",
-              FORM_CARD_CONTENT_BEFORE_FOOTER,
-            )}
-          >
-            <CardTitle className="sr-only">First client</CardTitle>
-            <div className="flex flex-col gap-6">
+          <CardTitle className="sr-only">First client</CardTitle>
+          <div className="flex flex-col gap-6">
               <fieldset className="flex flex-col gap-0 border-0 p-0">
                 <legend className="mb-0 w-full text-sm leading-none font-medium text-foreground">
                   {nameCopy.kindLegend}
@@ -375,42 +358,37 @@ export function FirstClientOnboardingForm() {
                   <AlertDescription>{serverError}</AlertDescription>
                 </Alert>
               ) : null}
-            </div>
-          </CardContent>
+          </div>
 
-          <CardFooter className={FORM_CARD_FOOTER_ONBOARDING_SPLIT}>
+          <div className="flex items-center justify-between gap-3 pt-2">
             <Link
               href="/onboarding/brand"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "text-muted-foreground inline-flex",
-              )}
+              className="text-sm font-medium text-[var(--fg-2)] transition-colors hover:text-[var(--fg)]"
             >
               ← Back
             </Link>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
+            <div className="flex items-center gap-3">
+              <button
                 type="button"
-                variant="outline"
                 disabled={isPending}
                 onClick={skipToDashboard}
+                className="text-sm font-medium text-[var(--fg-3)] transition-colors hover:text-[var(--fg-2)] disabled:opacity-50"
               >
-                Skip to dashboard
-              </Button>
-              <Button type="submit" disabled={isPending}>
+                Skip
+              </button>
+              <Button type="submit" disabled={isPending} className="h-11 rounded-xl px-6">
                 {isPending ? (
                   "Saving…"
                 ) : (
                   <>
-                    Add client and finish
-                    <ArrowRightIcon data-icon="inline-end" />
+                    Finish setup
+                    <ArrowRightIcon className="size-4" />
                   </>
                 )}
               </Button>
             </div>
-          </CardFooter>
+          </div>
         </form>
-      </Card>
     </div>
   );
 }
