@@ -117,7 +117,7 @@ export default async function DashboardPage() {
       <AISidekickStrip />
 
       {/* KPI grid */}
-      <DashboardKpiCards summary={summary} counts={counts} />
+      <DashboardKpiCards summary={summary} currency={currency} />
 
       {/* Attention cards */}
       <AttentionCards items={attentionItems} />
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
 
       {/* Pipeline (full width) */}
       <div className="grid gap-4">
-        <PipelinePanel pipeline={pipeline} />
+        <PipelinePanel pipeline={pipeline} currency={currency} />
       </div>
     </div>
   );

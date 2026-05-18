@@ -27,6 +27,7 @@ import { formatCurrency } from "@/lib/utils/format";
 
 type Props = {
   pipeline: ActivePipelineResult;
+  currency: string;
 };
 
 const RISK_DOT: Record<PipelineProject["risk"], string> = {
@@ -44,7 +45,7 @@ function deadlineLabel(p: PipelineProject): string {
   }).format(p.deadline instanceof Date ? p.deadline : new Date(p.deadline));
 }
 
-export function PipelinePanel({ pipeline }: Props) {
+export function PipelinePanel({ pipeline, currency }: Props) {
   const { projects, totalCount } = pipeline;
 
   return (
@@ -129,7 +130,7 @@ export function PipelinePanel({ pipeline }: Props) {
                       )}
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">
-                      {p.budget !== null ? formatCurrency(p.budget) : "—"}
+                      {p.budget !== null ? formatCurrency(p.budget, currency) : "—"}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {p.daysLabel || deadlineLabel(p)}

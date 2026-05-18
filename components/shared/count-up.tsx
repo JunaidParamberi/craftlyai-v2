@@ -9,27 +9,29 @@ type FormatType = "number" | "currency";
 type Props = {
   value: number;
   format?: FormatType;
+  currency?: string;
   duration?: number;
   className?: string;
 };
 
-function applyFormat(n: number, fmt: FormatType): string {
-  if (fmt === "currency") return formatCurrency(n);
+function applyFormat(n: number, fmt: FormatType, currency: string): string {
+  if (fmt === "currency") return formatCurrency(n, currency);
   return String(Math.round(n));
 }
 
 export function CountUp({
   value,
   format = "number",
+  currency = "USD",
   duration = 700,
   className,
 }: Props) {
-  const [displayed, setDisplayed] = useState(applyFormat(0, format));
+  const [displayed, setDisplayed] = useState(applyFormat(0, format, currency));
   const frameRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Reset to 0 so every mount (including back-navigation) animates cleanly
-    setDisplayed(applyFormat(0, format));
+    setDisplayed(applyFormat(0, format, currency));
 
     const startTime = performance.now();
 
@@ -37,7 +39,7 @@ export function CountUp({
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayed(applyFormat(value * eased, format));
+      setDisplayed(applyFormat(value * eased, format, currency));
       if (progress < 1) {
         frameRef.current = requestAnimationFrame(tick);
       }

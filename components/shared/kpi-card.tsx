@@ -65,28 +65,28 @@ export function KpiCard({
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="mb-3 flex items-start justify-between gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground leading-tight">
-          {label}
-        </span>
+      <div className="mb-2 text-[13px] text-muted-foreground leading-tight">
+        {label}
+      </div>
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-heading text-[28px] font-semibold tabular-nums tracking-[-0.02em] text-foreground leading-none">
+          {value}
+        </p>
         {delta && (
           <span
             className={cn(
-              "inline-flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.5",
-              "text-[10px] font-semibold tabular-nums",
+              "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1",
+              "text-[11px] font-medium tabular-nums",
               deltaClass
             )}
           >
-            <TrendIcon size={10} strokeWidth={2.5} />
+            <TrendIcon size={11} strokeWidth={2} />
             {delta}
           </span>
         )}
       </div>
-      <p className="font-heading text-[26px] font-bold tabular-nums tracking-[-0.025em] text-foreground leading-none">
-        {value}
-      </p>
       {sub != null && (
-        <p className={cn("mt-2 text-[11px] leading-snug", subClass)}>{sub}</p>
+        <p className={cn("mt-2 text-[12px] leading-snug", subClass)}>{sub}</p>
       )}
     </div>
   );
