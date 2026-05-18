@@ -65,6 +65,8 @@ describe("mergeAndSortEvents", () => {
     type: "doc_sent",
     id,
     href: `/documents/${id}`,
+    who: "You",
+    text: id,
     label: id,
     timestamp: new Date(ts),
   });

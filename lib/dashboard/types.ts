@@ -29,6 +29,14 @@ export type ActivityEvent = {
   id: string;
   href: string;
   label: string;
+  /** Bold actor: "Hawthorn & Co", "You", project name. */
+  who: string;
+  /** Muted verb + entity: "paid invoice INV-2051". */
+  text: string;
+  /** Optional money amount (formatted by consumer with currency). */
+  amount?: number | null;
+  /** Optional non-money meta suffix: "Maple Co.", quote: "Love the timeline." */
+  metaSuffix?: string | null;
   timestamp: Date | string;
 };
 

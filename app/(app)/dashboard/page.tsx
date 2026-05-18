@@ -125,7 +125,7 @@ export default async function DashboardPage() {
       {/* Revenue chart + Activity */}
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <RevenueCard data={monthlyRevenue} currency={currency} />
-        <ActivityFeed events={activity} />
+        <ActivityFeed events={activity} currency={currency} />
       </div>
 
       {/* Pipeline (full width) */}
