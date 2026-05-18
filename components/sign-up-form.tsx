@@ -1,46 +1,46 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
-import { FcGoogle } from 'react-icons/fc'
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 
-import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import Link from 'next/link'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
-export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [repeatPassword, setRepeatPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showRepeatPassword, setShowRepeatPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
-  const router = useRouter()
+const LINK_STYLE: React.CSSProperties = {
+  color: "#A5B4FF",
+  fontWeight: 600,
+  textDecoration: "underline",
+  textUnderlineOffset: 4,
+};
+
+export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const supabase = createClient()
-    setIsLoading(true)
-    setError(null)
+    e.preventDefault();
+    setError(null);
 
     if (password !== repeatPassword) {
-      setError('Passwords do not match')
-      setIsLoading(false)
-      return
+      setError("Passwords do not match");
+      return;
     }
+
+    const supabase = createClient();
+    setIsLoading(true);
 
     try {
       const { error } = await supabase.auth.signUp({
@@ -49,130 +49,163 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
         options: {
           emailRedirectTo: `${window.location.origin}/auth/confirm?next=/dashboard`,
         },
-      })
-      if (error) throw error
-      router.push('/auth/sign-up-success')
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
+      });
+      if (error) throw error;
+      router.push("/auth/sign-up-success");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleGoogleSignUp = async () => {
-    const supabase = createClient()
-    setIsGoogleLoading(true)
-    setError(null)
+    const supabase = createClient();
+    setIsGoogleLoading(true);
+    setError(null);
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/confirm?next=/dashboard`,
         },
-      })
-      if (error) throw error
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
-      setIsGoogleLoading(false)
+      });
+      if (error) throw error;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      setIsGoogleLoading(false);
     }
-  }
+  };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignUp}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    className="pr-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-sm p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repeat Password</Label>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="repeat-password"
-                    type={showRepeatPassword ? 'text' : 'password'}
-                    required
-                    className="pr-10"
-                    value={repeatPassword}
-                    onChange={(e) => setRepeatPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-sm p-1 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowRepeatPassword((prev) => !prev)}
-                    aria-label={showRepeatPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showRepeatPassword ? (
-                      <EyeOff className="size-4" />
-                    ) : (
-                      <Eye className="size-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Creating an account...' : 'Sign up'}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                disabled={isGoogleLoading}
-                onClick={handleGoogleSignUp}
-              >
-                <FcGoogle className="size-4" />
-                {isGoogleLoading ? 'Redirecting...' : 'Continue with Google'}
-              </Button>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{' '}
-              <Link href="/auth/login" className="underline underline-offset-4">
-                Login
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+    <div className={cn("flex flex-col gap-8", className)} {...props}>
+      <header className="flex flex-col gap-2">
+        <h1 className="font-display text-[1.875rem] font-semibold leading-[1.1] tracking-[-0.025em] text-[var(--fg)]">
+          Create your account
+        </h1>
+        <p className="text-sm text-[var(--fg-2)]">
+          Start free. Or{" "}
+          <Link href="/auth/login" className="auth-link" style={LINK_STYLE}>
+            sign in
+          </Link>
+          .
+        </p>
+      </header>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="h-11 w-full justify-center gap-2 rounded-xl border-[var(--border-strong)] bg-[var(--bg-surface)] text-sm font-medium shadow-[var(--shadow-xs)] hover:bg-[var(--bg-subtle)]"
+        disabled={isGoogleLoading}
+        onClick={handleGoogleSignUp}
+      >
+        <FcGoogle className="size-[18px]" />
+        {isGoogleLoading ? "Redirecting…" : "Continue with Google"}
+      </Button>
+
+      <div className="relative flex items-center">
+        <span className="h-px flex-1 bg-[var(--border)]" />
+        <span className="px-3 text-xs uppercase tracking-[0.16em] text-[var(--fg-3)]">
+          or with email
+        </span>
+        <span className="h-px flex-1 bg-[var(--border)]" />
+      </div>
+
+      <form onSubmit={handleSignUp} className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="email" className="text-xs font-medium text-[var(--fg-2)]">
+            Email
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@studio.com"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-11 rounded-xl bg-[var(--bg-surface)]"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="password" className="text-xs font-medium text-[var(--fg-2)]">
+            Password
+          </Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              required
+              autoComplete="new-password"
+              className="h-11 rounded-xl bg-[var(--bg-surface)] pr-11"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-[var(--fg-3)] transition-colors hover:text-[var(--fg)]"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="repeat-password" className="text-xs font-medium text-[var(--fg-2)]">
+            Repeat password
+          </Label>
+          <div className="relative">
+            <Input
+              id="repeat-password"
+              type={showRepeatPassword ? "text" : "password"}
+              required
+              autoComplete="new-password"
+              className="h-11 rounded-xl bg-[var(--bg-surface)] pr-11"
+              value={repeatPassword}
+              onChange={(e) => setRepeatPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-[var(--fg-3)] transition-colors hover:text-[var(--fg)]"
+              onClick={() => setShowRepeatPassword((prev) => !prev)}
+              aria-label={showRepeatPassword ? "Hide password" : "Show password"}
+            >
+              {showRepeatPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <p
+            role="alert"
+            className="rounded-lg border border-[var(--danger)]/30 bg-[var(--danger-soft)] px-3 py-2 text-sm text-[var(--danger)]"
+          >
+            {error}
+          </p>
+        )}
+
+        <Button
+          type="submit"
+          className="group h-11 w-full justify-center gap-1.5 rounded-xl text-sm font-medium"
+          disabled={isLoading}
+        >
+          {isLoading ? "Creating account…" : "Create account"}
+          {!isLoading && (
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          )}
+        </Button>
+      </form>
+
+      <p className="text-center text-sm text-[var(--fg-2)]">
+        Already have an account?{" "}
+        <Link href="/auth/login" className="auth-link" style={LINK_STYLE}>
+          Sign in
+        </Link>
+      </p>
     </div>
-  )
+  );
 }

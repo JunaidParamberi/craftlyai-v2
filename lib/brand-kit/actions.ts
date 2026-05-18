@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_LOGO_ALLOWED_MIME, brandKitFormSchema } from "@/lib/validations/brand-kit";
@@ -197,6 +197,7 @@ export async function saveBrandKit(formData: FormData): Promise<SaveBrandKitResu
 
     revalidatePath("/settings/brand");
     revalidatePath("/onboarding/brand");
+    revalidateTag("profile");
     return { ok: true, brandKit: normalizeBrandKitRow(data) };
   }
 
