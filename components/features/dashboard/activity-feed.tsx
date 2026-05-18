@@ -31,8 +31,8 @@ const EVENT_STYLES: Record<
 > = {
   invoice_paid: {
     icon: CheckCircle2,
-    container: "bg-[color-mix(in_srgb,var(--success,#1F8A52)_10%,transparent)]",
-    iconClass: "text-[var(--success,#1F8A52)]",
+    container: "bg-[color-mix(in_srgb,var(--success)_10%,transparent)]",
+    iconClass: "text-[var(--success)]",
   },
   doc_sent: {
     icon: Send,
@@ -41,8 +41,8 @@ const EVENT_STYLES: Record<
   },
   quote_approved: {
     icon: ThumbsUp,
-    container: "bg-[color-mix(in_srgb,var(--success,#1F8A52)_10%,transparent)]",
-    iconClass: "text-[var(--success,#1F8A52)]",
+    container: "bg-[color-mix(in_srgb,var(--success)_10%,transparent)]",
+    iconClass: "text-[var(--success)]",
   },
   quote_declined: {
     icon: ThumbsDown,

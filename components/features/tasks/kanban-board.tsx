@@ -47,15 +47,15 @@ const COLUMNS = [
     status: "done" as TaskStatus,
     label: "Done",
     icon: CheckCircle2,
-    accent: "[border-top-color:var(--success,#1F8A52)]",
-    bg: "[background:color-mix(in_srgb,var(--success,#1F8A52)_5%,transparent)]",
+    accent: "[border-top-color:var(--success)]",
+    bg: "[background:color-mix(in_srgb,var(--success)_5%,transparent)]",
   },
   {
     status: "cancelled" as TaskStatus,
     label: "Cancelled",
     icon: XCircle,
-    accent: "[border-top-color:var(--danger,#C13838)]",
-    bg: "[background:color-mix(in_srgb,var(--danger,#C13838)_5%,transparent)]",
+    accent: "[border-top-color:var(--danger)]",
+    bg: "[background:color-mix(in_srgb,var(--danger)_5%,transparent)]",
   },
 ] as const;
 

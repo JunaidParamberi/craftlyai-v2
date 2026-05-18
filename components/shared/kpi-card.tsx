@@ -34,20 +34,20 @@ export function KpiCard({
 
   const deltaClass =
     variant === "danger"
-      ? "text-[var(--danger,#C13838)] bg-[color-mix(in_srgb,var(--danger,#C13838)_10%,transparent)]"
+      ? "text-[var(--danger)] bg-[color-mix(in_srgb,var(--danger)_10%,transparent)]"
       : variant === "warning"
-        ? "text-[var(--warning,#B36A12)] bg-[color-mix(in_srgb,var(--warning,#B36A12)_10%,transparent)]"
+        ? "text-[var(--warning)] bg-[color-mix(in_srgb,var(--warning)_10%,transparent)]"
         : trend === "up"
-          ? "text-[var(--success,#1F8A52)] bg-[color-mix(in_srgb,var(--success,#1F8A52)_10%,transparent)]"
+          ? "text-[var(--success)] bg-[color-mix(in_srgb,var(--success)_10%,transparent)]"
           : trend === "down"
-            ? "text-[var(--danger,#C13838)] bg-[color-mix(in_srgb,var(--danger,#C13838)_10%,transparent)]"
+            ? "text-[var(--danger)] bg-[color-mix(in_srgb,var(--danger)_10%,transparent)]"
             : "text-muted-foreground bg-muted";
 
   const subClass =
     variant === "danger"
-      ? "text-[var(--danger,#C13838)]"
+      ? "text-[var(--danger)]"
       : variant === "warning"
-        ? "text-[var(--warning,#B36A12)]"
+        ? "text-[var(--warning)]"
         : "text-muted-foreground";
 
   const card = (
@@ -56,9 +56,9 @@ export function KpiCard({
         "relative rounded-xl border border-border bg-card px-4 py-4",
         "opacity-0 animate-[fadeUp_0.45s_ease_forwards]",
         variant === "danger" &&
-          "border-[color-mix(in_srgb,var(--danger,#C13838)_25%,var(--border))]",
+          "border-[color-mix(in_srgb,var(--danger)_25%,var(--border))]",
         variant === "warning" &&
-          "border-[color-mix(in_srgb,var(--warning,#B36A12)_25%,var(--border))]",
+          "border-[color-mix(in_srgb,var(--warning)_25%,var(--border))]",
         href &&
           "cursor-pointer transition-[border-color,box-shadow] hover:border-[var(--border-focus)] hover:shadow-[var(--shadow-sm,0_1px_4px_rgba(0,0,0,0.06))]",
         className

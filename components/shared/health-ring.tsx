@@ -6,9 +6,9 @@ type HealthRingProps = {
 };
 
 function tintByBand(score: number): string {
-  if (score >= 80) return "var(--success,#1F8A52)";
-  if (score >= 60) return "var(--warning,#B36A12)";
-  return "var(--danger,#C13838)";
+  if (score >= 80) return "var(--success)";
+  if (score >= 60) return "var(--warning)";
+  return "var(--danger)";
 }
 
 export function HealthRing({ score, size = 32, strokeWidth = 3, className }: HealthRingProps) {
@@ -32,7 +32,7 @@ export function HealthRing({ score, size = 32, strokeWidth = 3, className }: Hea
         cy={size / 2}
         r={r}
         fill="none"
-        stroke="var(--bg-subtle,#F4F4F1)"
+        stroke="var(--bg-subtle)"
         strokeWidth={strokeWidth}
       />
       <circle
