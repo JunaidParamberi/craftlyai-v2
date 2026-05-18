@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { AlertTriangle, Clock, MessageSquare, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  MessageSquare,
+  MoreHorizontal,
+  Quote,
+  Sparkles,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import type { AttentionItem, AttentionItemType } from "@/lib/dashboard/types";
@@ -29,9 +36,9 @@ const TONE: Record<AttentionItemType, Tone> = {
     action: "Open project",
   },
   expiring_quote: {
-    icon: Clock,
-    iconBg: "var(--warning-soft)",
-    iconColor: "var(--warning)",
+    icon: Quote,
+    iconBg: "var(--info-soft)",
+    iconColor: "var(--info)",
     action: "Nudge client",
   },
   quote_no_response: {
@@ -100,12 +107,12 @@ export function AttentionCards({ items }: Props) {
                 gap: 12,
               }}
             >
-              <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <div
                   style={{
-                    width: 30,
-                    height: 30,
-                    borderRadius: 8,
+                    width: 36,
+                    height: 36,
+                    borderRadius: 9,
                     background: tone.iconBg,
                     color: tone.iconColor,
                     display: "grid",
@@ -113,12 +120,12 @@ export function AttentionCards({ items }: Props) {
                     flexShrink: 0,
                   }}
                 >
-                  <Icon size={15} />
+                  <Icon size={17} strokeWidth={1.6} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: 13.5,
+                      fontSize: 14,
                       fontWeight: 500,
                       lineHeight: 1.35,
                       color: "var(--fg)",
@@ -142,21 +149,59 @@ export function AttentionCards({ items }: Props) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: 5,
-                    height: 26,
-                    borderRadius: 7,
+                    gap: 6,
+                    height: 30,
+                    borderRadius: 8,
                     border: "1px solid var(--border)",
                     background: "var(--bg-subtle)",
                     color: "var(--fg-2)",
-                    fontSize: 12,
+                    fontSize: 12.5,
                     fontWeight: 500,
                     textDecoration: "none",
-                    transition: "background 120ms, color 120ms",
+                    transition: "background 120ms, color 120ms, border-color 120ms",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "var(--bg-surface)";
+                    e.currentTarget.style.color = "var(--fg)";
+                    e.currentTarget.style.borderColor = "var(--border-strong)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "var(--bg-subtle)";
+                    e.currentTarget.style.color = "var(--fg-2)";
+                    e.currentTarget.style.borderColor = "var(--border)";
                   }}
                 >
-                  <Sparkles size={11} />
+                  <Sparkles size={12} strokeWidth={1.6} />
                   {tone.action}
                 </Link>
+                <button
+                  type="button"
+                  aria-label="More actions"
+                  title="More actions"
+                  style={{
+                    width: 30,
+                    height: 30,
+                    display: "grid",
+                    placeItems: "center",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                    background: "var(--bg-subtle)",
+                    color: "var(--fg-3)",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    transition: "background 120ms, color 120ms",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "var(--bg-surface)";
+                    e.currentTarget.style.color = "var(--fg)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "var(--bg-subtle)";
+                    e.currentTarget.style.color = "var(--fg-3)";
+                  }}
+                >
+                  <MoreHorizontal size={14} strokeWidth={1.6} />
+                </button>
               </div>
             </div>
           );
