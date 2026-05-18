@@ -365,21 +365,23 @@ export function Pane({
               <ChevronDown size={14} strokeWidth={1.6} style={{ color: "var(--fg-3)", flexShrink: 0 }} />
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" className="min-w-52">
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-sm font-medium">Account</span>
-                  {userEmail && (
-                    <span className="truncate text-xs text-muted-foreground">{userEmail}</span>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-sm font-medium">Account</span>
+                    {userEmail && (
+                      <span className="truncate text-xs text-muted-foreground">{userEmail}</span>
+                    )}
+                  </div>
+                  {showUpgrade && (
+                    <Badge variant="outline" className="shrink-0 text-xs capitalize font-medium">
+                      {PLAN_LABELS[planUsage.planTier] ?? planUsage.planTier}
+                    </Badge>
                   )}
                 </div>
-                {showUpgrade && (
-                  <Badge variant="outline" className="shrink-0 text-xs capitalize font-medium">
-                    {PLAN_LABELS[planUsage.planTier] ?? planUsage.planTier}
-                  </Badge>
-                )}
-              </div>
-            </DropdownMenuLabel>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem render={<Link href="/settings" />}>
