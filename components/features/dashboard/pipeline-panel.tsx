@@ -1,119 +1,155 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { riskIndicatorLabel } from "@/lib/dashboard/attention-utils";
-import type { ActivePipelineResult, PipelineProject } from "@/lib/dashboard/types";
+import { Progress } from "@/components/ui/progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { StatusBadge } from "@/components/shared/status-badge";
+import type {
+  ActivePipelineResult,
+  PipelineProject,
+} from "@/lib/dashboard/types";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils/format";
 
 type Props = {
   pipeline: ActivePipelineResult;
-};
-
-const RISK_BORDER: Record<PipelineProject["risk"], string> = {
-  overdue: "border-l-destructive",
-  at_risk: "border-l-destructive",
-  watch: "border-l-amber-500",
-  on_track: "border-l-emerald-500",
+  currency: string;
 };
 
 const RISK_DOT: Record<PipelineProject["risk"], string> = {
-  overdue: "bg-destructive",
-  at_risk: "bg-destructive",
-  watch: "bg-amber-500",
-  on_track: "bg-emerald-500",
+  overdue: "bg-[var(--danger)]",
+  at_risk: "bg-[var(--danger)]",
+  watch: "bg-[var(--warning)]",
+  on_track: "bg-[var(--fg-3)]",
 };
 
-const RISK_TEXT: Record<PipelineProject["risk"], string> = {
-  overdue: "text-destructive",
-  at_risk: "text-destructive",
-  watch: "text-amber-600 dark:text-amber-500",
-  on_track: "text-emerald-600 dark:text-emerald-500",
-};
-
-function PipelineRow({ project }: { project: PipelineProject }) {
-  return (
-    <Link
-      href={`/projects/${project.id}`}
-      className={cn(
-        "block rounded-[6px] border border-border/60 border-l-2 bg-card/50 px-3 py-3 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1",
-        RISK_BORDER[project.risk]
-      )}
-    >
-      <p className="truncate font-medium text-sm leading-snug">{project.title}</p>
-      {project.clientName ? (
-        <p className="mt-0.5 truncate text-muted-foreground text-xs">
-          {project.clientName}
-        </p>
-      ) : null}
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-muted-foreground text-xs">{project.daysLabel}</p>
-        <span
-          className={cn(
-            "inline-flex items-center gap-1.5 text-xs font-medium",
-            RISK_TEXT[project.risk]
-          )}
-        >
-          <span
-            className={cn("size-1.5 shrink-0 rounded-full", RISK_DOT[project.risk])}
-            aria-hidden
-          />
-          {riskIndicatorLabel(project.risk)}
-        </span>
-      </div>
-    </Link>
-  );
+function deadlineLabel(p: PipelineProject): string {
+  if (!p.deadline) return "—";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(p.deadline instanceof Date ? p.deadline : new Date(p.deadline));
 }
 
-export function PipelinePanel({ pipeline }: Props) {
+export function PipelinePanel({ pipeline, currency }: Props) {
   const { projects, totalCount } = pipeline;
-  const moreCount = Math.max(0, totalCount - projects.length);
 
   return (
-    <Card className="lg:col-span-2" size="sm">
+    <Card size="sm">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
-        <div className="flex flex-col gap-1">
-          <CardTitle>Active pipeline</CardTitle>
-          <CardDescription>
-            Projects in motion, sorted by deadline
-          </CardDescription>
-        </div>
+        <CardTitle>Active pipeline</CardTitle>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           nativeButton={false}
           render={<Link href="/projects" />}
         >
-          View all
+          All projects
+          <ChevronRight />
         </Button>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3 pt-6">
+      <CardContent className="pt-0">
         {projects.length === 0 ? (
-          <p className="py-4 text-center text-muted-foreground text-sm">
+          <p className="py-8 text-center text-muted-foreground text-sm">
             No active projects yet.
           </p>
         ) : (
-          <>
-            {projects.map((project) => (
-              <PipelineRow key={project.id} project={project} />
-            ))}
-            {moreCount > 0 ? (
-              <p className="text-center text-muted-foreground text-xs">
-                <Link
-                  href="/projects"
-                  className="font-medium text-primary hover:underline"
-                >
-                  +{moreCount} more
-                </Link>
-              </p>
-            ) : null}
-          </>
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Project
+                </TableHead>
+                <TableHead className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Client
+                </TableHead>
+                <TableHead className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Status
+                </TableHead>
+                <TableHead className="w-[200px] text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Progress
+                </TableHead>
+                <TableHead className="text-right text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Value
+                </TableHead>
+                <TableHead className="text-[10.5px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+                  Deadline
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {projects.map((p) => {
+                const pct = p.progress !== null ? Math.round(p.progress * 100) : null;
+                return (
+                  <TableRow key={p.id} className="cursor-pointer">
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/projects/${p.id}`}
+                        className="flex items-center gap-2.5 hover:underline"
+                      >
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "size-1.5 shrink-0 rounded-full",
+                            RISK_DOT[p.risk],
+                          )}
+                        />
+                        <span className="truncate">{p.title}</span>
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {p.clientName ?? "—"}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={p.status} />
+                    </TableCell>
+                    <TableCell>
+                      {pct !== null ? (
+                        <div className="flex items-center gap-2.5">
+                          <Progress value={pct} className="h-1.5 flex-1" />
+                          <span className="min-w-[30px] text-[11px] tabular-nums text-muted-foreground">
+                            {pct}%
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right font-medium tabular-nums">
+                      {p.budget !== null ? formatCurrency(p.budget, currency) : "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {p.daysLabel || deadlineLabel(p)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
+        {totalCount > projects.length && (
+          <p className="border-t border-border/60 py-3 text-center text-xs">
+            <Link
+              href="/projects"
+              className="font-medium text-primary hover:underline"
+            >
+              +{totalCount - projects.length} more
+            </Link>
+          </p>
         )}
       </CardContent>
     </Card>

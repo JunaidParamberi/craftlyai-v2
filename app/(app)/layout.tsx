@@ -51,20 +51,30 @@ export default async function AppShellLayout({
   const userEmail = user?.email ?? null;
   const userInitials = getUserInitials(result.profile.full_name, userEmail);
 
-  const [clientCountResult, docCountResult, notifications, unreadCount] =
-    await Promise.all([
-      supabase
-        .from("clients")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user?.id ?? ""),
-      supabase
-        .from("documents")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user?.id ?? "")
-        .gte("created_at", startOfCurrentMonth()),
-      listNotificationsForUser(50),
-      getUnreadNotificationCount(),
-    ]);
+  const [
+    clientCountResult,
+    docCountResult,
+    openTasksResult,
+    notifications,
+    unreadCount,
+  ] = await Promise.all([
+    supabase
+      .from("clients")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user?.id ?? ""),
+    supabase
+      .from("documents")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user?.id ?? "")
+      .gte("created_at", startOfCurrentMonth()),
+    supabase
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user?.id ?? "")
+      .in("status", ["todo", "in_progress"]),
+    listNotificationsForUser(50),
+    getUnreadNotificationCount(),
+  ]);
 
   const planUsage: PlanUsage = {
     planTier: (result.profile.plan_tier ?? "free") as PlanTier,
@@ -72,13 +82,18 @@ export default async function AppShellLayout({
     docCountThisMonth: docCountResult.count ?? 0,
   };
 
+  const userName = result.profile.full_name ?? null;
+  const openTaskCount = openTasksResult.count ?? 0;
+
   return (
     <DashboardShell
       userEmail={userEmail}
+      userName={userName}
       userInitials={userInitials}
       planUsage={planUsage}
       notifications={notifications}
       unreadCount={unreadCount}
+      openTaskCount={openTaskCount}
     >
       {children}
     </DashboardShell>

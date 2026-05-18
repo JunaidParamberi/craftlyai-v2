@@ -32,6 +32,13 @@ export function NotificationBell({ notifications, unreadCount }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Open drawer when pane Inbox item is clicked
+  useEffect(() => {
+    const h = () => setOpen(true);
+    window.addEventListener("craftly:open-inbox", h);
+    return () => window.removeEventListener("craftly:open-inbox", h);
+  }, []);
+
   return (
     <>
       <Button

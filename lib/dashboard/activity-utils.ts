@@ -1,6 +1,5 @@
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 
-import { formatCurrency } from "@/lib/utils/format";
 import type { DocumentType } from "@/types";
 import type { ActivityEvent, ActivityEventType } from "./types";
 
@@ -51,13 +50,14 @@ export function extractDocumentEvents(doc: DocumentActivitySource): ActivityEven
   const number = docNumber(doc);
 
   if (doc.paid_at) {
-    const amount =
-      doc.amount !== null ? ` · ${formatCurrency(doc.amount)}` : "";
     events.push({
       type: "invoice_paid",
       id: eventId(doc.id, "invoice_paid"),
       href: `/documents/${doc.id}`,
-      label: `Invoice #${number} paid · ${client}${amount}`,
+      who: client,
+      text: `paid invoice #${number}`,
+      amount: doc.amount ?? null,
+      label: `${client} paid invoice #${number}`,
       timestamp: parseISO(doc.paid_at),
     });
   }
@@ -68,7 +68,10 @@ export function extractDocumentEvents(doc: DocumentActivitySource): ActivityEven
       type: "doc_sent",
       id: eventId(doc.id, "doc_sent"),
       href: `/documents/${doc.id}`,
-      label: `${typeLabel} #${number} sent to ${client}`,
+      who: "You",
+      text: `sent ${typeLabel} #${number}`,
+      metaSuffix: client,
+      label: `You sent ${typeLabel} #${number} · ${client}`,
       timestamp: parseISO(doc.sent_at),
     });
   }
@@ -78,7 +81,10 @@ export function extractDocumentEvents(doc: DocumentActivitySource): ActivityEven
       type: "quote_approved",
       id: eventId(doc.id, "quote_approved"),
       href: `/documents/${doc.id}`,
-      label: `Quote #${number} approved by ${client}`,
+      who: client,
+      text: `approved Quote #${number}`,
+      amount: doc.amount ?? null,
+      label: `${client} approved Quote #${number}`,
       timestamp: parseISO(doc.approved_at),
     });
   }
@@ -88,7 +94,9 @@ export function extractDocumentEvents(doc: DocumentActivitySource): ActivityEven
       type: "quote_declined",
       id: eventId(doc.id, "quote_declined"),
       href: `/documents/${doc.id}`,
-      label: `Quote #${number} declined by ${client}`,
+      who: client,
+      text: `declined Quote #${number}`,
+      label: `${client} declined Quote #${number}`,
       timestamp: parseISO(doc.declined_at),
     });
   }
@@ -97,12 +105,16 @@ export function extractDocumentEvents(doc: DocumentActivitySource): ActivityEven
 }
 
 export function extractProjectEvents(project: ProjectActivitySource): ActivityEvent[] {
+  const statusLabel = project.status.replace(/_/g, " ");
   return [
     {
       type: "project_status_changed",
       id: `${project.id}:status`,
       href: `/projects/${project.id}`,
-      label: `${project.title} marked ${project.status.replace(/_/g, " ")}`,
+      who: project.title,
+      text: `marked ${statusLabel}`,
+      metaSuffix: project.clientName ?? null,
+      label: `${project.title} marked ${statusLabel}`,
       timestamp: parseISO(project.updated_at),
     },
   ];

@@ -29,6 +29,14 @@ export type ActivityEvent = {
   id: string;
   href: string;
   label: string;
+  /** Bold actor: "Hawthorn & Co", "You", project name. */
+  who: string;
+  /** Muted verb + entity: "paid invoice INV-2051". */
+  text: string;
+  /** Optional money amount (formatted by consumer with currency). */
+  amount?: number | null;
+  /** Optional non-money meta suffix: "Maple Co.", quote: "Love the timeline." */
+  metaSuffix?: string | null;
   timestamp: Date | string;
 };
 
@@ -40,6 +48,10 @@ export type PipelineProject = {
   risk: "overdue" | "at_risk" | "watch" | "on_track";
   daysLabel: string;
   statusLabel: string;
+  status: string;
+  budget: number | null;
+  spent: number | null;
+  progress: number | null;
 };
 
 export type ActivePipelineResult = {

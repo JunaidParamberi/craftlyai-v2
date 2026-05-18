@@ -1,9 +1,11 @@
 "use client";
 
 import { Command, Settings } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { branding } from "@/config/branding";
 import { RAIL_SECTIONS } from "@/config/nav";
 
 type RailProps = {
@@ -42,24 +44,27 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
       }}
     >
       {/* Logo */}
-      <Link href="/dashboard" style={{ marginBottom: 12, display: "block" }}>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 9,
-            background: "var(--fg)",
-            color: "var(--bg-canvas)",
-            display: "grid",
-            placeItems: "center",
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            fontSize: 15,
-            letterSpacing: "-0.04em",
-          }}
-        >
-          C
-        </div>
+      <Link
+        href="/dashboard"
+        aria-label="CraftlyAI home"
+        style={{
+          marginBottom: 12,
+          display: "grid",
+          placeItems: "center",
+          width: 32,
+          height: 32,
+          borderRadius: 9,
+          overflow: "hidden",
+        }}
+      >
+        <Image
+          src={branding.mark}
+          alt="CraftlyAI"
+          width={32}
+          height={32}
+          priority
+          style={{ width: 32, height: 32, objectFit: "contain" }}
+        />
       </Link>
 
       {/* Section icons — fill remaining space */}
@@ -73,6 +78,7 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
               onClick={() => onSectionChange(s.id)}
               aria-label={s.label}
               aria-pressed={active}
+              className="rail-btn"
               style={{
                 ...btnBase,
                 color: active ? "var(--fg)" : "var(--fg-3)",
@@ -94,6 +100,7 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
                 />
               )}
               <Icon size={18} strokeWidth={1.6} />
+              <span className="rail-tooltip">{s.label}</span>
             </button>
           );
         })}
@@ -104,7 +111,7 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
         <Link href="/settings">
           <button
             aria-label="Settings"
-            title="Settings"
+            className="rail-btn"
             style={{
               ...btnBase,
               color: pathname.startsWith("/settings") ? "var(--fg)" : "var(--fg-3)",
@@ -112,12 +119,13 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
             }}
           >
             <Settings size={18} strokeWidth={1.6} />
+            <span className="rail-tooltip">Settings</span>
           </button>
         </Link>
         <button
           onClick={onOpenSearch}
           aria-label="Command palette (⌘K)"
-          title="Command palette (⌘K)"
+          className="rail-btn"
           style={{
             ...btnBase,
             color: "var(--fg-3)",
@@ -125,6 +133,7 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
           }}
         >
           <Command size={18} strokeWidth={1.6} />
+          <span className="rail-tooltip">Command (⌘K)</span>
         </button>
       </div>
     </aside>

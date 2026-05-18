@@ -15,19 +15,23 @@ import type { NotificationRow } from "@/types";
 type DashboardShellProps = {
   children: React.ReactNode;
   userEmail: string | null;
+  userName: string | null;
   userInitials: string;
   planUsage: PlanUsage;
   notifications: NotificationRow[];
   unreadCount: number;
+  openTaskCount: number;
 };
 
 export function DashboardShell({
   children,
   userEmail,
+  userName,
   userInitials,
   planUsage,
   notifications,
   unreadCount,
+  openTaskCount,
 }: DashboardShellProps) {
   const pathname = usePathname();
   const [commandOpen, setCommandOpen] = useState(false);
@@ -77,8 +81,11 @@ export function DashboardShell({
         <Pane
           section={section}
           userEmail={userEmail}
+          userName={userName}
           userInitials={userInitials}
           planUsage={planUsage}
+          unreadCount={unreadCount}
+          openTaskCount={openTaskCount}
           onOpenSearch={() => setCommandOpen(true)}
         />
 

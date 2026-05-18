@@ -29,10 +29,15 @@ const PLAN_LABELS: Record<string, string> = {
 type PaneProps = {
   section: string;
   userEmail: string | null;
+  userName: string | null;
   userInitials: string;
   planUsage: PlanUsage;
+  unreadCount: number;
+  openTaskCount: number;
   onOpenSearch: () => void;
 };
+
+export const OPEN_INBOX_EVENT = "craftly:open-inbox";
 
 function getInitials(initials: string): string {
   return initials.slice(0, 2).toUpperCase();
@@ -53,13 +58,31 @@ function hashInitials(str: string): number {
   return Math.abs(h) % AVATAR_PALETTES.length;
 }
 
-export function Pane({ section, userEmail, userInitials, planUsage, onOpenSearch }: PaneProps) {
+export function Pane({
+  section,
+  userEmail,
+  userName,
+  userInitials,
+  planUsage,
+  unreadCount,
+  openTaskCount,
+  onOpenSearch,
+}: PaneProps) {
   const pathname = usePathname();
   const router = useRouter();
   const config = PANE_CONFIGS[section];
 
   const showUpgrade = PLAN_ORDER.indexOf(planUsage.planTier) < PLAN_ORDER.indexOf("pro");
   const palette = AVATAR_PALETTES[hashInitials(userInitials)];
+
+  const COUNTS: Record<string, number | undefined> = {
+    inbox: unreadCount,
+    tasks: openTaskCount,
+  };
+
+  function openInbox() {
+    window.dispatchEvent(new Event(OPEN_INBOX_EVENT));
+  }
 
   const signOut = async () => {
     const supabase = createClient();
@@ -192,43 +215,84 @@ export function Pane({ section, userEmail, userInitials, planUsage, onOpenSearch
             )}
             {sec.items.map((item) => {
               const Icon = item.icon;
+              const isAction = item.href.startsWith("#");
               const active =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "6px 10px",
-                    margin: "1px 4px",
-                    borderRadius: 7,
-                    fontSize: "var(--text-base)",
-                    color: active ? "var(--fg)" : "var(--fg-2)",
-                    fontWeight: active ? 500 : 400,
-                    background: active ? "var(--bg-subtle)" : "transparent",
-                    textDecoration: "none",
-                    transition: `background var(--dur-fast), color var(--dur-fast)`,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-subtle)";
-                      (e.currentTarget as HTMLAnchorElement).style.color = "var(--fg)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
-                      (e.currentTarget as HTMLAnchorElement).style.color = "var(--fg-2)";
-                    }
-                  }}
-                >
+                !isAction &&
+                (pathname === item.href || pathname.startsWith(`${item.href}/`));
+              const count = COUNTS[item.id];
+              const itemStyle: React.CSSProperties = {
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "6px 10px",
+                margin: "1px 4px",
+                borderRadius: 7,
+                fontSize: "var(--text-base)",
+                color: active ? "var(--fg)" : "var(--fg-2)",
+                fontWeight: active ? 500 : 400,
+                background: active ? "var(--bg-subtle)" : "transparent",
+                textDecoration: "none",
+                transition: `background var(--dur-fast), color var(--dur-fast)`,
+                border: "none",
+                width: "calc(100% - 8px)",
+                textAlign: "left",
+                cursor: "pointer",
+              };
+              const onEnter = (e: React.MouseEvent<HTMLElement>) => {
+                if (!active) {
+                  e.currentTarget.style.background = "var(--bg-subtle)";
+                  e.currentTarget.style.color = "var(--fg)";
+                }
+              };
+              const onLeave = (e: React.MouseEvent<HTMLElement>) => {
+                if (!active) {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "var(--fg-2)";
+                }
+              };
+              const inner = (
+                <>
                   <span style={{ color: active ? "var(--fg)" : "var(--fg-3)", flexShrink: 0 }}>
                     <Icon size={15} strokeWidth={1.6} />
                   </span>
                   <span style={{ flex: 1 }}>{item.label}</span>
+                  {typeof count === "number" && count > 0 && (
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: "var(--fg-3)",
+                        fontVariantNumeric: "tabular-nums",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {count > 99 ? "99+" : count}
+                    </span>
+                  )}
+                </>
+              );
+              if (isAction) {
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={item.id === "inbox" ? openInbox : undefined}
+                    style={itemStyle}
+                    onMouseEnter={onEnter}
+                    onMouseLeave={onLeave}
+                  >
+                    {inner}
+                  </button>
+                );
+              }
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  style={itemStyle}
+                  onMouseEnter={onEnter}
+                  onMouseLeave={onLeave}
+                >
+                  {inner}
                 </Link>
               );
             })}
@@ -292,7 +356,7 @@ export function Pane({ section, userEmail, userInitials, planUsage, onOpenSearch
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {userEmail ?? "Account"}
+                  {userName ?? userEmail ?? "Account"}
                 </div>
                 <div style={{ fontSize: "var(--text-xs)", color: "var(--fg-3)" }}>
                   {PLAN_LABELS[planUsage.planTier] ?? planUsage.planTier} plan

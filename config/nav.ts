@@ -4,9 +4,12 @@ import {
   FileText,
   FolderKanban,
   Home,
+  Inbox,
+  Layers,
   LayoutDashboard,
   ListChecks,
   Receipt,
+  Sliders,
   Timer,
   TrendingUp,
   Users,
@@ -40,6 +43,7 @@ export const RAIL_SECTIONS: RailSection[] = [
   { id: "home", icon: Home, label: "Home" },
   { id: "work", icon: Briefcase, label: "Work" },
   { id: "money", icon: Wallet, label: "Money" },
+  { id: "design", icon: Layers, label: "Design system" },
 ];
 
 export const PANE_CONFIGS: Record<string, PaneConfig> = {
@@ -49,6 +53,7 @@ export const PANE_CONFIGS: Record<string, PaneConfig> = {
       {
         items: [
           { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+          { id: "inbox",     icon: Inbox,           label: "Inbox",     href: "#inbox" },
           { id: "tasks",     icon: ListChecks,      label: "Tasks",     href: "/tasks" },
           { id: "time",      icon: Timer,           label: "Time",      href: "/time" },
         ],
@@ -84,6 +89,17 @@ export const PANE_CONFIGS: Record<string, PaneConfig> = {
       },
     ],
   },
+  design: {
+    title: "Design system",
+    sections: [
+      {
+        items: [
+          { id: "ds-overview", icon: Layers,  label: "Overview",   href: "/design-system" },
+          { id: "ds-comp",     icon: Sliders, label: "Components", href: "/design-system" },
+        ],
+      },
+    ],
+  },
 };
 
 export const ROUTE_TO_SECTION: Record<string, string> = {
@@ -97,6 +113,7 @@ export const ROUTE_TO_SECTION: Record<string, string> = {
   "/expenses":  "money",
   "/settings":  "home",
   "/support":   "home",
+  "/design-system": "design",
 };
 
 export const ROUTE_LABELS: Record<string, [string, string]> = {
@@ -111,7 +128,9 @@ export const ROUTE_LABELS: Record<string, [string, string]> = {
   "/settings":         ["Settings", "General"],
   "/settings/brand":   ["Settings", "Brand kit"],
   "/settings/billing": ["Settings", "Billing"],
+  "/settings/profile": ["Settings", "Profile"],
   "/support":          ["Help",     "Support"],
+  "/design-system":    ["Design system", "Overview"],
 };
 
 export function getRouteSection(pathname: string): string {

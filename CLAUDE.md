@@ -52,11 +52,14 @@ Target user at launch: solo freelancers earning $2,000–$15,000/month in tech, 
 ```
 craftlyai.app/
 ├── app/
-│   ├── (auth)/
+│   ├── auth/
 │   │   ├── login/
-│   │   ├── signup/
+│   │   ├── sign-up/
+│   │   ├── sign-up-success/
 │   │   ├── forgot-password/
-│   │   └── reset-password/
+│   │   ├── update-password/
+│   │   ├── confirm/
+│   │   └── error/
 │   ├── (app)/                 ← route group: URLs have no “app” segment
 │   │   ├── dashboard/         ← /dashboard
 │   │   ├── clients/

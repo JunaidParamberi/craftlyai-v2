@@ -16,8 +16,8 @@ import type { TaskRow } from "@/types";
 import { Badge } from "@/components/ui/badge";
 
 const PRIORITY_BORDER: Record<string, string> = {
-  high: "border-l-[var(--danger,#C13838)]",
-  medium: "border-l-[var(--warning,#B36A12)]",
+  high: "border-l-[var(--danger)]",
+  medium: "border-l-[var(--warning)]",
   low: "border-l-border",
 };
 

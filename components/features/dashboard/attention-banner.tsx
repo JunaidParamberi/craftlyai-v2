@@ -13,9 +13,9 @@ export function AttentionBanner({ items }: Props) {
   return (
     <section
       aria-label="Items needing attention"
-      className="rounded-xl border border-[color-mix(in_srgb,var(--warning,#B36A12)_30%,transparent)] bg-[color-mix(in_srgb,var(--warning,#B36A12)_8%,transparent)] px-4 py-4 md:px-5"
+      className="rounded-xl border border-[color-mix(in_srgb,var(--warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--warning)_8%,transparent)] px-4 py-4 md:px-5"
     >
-      <p className="mb-3 flex items-center gap-2 font-semibold text-[var(--warning,#B36A12)] text-sm">
+      <p className="mb-3 flex items-center gap-2 font-semibold text-[var(--warning)] text-sm">
         <TriangleAlert />
         {items.length} item{items.length !== 1 ? "s" : ""} need your attention
       </p>
@@ -24,10 +24,10 @@ export function AttentionBanner({ items }: Props) {
           <li key={`${item.type}-${item.id}`}>
             <Link
               href={item.href}
-              className="flex items-center justify-between gap-3 rounded-lg bg-[color-mix(in_srgb,var(--warning,#B36A12)_5%,transparent)] px-3 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--warning,#B36A12)_12%,transparent)]"
+              className="flex items-center justify-between gap-3 rounded-lg bg-[color-mix(in_srgb,var(--warning)_5%,transparent)] px-3 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--warning)_12%,transparent)]"
             >
               <span className="min-w-0 text-sm leading-snug">{item.label}</span>
-              <span className="shrink-0 text-[var(--warning,#B36A12)] text-xs font-medium">
+              <span className="shrink-0 text-[var(--warning)] text-xs font-medium">
                 View →
               </span>
             </Link>

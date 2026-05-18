@@ -1,0 +1,101 @@
+You are migrating this project to use the CraftlyAI design system. The goal is that every screen in this app looks EXACTLY like the corresponding mock under docs/design/reference/ — same layout, same components, same colors, same typography, same spacing, same motion, same loading/empty/error states, in both light and dark themes.
+
+Treat docs/design/reference/ as the source of truth. The CSS, HTML and JSX there are the canonical design. Recreate them in this codebase's framework (Next.js / Remix / Vite + React / whatever this project uses) using the project's existing conventions for file structure, routing, and state.
+
+================================================================
+STEP 1 — Read everything (do this before anything else)
+================================================================
+Read these in order:
+  - docs/design/DESIGN_SYSTEM.md   (the binding rules)
+  - docs/design/SYSTEM.md          (tokens, type, spacing, motion)
+  - docs/design/COMPONENTS.md      (component catalog)
+  - docs/design/SKELETONS_AND_LOADERS.md
+  - docs/design/MIGRATION.md
+  - docs/design/reference/styles/tokens.css
+  - docs/design/reference/styles/app.css
+  - docs/design/reference/src/icons.jsx
+  - docs/design/reference/src/data.jsx
+  - docs/design/reference/src/components/primitives.jsx
+  - docs/design/reference/src/components/skeletons.jsx
+  - docs/design/reference/src/components/cmdk.jsx
+  - docs/design/reference/src/app.jsx
+  - every file under docs/design/reference/src/screens/
+
+================================================================
+STEP 2 — Foundation (execute)
+================================================================
+1. Append a "## Design system" section to the existing CLAUDE.md at the project root containing:
+     "Every UI change MUST follow docs/design/DESIGN_SYSTEM.md. Read it before touching any UI file. New features ship with skeleton + empty + error states and both light and dark themes."
+2. Copy docs/design/reference/styles/tokens.css into the project's global styles. Import it before all other CSS. If shadcn/ui is installed, also paste the shadcn variable mapping from SYSTEM.md into globals.css so existing shadcn components inherit the system.
+3. Load fonts: Inter Tight (display, 500/600/700), Inter (body, 400/500/600/700), JetBrains Mono (400/500). Use this framework's preferred mechanism (next/font/google, link tags, etc.).
+4. Wire a theme switcher: data-theme="light"|"dark" on <html>, persisted in localStorage, default light. Place the toggle in the topbar (sun/moon pill).
+5. Port the contents of docs/design/reference/styles/app.css into the project (rail / pane / topbar / btn / card / input / badge / table / tabs / cmdk / skeletons / loaders / motion). Keep class names identical so the reference JSX maps cleanly.
+
+================================================================
+STEP 3 — Port the shared layer
+================================================================
+Port these files into the project, matching the API exactly:
+  - icons.jsx          → use lucide-react with strokeWidth={1.6}
+  - primitives.jsx     → Avatar, StatusBadge, KPICard, AreaChart, MiniBars, Progress, HealthRing
+  - skeletons.jsx      → Skeleton, SkeletonText, SkeletonAvatar, SkeletonKPI, SkeletonList, SkeletonListRow, SkeletonTableRow, SkeletonTable, SkeletonChart, SkeletonCard, Spinner, DotPulse, ProgressIndeterminate, AIThinking, InlineLoader, ButtonLoading
+  - cmdk.jsx           → Cmd+K palette; wire ⌘K/Ctrl+K global shortcut
+  - app.jsx            → rail + pane + topbar shell; the topbar must include the Ask AI ghost button (Sparkles + ⌘K kbd) and the theme toggle
+
+Use the project's file conventions (.tsx vs .jsx, default vs named exports, etc.).
+
+================================================================
+STEP 4 — Recreate EVERY screen pixel-for-pixel
+================================================================
+For each file under docs/design/reference/src/screens/, recreate the screen in this project under the equivalent route:
+
+  - design-system.jsx → /design-system (keep the live reference page; it doubles as your style guide)
+  - dashboard.jsx     → /dashboard
+  - clients.jsx       → /clients
+  - projects.jsx      → /projects
+  - documents.jsx     → /documents
+  - finance.jsx       → /finance
+  - tasks.jsx         → /tasks
+  - time.jsx          → /time
+  - expenses.jsx      → /expenses
+  - settings.jsx      → /settings
+  - login.jsx         → /login (fullscreen, no shell)
+
+Match every screen 1:1:
+  - Same grid, same gap, same card composition, same headings, same eyebrows, same badges, same buttons.
+  - Same page header pattern (eyebrow + h1 + subtitle + actions row on the right).
+  - Same page padding 28px 32px 80px, max-width 1320px.
+  - Same fade-up animation on cards with delay-1/2/3/4 stagger.
+  - Sentence-case headings only.
+  - Tabular numerals on every $ / number column.
+
+Data: start by pulling mock data from docs/design/reference/src/data.jsx so the screens render exactly like the mock on first run. Then, in a SEPARATE follow-up commit, swap each mock import for the real data source in this project (API call / database query / store). Don't try to wire real data in the same pass as the visual port — it makes diffs unreviewable.
+
+Required states for every async surface:
+  - loading  → skeleton matching the final layout (no CLS)
+  - empty    → icon + sentence-case headline + 1-line explanation + primary action
+  - error    → toast or inline card
+  - loaded   → the real thing
+
+AI surfaces: use <AIThinking label="..."> NEVER a plain spinner. Buttons that submit/send: wrap in <ButtonLoading> so width is preserved.
+
+================================================================
+STEP 5 — Verify
+================================================================
+Before declaring done, for each screen:
+  - Switch to dark theme and confirm it looks deliberate, not just inverted.
+  - Confirm no hardcoded hex colors anywhere in the new code (grep for /#[0-9a-f]{3,8}/i outside tokens.css).
+  - Confirm every spacing/radius value resolves to a --space-N or --radius-* token.
+  - Confirm ⌘K opens the palette from anywhere.
+  - Confirm the rail/pane/topbar shell wraps all routes except /login.
+  - Confirm both 1280px and 1920px viewport widths look correct.
+
+================================================================
+Execution order
+================================================================
+Execute Step 1 and Step 2 immediately. Then PAUSE and show me:
+  (a) the diff of CLAUDE.md
+  (b) where you put tokens.css and how it's imported
+  (c) how the theme switcher works
+  (d) a short list of every screen file you'll create in Step 4 and their routes
+
+Wait for my "go" before Step 3, Step 4, Step 5. Do NOT batch all phases — I want to review each.

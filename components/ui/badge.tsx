@@ -20,15 +20,15 @@ const badgeVariants = cva(
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
         success:
-          "border-transparent bg-[color-mix(in_srgb,var(--success,#1F8A52)_12%,transparent)] text-[var(--success,#1F8A52)] dark:bg-[color-mix(in_srgb,var(--success,#3FB87D)_18%,transparent)] dark:text-[var(--success,#3FB87D)]",
+          "border-transparent bg-[color-mix(in_srgb,var(--success)_12%,transparent)] text-[var(--success)] dark:bg-[color-mix(in_srgb,var(--success)_18%,transparent)] dark:text-[var(--success)]",
         warning:
-          "border-transparent bg-[color-mix(in_srgb,var(--warning,#B36A12)_12%,transparent)] text-[var(--warning,#B36A12)] dark:bg-[color-mix(in_srgb,var(--warning,#E0995E)_18%,transparent)] dark:text-[var(--warning,#E0995E)]",
+          "border-transparent bg-[color-mix(in_srgb,var(--warning)_12%,transparent)] text-[var(--warning)] dark:bg-[color-mix(in_srgb,var(--warning)_18%,transparent)] dark:text-[var(--warning)]",
         danger:
           "bg-destructive/10 text-destructive dark:bg-destructive/20",
         info:
           "border-transparent bg-[color-mix(in_srgb,var(--border-focus)_10%,transparent)] text-[var(--border-focus)] dark:bg-[color-mix(in_srgb,var(--border-focus)_15%,transparent)]",
         accent:
-          "border-transparent bg-[var(--accent-soft,hsl(226_80%_95%))] text-[var(--border-focus)]",
+          "border-transparent bg-[var(--accent-soft)] text-[var(--border-focus)]",
       },
     },
     defaultVariants: {
