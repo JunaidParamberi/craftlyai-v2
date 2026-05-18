@@ -21,7 +21,7 @@ export function DashboardKpiCards({ summary, currency }: Props) {
 
   const revDelta =
     revenueChangePct === null
-      ? null
+      ? "New"
       : `${revenueChangePct >= 0 ? "+" : ""}${revenueChangePct}%`;
   const revTrend =
     revenueChangePct === null ? "flat" : revenueChangePct >= 0 ? "up" : "down";
@@ -29,15 +29,20 @@ export function DashboardKpiCards({ summary, currency }: Props) {
   const outstandingDelta =
     outstandingCount > 0
       ? `${outstandingCount} invoice${outstandingCount !== 1 ? "s" : ""}`
-      : null;
+      : "Up to date";
+  const outstandingTrend: "up" | "down" | "flat" =
+    outstandingCount > 0 ? "flat" : "up";
 
   const overdueDelta =
     overdueCount > 0
       ? `${overdueCount} invoice${overdueCount !== 1 ? "s" : ""}`
-      : null;
+      : "All clear";
+  const overdueTrend: "up" | "down" | "flat" =
+    overdueCount > 0 ? "down" : "up";
 
   const avgPayValue =
     avgPayDays !== null ? `${avgPayDays.toFixed(1)} days` : "—";
+  const avgPayDelta = avgPayDays !== null ? "tracked" : null;
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -53,7 +58,7 @@ export function DashboardKpiCards({ summary, currency }: Props) {
         label="Outstanding"
         value={<CountUp value={outstanding} format="currency" currency={currency} />}
         delta={outstandingDelta}
-        trend="flat"
+        trend={outstandingTrend}
         sub={
           outstandingCount > 0
             ? `${formatCurrency(outstanding, currency)} unpaid`
@@ -65,7 +70,7 @@ export function DashboardKpiCards({ summary, currency }: Props) {
         label="Overdue"
         value={<CountUp value={overdue} format="currency" currency={currency} />}
         delta={overdueDelta}
-        trend={overdueCount > 0 ? "down" : "flat"}
+        trend={overdueTrend}
         sub={overdueCount > 0 ? `${overdueCount} at risk` : "All clear"}
         variant={overdueCount > 0 ? "danger" : "default"}
         delay={120}
@@ -73,6 +78,8 @@ export function DashboardKpiCards({ summary, currency }: Props) {
       <KpiCard
         label="Avg. pay time"
         value={avgPayValue}
+        delta={avgPayDelta}
+        trend="flat"
         sub={avgPayDays !== null ? "across paid invoices" : "no paid invoices yet"}
         delay={180}
       />
