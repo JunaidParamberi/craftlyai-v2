@@ -73,6 +73,7 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
               onClick={() => onSectionChange(s.id)}
               aria-label={s.label}
               aria-pressed={active}
+              className="rail-btn"
               style={{
                 ...btnBase,
                 color: active ? "var(--fg)" : "var(--fg-3)",
@@ -94,6 +95,7 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
                 />
               )}
               <Icon size={18} strokeWidth={1.6} />
+              <span className="rail-tooltip">{s.label}</span>
             </button>
           );
         })}
@@ -104,7 +106,7 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
         <Link href="/settings">
           <button
             aria-label="Settings"
-            title="Settings"
+            className="rail-btn"
             style={{
               ...btnBase,
               color: pathname.startsWith("/settings") ? "var(--fg)" : "var(--fg-3)",
@@ -112,12 +114,13 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
             }}
           >
             <Settings size={18} strokeWidth={1.6} />
+            <span className="rail-tooltip">Settings</span>
           </button>
         </Link>
         <button
           onClick={onOpenSearch}
           aria-label="Command palette (⌘K)"
-          title="Command palette (⌘K)"
+          className="rail-btn"
           style={{
             ...btnBase,
             color: "var(--fg-3)",
@@ -125,6 +128,7 @@ export function Rail({ section, onSectionChange, onOpenSearch }: RailProps) {
           }}
         >
           <Command size={18} strokeWidth={1.6} />
+          <span className="rail-tooltip">Command (⌘K)</span>
         </button>
       </div>
     </aside>
