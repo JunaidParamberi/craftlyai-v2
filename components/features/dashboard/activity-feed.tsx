@@ -69,7 +69,10 @@ function VIEW_ICON_TONE(): Tone {
   };
 }
 
+const VISIBLE_LIMIT = 5;
+
 export function ActivityFeed({ events, currency }: Props) {
+  const visible = events.slice(0, VISIBLE_LIMIT);
   return (
     <Card size="sm">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
@@ -84,12 +87,12 @@ export function ActivityFeed({ events, currency }: Props) {
         </Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-0 pt-0">
-        {events.length === 0 ? (
+        {visible.length === 0 ? (
           <p className="py-6 text-center text-muted-foreground text-sm">
             No recent activity in the last 30 days.
           </p>
         ) : (
-          events.map((event, index) => {
+          visible.map((event, index) => {
             const tone = TONE[event.type] ?? VIEW_ICON_TONE();
             const Icon = tone.icon;
             const amountText =
@@ -102,7 +105,7 @@ export function ActivityFeed({ events, currency }: Props) {
                 href={event.href}
                 className={cn(
                   "flex items-center gap-3 py-3 transition-opacity hover:opacity-80",
-                  index !== events.length - 1 && "border-b border-border/60",
+                  index !== visible.length - 1 && "border-b border-border/60",
                 )}
               >
                 <div
