@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { TaskListRow } from "@/types";
 
 import {
+  countDueTodayTasks,
+  countDoneThisMonthTasks,
   filterTasks,
+  isDueToday,
   isTaskOverdue,
   parseTaskListFilters,
   sortTasks,
@@ -27,6 +30,60 @@ function task(overrides: Partial<TaskListRow> = {}): TaskListRow {
     ...overrides,
   };
 }
+
+describe("isDueToday", () => {
+  it("returns true when due date is today and status is open", () => {
+    expect(
+      isDueToday(
+        { status: "todo", due_date: "2026-05-15" },
+        new Date("2026-05-15T12:00:00.000Z"),
+      ),
+    ).toBe(true);
+  });
+
+  it("returns false for done tasks due today", () => {
+    expect(
+      isDueToday(
+        { status: "done", due_date: "2026-05-15" },
+        new Date("2026-05-15T12:00:00.000Z"),
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("countDueTodayTasks", () => {
+  it("counts only open tasks due today", () => {
+    const tasks = [
+      task({ id: "a", due_date: "2026-05-15", status: "todo" }),
+      task({ id: "b", due_date: "2026-05-15", status: "done" }),
+      task({ id: "c", due_date: "2026-05-16", status: "todo" }),
+    ];
+    expect(
+      countDueTodayTasks(tasks, new Date("2026-05-15T12:00:00.000Z")),
+    ).toBe(1);
+  });
+});
+
+describe("countDoneThisMonthTasks", () => {
+  it("counts done tasks updated in the same month", () => {
+    const tasks = [
+      task({
+        id: "a",
+        status: "done",
+        updated_at: "2026-05-10T00:00:00.000Z",
+      }),
+      task({
+        id: "b",
+        status: "done",
+        updated_at: "2026-04-10T00:00:00.000Z",
+      }),
+      task({ id: "c", status: "todo", updated_at: "2026-05-10T00:00:00.000Z" }),
+    ];
+    expect(
+      countDoneThisMonthTasks(tasks, new Date("2026-05-15T12:00:00.000Z")),
+    ).toBe(1);
+  });
+});
 
 describe("isTaskOverdue", () => {
   it("returns true for open task with past due date", () => {
@@ -92,6 +149,7 @@ describe("parseTaskListFilters", () => {
       status: "all",
       priority: "all",
       sort: "due",
+      view: "all",
     });
   });
 
@@ -103,13 +161,65 @@ describe("parseTaskListFilters", () => {
         status: "in_progress",
         priority: "high",
         sort: "created",
+        view: "overdue",
       }),
     ).toEqual({
       project: projectId,
       status: "in_progress",
       priority: "high",
       sort: "created",
+      view: "overdue",
     });
+  });
+});
+
+describe("filterTasks view", () => {
+  const base = {
+    project: "all" as const,
+    status: "all" as const,
+    priority: "all" as const,
+    sort: "due" as const,
+  };
+
+  it("view all includes done tasks", () => {
+    const tasks = [
+      task({ id: "a", status: "todo" }),
+      task({ id: "b", status: "done" }),
+    ];
+    const result = filterTasks(tasks, { ...base, view: "all" }, "");
+    expect(result).toHaveLength(2);
+  });
+
+  it("view open excludes done but keeps cancelled", () => {
+    const tasks = [
+      task({ id: "a", status: "done" }),
+      task({ id: "b", status: "cancelled" }),
+      task({ id: "c", status: "todo" }),
+    ];
+    const result = filterTasks(tasks, { ...base, view: "open" }, "");
+    expect(result.map((t) => t.id)).toEqual(["b", "c"]);
+  });
+
+  it("filters overdue view", () => {
+    const tasks = [
+      task({
+        id: "a",
+        due_date: "2026-05-01",
+        status: "todo",
+      }),
+      task({
+        id: "b",
+        due_date: "2026-06-01",
+        status: "todo",
+      }),
+    ];
+    const result = filterTasks(
+      tasks,
+      { ...base, view: "overdue" },
+      "",
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe("a");
   });
 });
 
@@ -131,7 +241,7 @@ describe("filterTasks", () => {
   it("filters by project", () => {
     const result = filterTasks(
       tasks,
-      { project: "p1", status: "all", priority: "all", sort: "due" },
+      { project: "p1", status: "all", priority: "all", sort: "due", view: "open" },
       "",
     );
     expect(result).toHaveLength(1);
@@ -141,7 +251,7 @@ describe("filterTasks", () => {
   it("filters by search query on client name", () => {
     const result = filterTasks(
       tasks,
-      { project: "all", status: "all", priority: "all", sort: "due" },
+      { project: "all", status: "all", priority: "all", sort: "due", view: "open" },
       "acme",
     );
     expect(result).toHaveLength(1);

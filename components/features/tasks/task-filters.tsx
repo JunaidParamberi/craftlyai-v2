@@ -1,31 +1,39 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
-
-import type { TaskListFilters } from "@/lib/tasks/task-utils";
-import type { ProjectListRow } from "@/types";
+import { useCallback, useMemo, useState } from "react";
+import { ArrowDown, Check, Filter } from "lucide-react";
 
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  buildTasksHref,
+  parseTaskListFilters,
+  type TaskListFilters,
+  type TaskSortKey,
+} from "@/lib/tasks/task-utils";
+import { searchParamsToRecord, useTaskFilters } from "@/lib/tasks/use-task-filters";
+import type { ProjectListRow, TaskListRow } from "@/types";
 
-const FILTER_TRIGGER_CLASS = "h-9 w-full min-w-0 sm:w-[9.5rem]";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type TaskFiltersProps = {
   filters: TaskListFilters;
   projects: ProjectListRow[];
+  tasks: TaskListRow[];
 };
-
-function projectLabel(projects: ProjectListRow[], id: string): string {
-  if (id === "all") return "All projects";
-  return projects.find((p) => p.id === id)?.title ?? "Project";
-}
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All statuses" },
@@ -48,110 +56,204 @@ const SORT_OPTIONS = [
   { value: "priority", label: "Priority" },
 ] as const;
 
-export function TaskFilters({ filters, projects }: TaskFiltersProps) {
+function tabItemClass(active: boolean) {
+  return cn(
+    "-mb-px inline-flex shrink-0 items-center gap-1.5 border-b-[1.5px] px-3 py-2 text-sm font-medium transition-colors",
+    active
+      ? "border-foreground text-foreground"
+      : "border-transparent text-muted-foreground hover:text-foreground",
+  );
+}
+
+function projectTaskCount(tasks: TaskListRow[], projectId: string): number {
+  return tasks.filter((t) => t.project_id === projectId).length;
+}
+
+export function TaskFilters({
+  filters: filtersProp,
+  projects,
+  tasks,
+}: TaskFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const filters = useTaskFilters(filtersProp);
+  const [filterOpen, setFilterOpen] = useState(false);
 
-  const setParam = useCallback(
-    (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value === "all" || (key === "sort" && value === "due")) {
-        params.delete(key);
-      } else {
-        params.set(key, value);
-      }
-      const qs = params.toString();
-      router.push(qs ? `${pathname}?${qs}` : pathname);
+  const hasAdvancedFilters =
+    filters.status !== "all" || filters.priority !== "all";
+
+  const navigate = useCallback(
+    (patch: Partial<TaskListFilters>) => {
+      const current = parseTaskListFilters(searchParamsToRecord(searchParams));
+      router.push(buildTasksHref(patch, current), { scroll: false });
     },
-    [pathname, router, searchParams],
+    [router, searchParams],
+  );
+
+  const clearAdvanced = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("status");
+    params.delete("priority");
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    setFilterOpen(false);
+  }, [pathname, router, searchParams]);
+
+  const projectTabs = useMemo(
+    () => [
+      { id: "all", label: "All projects", count: tasks.length },
+      ...projects.map((p) => ({
+        id: p.id,
+        label: p.title,
+        count: projectTaskCount(tasks, p.id),
+      })),
+    ],
+    [projects, tasks],
   );
 
   return (
-    <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:flex-1 sm:flex-wrap sm:items-center">
-      <Select
-        value={filters.project}
-        onValueChange={(v) => setParam("project", v ?? "all")}
-      >
-        <SelectTrigger className={FILTER_TRIGGER_CLASS}>
-          <SelectValue>
-            {projectLabel(projects, filters.project)}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem value="all">All projects</SelectItem>
-            {projects.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                {p.title}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+    <div className="mb-5 flex items-center border-b border-border">
+      <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+        {projectTabs.map((tab) => {
+          const active = filters.project === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() =>
+                navigate({ project: tab.id === "all" ? "all" : tab.id })
+              }
+              className={tabItemClass(active)}
+            >
+              {tab.label}
+              <span className="rounded-full bg-[var(--bg-subtle)] px-1.5 py-0.5 text-[10.5px] font-medium tabular-nums text-[var(--fg-3)]">
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-      <Select
-        value={filters.status}
-        onValueChange={(v) => setParam("status", v ?? "all")}
-      >
-        <SelectTrigger className={FILTER_TRIGGER_CLASS}>
-          <SelectValue>
-            {STATUS_OPTIONS.find((o) => o.value === filters.status)?.label ??
-              "All statuses"}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {STATUS_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <div className="flex shrink-0 items-center gap-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={<button type="button" className={tabItemClass(false)} />}
+          >
+            <ArrowDown className="size-3.5" strokeWidth={1.6} />
+            Due date
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[10rem]">
+            <DropdownMenuGroup>
+              <DropdownMenuRadioGroup
+                value={filters.sort}
+                onValueChange={(v) => {
+                  if (v === "due" || v === "created" || v === "priority") {
+                    navigate({ sort: v as TaskSortKey });
+                  }
+                }}
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <DropdownMenuRadioItem key={o.value} value={o.value}>
+                    {o.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-      <Select
-        value={filters.priority}
-        onValueChange={(v) => setParam("priority", v ?? "all")}
-      >
-        <SelectTrigger className={FILTER_TRIGGER_CLASS}>
-          <SelectValue>
-            {PRIORITY_OPTIONS.find((o) => o.value === filters.priority)
-              ?.label ?? "All priorities"}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {PRIORITY_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+          <PopoverTrigger
+            render={
+              <button
+                type="button"
+                className={tabItemClass(hasAdvancedFilters)}
+              />
+            }
+          >
+            <Filter className="size-3.5" strokeWidth={1.6} />
+            Filter
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-56 p-2">
+            <div className="flex flex-col gap-1">
+              <p className="px-2 py-1 text-xs font-medium text-muted-foreground">
+                Status
+              </p>
+              {STATUS_OPTIONS.map((o) => {
+                const active = filters.status === o.value;
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors",
+                      active
+                        ? "bg-accent/10 text-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                    onClick={() => {
+                      navigate({
+                        status: o.value as TaskListFilters["status"],
+                      });
+                    }}
+                  >
+                    {o.label}
+                    {active ? (
+                      <Check className="size-3.5 text-accent" strokeWidth={2} />
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
 
-      <Select
-        value={filters.sort}
-        onValueChange={(v) => setParam("sort", v ?? "due")}
-      >
-        <SelectTrigger className={FILTER_TRIGGER_CLASS}>
-          <SelectValue>
-            {SORT_OPTIONS.find((o) => o.value === filters.sort)?.label ??
-              "Due date"}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {SORT_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+            <div className="my-2 h-px bg-border" role="separator" />
+
+            <div className="flex flex-col gap-1">
+              <p className="px-2 py-1 text-xs font-medium text-muted-foreground">
+                Priority
+              </p>
+              {PRIORITY_OPTIONS.map((o) => {
+                const active = filters.priority === o.value;
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors",
+                      active
+                        ? "bg-accent/10 text-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                    onClick={() => {
+                      navigate({
+                        priority: o.value as TaskListFilters["priority"],
+                      });
+                    }}
+                  >
+                    {o.label}
+                    {active ? (
+                      <Check className="size-3.5 text-accent" strokeWidth={2} />
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+
+            {hasAdvancedFilters ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3 w-full"
+                onClick={clearAdvanced}
+              >
+                Clear filters
+              </Button>
+            ) : null}
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }

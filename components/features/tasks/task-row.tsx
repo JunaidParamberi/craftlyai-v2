@@ -7,17 +7,14 @@ import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 
 import {
-  taskPriorityBadgeVariant,
-  taskPriorityLabel,
-  taskStatusBadgeVariant,
-  taskStatusLabel,
+  formatTaskDueDisplay,
+  taskPriorityStatusKey,
 } from "@/lib/tasks/display";
 import { deleteTask, updateTask } from "@/lib/tasks/actions";
 import { isTaskOverdue } from "@/lib/tasks/task-utils";
-import { formatProjectDate } from "@/lib/projects/display";
 import type { TaskListRow } from "@/types";
 
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -39,8 +36,7 @@ export function TaskRow({ task }: TaskRowProps) {
 
   const isDone = task.status === "done";
   const overdue = isTaskOverdue(task);
-  const showStatusBadge =
-    task.status === "in_progress" || task.status === "cancelled";
+  const due = formatTaskDueDisplay(task);
 
   function refresh() {
     router.refresh();
@@ -73,11 +69,13 @@ export function TaskRow({ task }: TaskRowProps) {
   return (
     <TableRow
       className={cn(
-        overdue && "bg-destructive/[0.04] hover:bg-destructive/[0.06]",
+        "tasks-table-row border-b border-border",
+        overdue &&
+          "bg-[color-mix(in_srgb,var(--danger)_6%,transparent)] hover:bg-[color-mix(in_srgb,var(--danger)_8%,transparent)]",
       )}
       data-state={isDone ? "done" : undefined}
     >
-      <TableCell className="w-10 pe-0">
+      <TableCell className="tasks-table-cell w-10 pe-0">
         <Checkbox
           checked={isDone}
           disabled={isPending}
@@ -87,66 +85,54 @@ export function TaskRow({ task }: TaskRowProps) {
           }
         />
       </TableCell>
-      <TableCell className="min-w-[12rem] whitespace-normal">
-        <div className="flex flex-col gap-1">
+      <TableCell className="tasks-table-cell min-w-[12rem] whitespace-normal">
+        <div className="flex flex-col gap-1.5">
           <span
             className={cn(
-              "font-medium leading-snug",
+              "text-sm font-medium leading-snug",
               isDone && "text-muted-foreground line-through",
             )}
           >
             {task.title}
           </span>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {showStatusBadge ? (
-              <Badge
-                variant={taskStatusBadgeVariant(task.status)}
-                className="font-normal"
-              >
-                {taskStatusLabel(task.status)}
-              </Badge>
-            ) : null}
-            {isDone ? (
-              <Badge variant="secondary" className="font-normal">
-                Done
-              </Badge>
-            ) : null}
+          <div className="flex flex-wrap items-center gap-1.5 md:hidden">
+            <Link
+              href={`/projects/${task.project.id}`}
+              className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              {task.project.title}
+            </Link>
+            <StatusBadge status={task.status} dot />
+            <StatusBadge status={taskPriorityStatusKey(task.priority)} dot />
+            <span className={cn("text-xs tabular-nums", due.className)}>
+              {due.label}
+            </span>
           </div>
         </div>
       </TableCell>
-      <TableCell className="hidden min-w-[10rem] whitespace-normal md:table-cell">
-        <div className="flex flex-col gap-0.5">
-          <Link
-            href={`/projects/${task.project.id}`}
-            className="font-medium text-foreground text-sm underline-offset-4 hover:text-primary hover:underline"
-          >
-            {task.project.title}
-          </Link>
-          {task.project.client ? (
-            <span className="text-muted-foreground text-xs">
-              {task.project.client.name}
-            </span>
-          ) : null}
-        </div>
+      <TableCell className="tasks-table-cell hidden min-w-[10rem] whitespace-normal md:table-cell">
+        <Link
+          href={`/projects/${task.project.id}`}
+          className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          {task.project.title}
+        </Link>
       </TableCell>
-      <TableCell className="hidden sm:table-cell">
-        <Badge variant={taskPriorityBadgeVariant(task.priority)}>
-          {taskPriorityLabel(task.priority)}
-        </Badge>
+      <TableCell className="tasks-table-cell hidden sm:table-cell">
+        <StatusBadge status={task.status} dot />
       </TableCell>
-      <TableCell className="hidden text-muted-foreground text-sm lg:table-cell">
-        {task.due_date ? (
-          <Badge
-            variant={overdue ? "destructive" : "outline"}
-            className="font-normal tabular-nums"
-          >
-            {formatProjectDate(task.due_date)}
-          </Badge>
-        ) : (
-          <span className="text-muted-foreground">—</span>
+      <TableCell className="tasks-table-cell hidden sm:table-cell">
+        <StatusBadge status={taskPriorityStatusKey(task.priority)} dot />
+      </TableCell>
+      <TableCell
+        className={cn(
+          "tasks-table-cell hidden text-sm lg:table-cell",
+          due.className,
         )}
+      >
+        {due.label}
       </TableCell>
-      <TableCell className="text-end">
+      <TableCell className="tasks-table-cell text-end">
         <DropdownMenu>
           <DropdownMenuTrigger
             render={

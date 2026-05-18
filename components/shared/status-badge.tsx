@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { VariantProps } from "class-variance-authority";
 
 type StatusKey =
   | "paid"
@@ -36,10 +35,10 @@ const STATUS_MAP: Record<StatusKey, StatusConfig> = {
   active:          { label: "Active",          variant: "success" },
 
   sent:            { label: "Sent",            variant: "info" },
-  in_progress:     { label: "In Progress",     variant: "info" },
+  in_progress:     { label: "In progress",     variant: "info" },
 
   draft:           { label: "Draft",           variant: "outline" },
-  todo:            { label: "To Do",           variant: "outline" },
+  todo:            { label: "To do",           variant: "outline" },
   planning:        { label: "Planning",        variant: "outline" },
   pending:         { label: "Pending",         variant: "outline" },
   payment_voucher: { label: "Voucher",         variant: "outline" },
@@ -59,16 +58,24 @@ const STATUS_MAP: Record<StatusKey, StatusConfig> = {
 
 type StatusBadgeProps = {
   status: StatusKey | string;
+  dot?: boolean;
   className?: string;
 };
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
+export function StatusBadge({ status, dot = false, className }: StatusBadgeProps) {
   const config = STATUS_MAP[status as StatusKey];
   const label = config?.label ?? status.replace(/_/g, " ");
   const variant = config?.variant ?? "outline";
 
   return (
-    <Badge variant={variant} className={cn("capitalize", className)}>
+    <Badge
+      variant={variant}
+      className={cn(
+        dot &&
+          "gap-1.5 before:size-1.5 before:shrink-0 before:rounded-full before:bg-current",
+        className,
+      )}
+    >
       {label}
     </Badge>
   );

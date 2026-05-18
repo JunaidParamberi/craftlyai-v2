@@ -510,6 +510,40 @@ td[data-numeric="true"],
   }
 }
 
+/* Tasks inbox table — matches reference table--card spacing */
+.tasks-table-head {
+  height: auto;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  background: var(--bg-canvas);
+  white-space: nowrap;
+}
+
+.tasks-table-cell {
+  padding: 12px 14px;
+  vertical-align: middle;
+}
+
+.tasks-table-cell:first-child {
+  padding-left: 18px;
+}
+
+.tasks-table-cell:last-child {
+  padding-right: 18px;
+}
+
+[data-slot="table-body"] .tasks-table-row:last-child {
+  border-bottom: 0;
+}
+
+[data-slot="table-body"] .tasks-table-row:hover {
+  background: var(--bg-subtle);
+}
+
 /* Rail hover tooltip */
 .rail-btn { position: relative; }
 .rail-btn:hover .rail-tooltip,

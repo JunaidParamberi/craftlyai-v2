@@ -12,6 +12,7 @@ type SearchParams = Promise<{
   status?: string;
   priority?: string;
   sort?: string;
+  view?: string;
 }>;
 
 export default async function TasksPage({

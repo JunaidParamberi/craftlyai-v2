@@ -1,15 +1,31 @@
-import { differenceInCalendarDays, parseISO, startOfDay } from "date-fns";
+import {
+  differenceInCalendarDays,
+  isSameMonth,
+  parseISO,
+  startOfDay,
+} from "date-fns";
 import { z } from "zod";
 
 import type { TaskListRow, TaskPriority, TaskStatus } from "@/types";
 
 export type TaskSortKey = "due" | "created" | "priority";
 
+export type TaskViewKey = "all" | "open" | "today" | "overdue" | "done";
+
+export const TASK_VIEW_KEYS = [
+  "all",
+  "open",
+  "today",
+  "overdue",
+  "done",
+] as const;
+
 export type TaskListFilters = {
   project: string;
   status: TaskStatus | "all";
   priority: TaskPriority | "all";
   sort: TaskSortKey;
+  view: TaskViewKey;
 };
 
 export const TASK_SORT_KEYS = ["due", "created", "priority"] as const;
@@ -39,6 +55,22 @@ function parseDueDateStart(dueDate: string): Date | null {
 
 function isOpenStatus(status: TaskStatus): boolean {
   return status === "todo" || status === "in_progress";
+}
+
+/** Due date is today (calendar) and task is still open. */
+export function isDueToday(
+  task: TaskOverdueInput,
+  now = new Date(),
+): boolean {
+  if (!isOpenStatus(task.status)) {
+    return false;
+  }
+  const due = task.due_date ? parseDueDateStart(task.due_date) : null;
+  if (!due) {
+    return false;
+  }
+  const today = startOfDay(now);
+  return differenceInCalendarDays(due, today) === 0;
 }
 
 /** Due date before today and not terminal status. */
@@ -154,7 +186,41 @@ export function parseTaskListFilters(
     ? (sortRaw as TaskSortKey)
     : "due";
 
-  return { project, status, priority, sort };
+  const viewRaw = raw("view")?.trim() ?? "all";
+  const view = (TASK_VIEW_KEYS as readonly string[]).includes(viewRaw)
+    ? (viewRaw as TaskViewKey)
+    : "all";
+
+  return { project, status, priority, sort, view };
+}
+
+function isDoneThisMonth(task: TaskListRow, now = new Date()): boolean {
+  if (task.status !== "done") {
+    return false;
+  }
+  const updated = parseISO(task.updated_at);
+  return !Number.isNaN(updated.getTime()) && isSameMonth(updated, now);
+}
+
+function matchesViewFilter<T extends TaskListRow>(
+  task: T,
+  view: TaskViewKey,
+  now = new Date(),
+): boolean {
+  switch (view) {
+    case "all":
+      return true;
+    case "open":
+      return task.status !== "done";
+    case "today":
+      return isDueToday(task, now);
+    case "overdue":
+      return isTaskOverdue(task, now);
+    case "done":
+      return isDoneThisMonth(task, now);
+    default:
+      return true;
+  }
 }
 
 export function filterTasks<T extends TaskListRow>(
@@ -172,6 +238,9 @@ export function filterTasks<T extends TaskListRow>(
       return false;
     }
     if (filters.priority !== "all" && task.priority !== filters.priority) {
+      return false;
+    }
+    if (!matchesViewFilter(task, filters.view)) {
       return false;
     }
     if (!q) {
@@ -199,4 +268,73 @@ export function countOverdueTasks(tasks: TaskListRow[]): number {
 
 export function countDoneTasks(tasks: TaskListRow[]): number {
   return tasks.filter((t) => t.status === "done").length;
+}
+
+export function countDueTodayTasks(
+  tasks: TaskListRow[],
+  now = new Date(),
+): number {
+  return tasks.filter((t) => isDueToday(t, now)).length;
+}
+
+/** Done tasks with `updated_at` in the current calendar month. */
+export function countDoneThisMonthTasks(
+  tasks: TaskListRow[],
+  now = new Date(),
+): number {
+  return tasks.filter((t) => {
+    if (t.status !== "done") {
+      return false;
+    }
+    const updated = parseISO(t.updated_at);
+    return !Number.isNaN(updated.getTime()) && isSameMonth(updated, now);
+  }).length;
+}
+
+export function countDistinctProjectsWithOpenTasks(
+  tasks: TaskListRow[],
+): number {
+  const ids = new Set<string>();
+  for (const t of tasks) {
+    if (isOpenStatus(t.status)) {
+      ids.add(t.project_id);
+    }
+  }
+  return ids.size;
+}
+
+/** Build `/tasks` query string; omits default values. */
+export function buildTasksHref(
+  patch: Partial<TaskListFilters>,
+  base?: TaskListFilters,
+): string {
+  const merged: TaskListFilters = {
+    project: "all",
+    status: "all",
+    priority: "all",
+    sort: "due",
+    view: "all",
+    ...base,
+    ...patch,
+  };
+
+  const params = new URLSearchParams();
+  if (merged.project !== "all") {
+    params.set("project", merged.project);
+  }
+  if (merged.status !== "all") {
+    params.set("status", merged.status);
+  }
+  if (merged.priority !== "all") {
+    params.set("priority", merged.priority);
+  }
+  if (merged.sort !== "due") {
+    params.set("sort", merged.sort);
+  }
+  if (merged.view !== "all") {
+    params.set("view", merged.view);
+  }
+
+  const qs = params.toString();
+  return qs ? `/tasks?${qs}` : "/tasks";
 }

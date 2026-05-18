@@ -2,13 +2,18 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, type ReactNode } from "react";
-import { ListTodo, Plus, Search } from "lucide-react";
+import { ListTodo, Plus, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 import {
+  countDistinctProjectsWithOpenTasks,
+  countOpenTasks,
+  countOverdueTasks,
   filterTasks,
   sortTasks,
   type TaskListFilters,
 } from "@/lib/tasks/task-utils";
+import { useTaskFilters } from "@/lib/tasks/use-task-filters";
 import type { ProjectListRow, TaskListRow } from "@/types";
 
 import { QuickAddTaskDialog } from "@/components/features/tasks/quick-add-task-dialog";
@@ -18,25 +23,13 @@ import { TaskRow } from "@/components/features/tasks/task-row";
 import { TasksSummaryStrip } from "@/components/features/tasks/tasks-summary-strip";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import { Separator } from "@/components/ui/separator";
-import {
   Table,
   TableBody,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 type TasksViewProps = {
   tasks: TaskListRow[];
@@ -48,15 +41,22 @@ function TasksEmptyState({
   title,
   description,
   action,
+  className,
 }: {
   title: string;
   description: string;
   action?: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-10 text-center">
-      <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-        <ListTodo className="text-muted-foreground" />
+    <div
+      className={cn(
+        "flex flex-col items-center gap-3 rounded-[var(--radius-lg)] border border-dashed border-border py-12 text-center",
+        className,
+      )}
+    >
+      <div className="flex size-12 items-center justify-center rounded-xl bg-muted">
+        <ListTodo className="size-5 text-muted-foreground" strokeWidth={1.6} />
       </div>
       <div className="flex flex-col gap-1">
         <p className="font-medium text-sm">{title}</p>
@@ -74,114 +74,128 @@ export function TasksView({
 }: TasksViewProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const filters = useTaskFilters(initialFilters);
 
   const filtered = useMemo(() => {
-    const narrowed = filterTasks(tasks, initialFilters, search);
-    return sortTasks(narrowed, initialFilters.sort);
-  }, [tasks, initialFilters, search]);
+    const narrowed = filterTasks(tasks, filters, "");
+    return sortTasks(narrowed, filters.sort);
+  }, [tasks, filters]);
+
+  const open = countOpenTasks(tasks);
+  const overdue = countOverdueTasks(tasks);
+  const projectCount = countDistinctProjectsWithOpenTasks(tasks);
+
+  const subtitle = `${open} open across ${projectCount} ${projectCount === 1 ? "project" : "projects"} · ${overdue} overdue`;
 
   const hasAnyTasks = tasks.length > 0;
   const hasFilteredResults = filtered.length > 0;
 
   function clearFilters() {
-    setSearch("");
     router.push(pathname);
   }
 
+  function planMyWeek() {
+    toast.info("Plan my week is coming soon.");
+  }
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-[1320px] flex-col">
       <PageHeader
-        eyebrow="Work"
+        className="mb-7 [&_h1]:text-[28px] [&_h1]:tracking-[-0.025em] md:[&_h1]:text-[30px] [&_p]:mt-1.5"
         title="Tasks"
-        description="All deliverables across your projects."
+        description={subtitle}
         actions={
-          <Button
-            type="button"
-            className="shrink-0"
-            onClick={() => setAddOpen(true)}
-            disabled={projects.length === 0}
-          >
-            <Plus data-icon="inline-start" />
-            Add task
-          </Button>
+          <>
+            <Button
+              type="button"
+              variant="secondary"
+              className="shrink-0 border border-border shadow-[var(--shadow-xs)]"
+              onClick={planMyWeek}
+            >
+              <Sparkles data-icon="inline-start" strokeWidth={1.6} />
+              Plan my week
+            </Button>
+            <Button
+              type="button"
+              className="shrink-0"
+              onClick={() => setAddOpen(true)}
+              disabled={projects.length === 0}
+            >
+              <Plus data-icon="inline-start" strokeWidth={1.6} />
+              New task
+            </Button>
+          </>
         }
       />
 
-      <TasksSummaryStrip tasks={tasks} />
+      <TasksSummaryStrip tasks={tasks} filters={filters} />
 
-      <Card className="border-border/60 shadow-sm">
-        <CardHeader className="border-b border-border/60 pb-4">
-          <CardTitle className="font-heading text-base">Task list</CardTitle>
-          <CardDescription>
-            Overdue items are highlighted. Use filters to focus on a project or
-            status.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 pt-4">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-            <InputGroup className="shrink-0 xl:w-72">
-              <InputGroupAddon>
-                <Search />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Search tasks…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </InputGroup>
-            <Separator
-              orientation="vertical"
-              className="hidden h-9 xl:block"
-            />
-            <Suspense fallback={null}>
-              <TaskFilters filters={initialFilters} projects={projects} />
-            </Suspense>
-          </div>
+      <section className="flex flex-col">
+        <Suspense fallback={null}>
+          <TaskFilters
+            filters={filters}
+            projects={projects}
+            tasks={tasks}
+          />
+        </Suspense>
 
-          {!hasAnyTasks ? (
-            <TasksEmptyState
-              title="No tasks yet"
-              description="Add tasks here or from a project's Tasks tab."
-              action={
-                projects.length > 0 ? (
-                  <Button type="button" size="sm" onClick={() => setAddOpen(true)}>
-                    <Plus data-icon="inline-start" />
-                    Add task
-                  </Button>
-                ) : (
-                  <p className="text-muted-foreground text-xs">
-                    Create a project first to attach tasks.
-                  </p>
-                )
-              }
-            />
-          ) : !hasFilteredResults ? (
-            <TasksEmptyState
-              title="No tasks match these filters"
-              description="Try adjusting your filters or search query."
-              action={
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={clearFilters}
-                >
-                  Clear filters
+        {!hasAnyTasks ? (
+          <TasksEmptyState
+            className="mt-5"
+            title="No tasks yet"
+            description="Add tasks here or from a project's Tasks tab."
+            action={
+              projects.length > 0 ? (
+                <Button type="button" size="sm" onClick={() => setAddOpen(true)}>
+                  <Plus data-icon="inline-start" />
+                  New task
                 </Button>
-              }
-            />
-          ) : (
+              ) : (
+                <p className="text-muted-foreground text-xs">
+                  Create a project first to attach tasks.
+                </p>
+              )
+            }
+          />
+        ) : !hasFilteredResults ? (
+          <TasksEmptyState
+            className="mt-5"
+            title="No tasks match these filters"
+            description="Try adjusting your filters or choose another summary tile."
+            action={
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={clearFilters}
+              >
+                Clear filters
+              </Button>
+            }
+          />
+        ) : (
+          <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-[var(--shadow-xs)]">
             <Table>
               <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-10" />
-                  <TableHead>Task</TableHead>
-                  <TableHead className="hidden md:table-cell">Project</TableHead>
-                  <TableHead className="hidden sm:table-cell">Priority</TableHead>
-                  <TableHead className="hidden lg:table-cell">Due</TableHead>
-                  <TableHead className="w-12 text-end">
+                <TableRow className="border-b border-border hover:bg-transparent">
+                  <TableHead className="tasks-table-head w-10 ps-[18px] pe-0" />
+                  <TableHead className="tasks-table-head min-w-[12rem]">
+                    Task
+                  </TableHead>
+                  <TableHead className="tasks-table-head hidden md:table-cell">
+                    Project
+                  </TableHead>
+                  <TableHead className="tasks-table-head hidden sm:table-cell">
+                    Status
+                  </TableHead>
+                  <TableHead className="tasks-table-head hidden sm:table-cell">
+                    Priority
+                  </TableHead>
+                  <TableHead className="tasks-table-head hidden lg:table-cell">
+                    Due
+                  </TableHead>
+                  <TableHead className="tasks-table-head w-12 pe-[18px] text-end">
                     <span className="sr-only">Actions</span>
                   </TableHead>
                 </TableRow>
@@ -192,16 +206,16 @@ export function TasksView({
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </section>
 
       <QuickAddTaskDialog
         open={addOpen}
         onOpenChange={setAddOpen}
         projects={projects}
         defaultProjectId={
-          initialFilters.project !== "all" ? initialFilters.project : null
+          filters.project !== "all" ? filters.project : null
         }
       />
     </div>
